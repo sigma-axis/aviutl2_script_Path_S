@@ -15,7 +15,8 @@
 1.  [パス部分フィルタσ](#パス部分フィルタσ) (フィルタ効果)
 1.  [パスに沿って配置σ](#パスに沿って配置σ) (フィルタ効果)
 
-TODO: images.
+<img width="960" height="540" alt="Overview of objects of this script" src="https://github.com/user-attachments/assets/57cc741b-9d50-4f68-a30a-d0608a6ba11c" />
+<img width="960" height="540" alt="Overview of effects of this script" src="https://github.com/user-attachments/assets/1bf5cc4b-013f-4027-a01a-36847e10db24" />
 
 - <details>
   <summary>元画像出典 (クリックで表示):</summary>
@@ -54,7 +55,8 @@ TODO: images.
 
 [パラメタの説明 :arrow_down:](#パス図形σのパラメタ) [共通のパラメタの説明 :arrow_down:](#共通の設定項目)
 
-TODO: image.
+<img width="640" height="480" alt="Image of manipulating figure paths" src="https://github.com/user-attachments/assets/8fd01b02-daed-4ccf-ba51-0a040b4feb73" />
+<img width="960" height="720" alt="Image of path strokes" src="https://github.com/user-attachments/assets/9059a77c-f2af-40d4-bbe2-8a1d61c99a05" />
 
 - 初期状態だと「オブジェクトを追加」メニューの「Path_S :arrow_right: 図形」に「パス図形σ@Path_S」が追加されています．
 
@@ -64,7 +66,7 @@ TODO: image.
 
 [パラメタの説明 :arrow_down:](#ラインσのパラメタ) [共通のパラメタの説明 :arrow_down:](#共通の設定項目)
 
-TODO: image.
+<img width="840" height="360" alt="Image of kinds of curves" src="https://github.com/user-attachments/assets/cf053f16-5abe-421d-8492-7497aef98e8d" />
 
 - 初期状態だと「オブジェクトを追加」メニューの「Path_S :arrow_right: 図形」に「ラインσ@Path_S」が追加されています．
 
@@ -74,7 +76,7 @@ TODO: image.
 
 [パラメタの説明 :arrow_down:](#スパイラルσのパラメタ) [共通のパラメタの説明 :arrow_down:](#共通の設定項目)
 
-TODO: image.
+<img width="480" height="320" alt="Image of two kinds of spirals" src="https://github.com/user-attachments/assets/bfd8010a-8911-4fa6-b59f-1c2222c3da37" />
 
 - 初期状態だと「オブジェクトを追加」メニューの「Path_S :arrow_right: 図形」に「スパイラルσ@Path_S」が追加されています．
 
@@ -84,7 +86,7 @@ TODO: image.
 
 [パラメタの説明 :arrow_down:](#アローσのパラメタ) [共通のパラメタの説明 :arrow_down:](#共通の設定項目)
 
-TODO: image.
+<img width="408" height="320" alt="Image of arrows with different placements of heads" src="https://github.com/user-attachments/assets/05c4cf9a-18fc-4535-87b6-aa2792b7f287" />
 
 - 初期状態だと「オブジェクトを追加」メニューの「Path_S :arrow_right: 図形」に「アローσ@Path_S」が追加されています．
 
@@ -94,7 +96,7 @@ TODO: image.
 
 [パラメタの説明 :arrow_down:](#パスマスクσ--パスマスクラインσ--パス部分フィルタσのパラメタ) [共通のパラメタの説明 :arrow_down:](#共通の設定項目)
 
-TODO: image.
+<img width="640" height="480" alt="An image clipped by the inner part of a path" src="https://github.com/user-attachments/assets/02d94745-4678-4b7d-8f78-aeefca2edea6" />
 
 - 初期状態だと「フィルタ効果を追加」メニューの「Path_S :arrow_right: クリッピング」に「パスマスクσ@Path_S」が追加されています．
 
@@ -104,7 +106,7 @@ TODO: image.
 
 [パラメタの説明 :arrow_down:](#パスマスクσ--パスマスクラインσ--パス部分フィルタσのパラメタ) [共通のパラメタの説明 :arrow_down:](#共通の設定項目)
 
-TODO: image.
+<img width="640" height="480" alt="An image clipped by the stroke of a path" src="https://github.com/user-attachments/assets/21b6fe1e-c4b8-4d25-9ab5-6f0ed1e640ce" />
 
 - 初期状態だと「フィルタ効果を追加」メニューの「Path_S :arrow_right: クリッピング」に「パスマスク(ライン)σ@Path_S」が追加されています．
 
@@ -114,7 +116,7 @@ TODO: image.
 
 [パラメタの説明 :arrow_down:](#パスマスクσ--パスマスクラインσ--パス部分フィルタσのパラメタ) [共通のパラメタの説明 :arrow_down:](#共通の設定項目)
 
-TODO: image.
+<img width="800" height="540" alt="An image that only a specific area is blurred and monochromed" src="https://github.com/user-attachments/assets/c37f44be-5f8b-414e-9a66-0d295fd63d5e" />
 
 - 初期状態だと「フィルタ効果を追加」メニューの「Path_S :arrow_right: 加工」に「パス部分フィルタσ@Path_S」が追加されています．
 
@@ -124,7 +126,7 @@ TODO: image.
 
 [パラメタの説明 :arrow_down:](#パスに沿って配置σのパラメタ) [共通のパラメタの説明 :arrow_down:](#共通の設定項目)
 
-TODO: image.
+<img width="880" height="440" alt="Charcters of a text arrayed on a path" src="https://github.com/user-attachments/assets/58acd121-7966-4352-a9b5-960a9b76921d" />
 
 - 初期状態だと「フィルタ効果を追加」メニューの「Path_S :arrow_right: 配置」に「パスに沿って配置σ@Path_S」が追加されています．
 
@@ -149,14 +151,12 @@ TODO: image.
 
 パスの曲線の形状を指定します．
 
-TODO: images.
-
 | 線タイプ | 例 | 備考 |
 |:---:|:---:|:---|
-| `折れ線` |  |  |
-| `補間移動` |  | トラックバー移動方法の「補間移動」と同じ計算式． |
-| `2次ベジェ曲線` |  |
-| `3次ベジェ曲線` | 初期値． |
+| `折れ線` | <img width="360" height="256" alt="An example of straight paths" src="https://github.com/user-attachments/assets/194f2213-9d25-44e6-a710-fbea72aa4f09" /> |  |
+| `補間移動` | <img width="360" height="256" alt="An example of interpolated path" src="https://github.com/user-attachments/assets/9c5d575d-0211-4d6d-9fa7-0f6bd605c5e9" /> | トラックバー移動方法の「補間移動」と同じ計算式． |
+| `2次ベジェ曲線` | <img width="360" height="256" alt="An example of quadratic Bezier paths" src="https://github.com/user-attachments/assets/96fb023e-2243-4b0e-b3d4-db04d3745da5" /> | |
+| `3次ベジェ曲線` | <img width="360" height="256" alt="An example of cubic Bezier paths" src="https://github.com/user-attachments/assets/a3563699-19e5-4ab8-9267-613989b88fa7" /> |初期値． |
 
 初期値は `3次ベジェ曲線`.
 
@@ -209,11 +209,10 @@ TODO: images.
 
 ラインの端点の形状を指定します．[「ループ」](#ループ)が OFF の場合のみ有効です．
 
-TODO: images.
-
 | 端の形状 | 例 |
-| `円` |  |
-| `四角` |  |
+|:---:|:---:|
+| `円` | <img width="320" height="320" alt="Image of rounded endpoint" src="https://github.com/user-attachments/assets/0100b898-afe5-4b8a-b3eb-8ea5d6e30ce8" /> |
+| `四角` | <img width="320" height="320" alt="Image of square endpoint" src="https://github.com/user-attachments/assets/f20cba23-64bd-472b-89ae-84ce36f0724f" /> |
 
 初期値は `円`.
 
@@ -260,14 +259,12 @@ TODO: images.
 
 パス内部の判定基準を指定します．
 
-TODO: images.
-
 | 範囲 | 例 |
 |:---:|:---:|
-| `内側` |  |
-| `奇偶` |  |
-| `内側反転` |  |
-| `奇偶反転` |  |
+| `内側` | <img width="240" height="240" alt="Image of inner fill mode" src="https://github.com/user-attachments/assets/01ec1000-7812-4205-be59-ebb7f45623ae" /> |
+| `奇偶` | <img width="240" height="240" alt="Image of parity fill mode" src="https://github.com/user-attachments/assets/e759daeb-ab71-4fc7-901b-e4f932dcfd44" /> |
+| `内側反転` | <img width="240" height="240" alt="Image of inverted inner fill mode" src="https://github.com/user-attachments/assets/9e831812-8204-4455-915e-fc61764b6073" /> |
+| `奇偶反転` | <img width="240" height="240" alt="Image of inverted parity fill mode" src="https://github.com/user-attachments/assets/5c1f8c26-27dc-40a0-a86d-a013f1d1a1e0" /> |
 
 - 「反転」の系統は，[「追加幅」](#追加幅--塗り追加幅)での膨張の方向にも影響します．
 
@@ -301,7 +298,7 @@ TODO: images.
 
 ### パス図形σのパラメタ
 
-TODO: image of GUI.
+<img width="500" height="842" alt="Image of GUI of Figure" src="https://github.com/user-attachments/assets/4f09f33e-65cc-44e9-b9b6-d77a5c250e33" />
 
 ####  ライン色, ライン透明度
 
@@ -320,7 +317,7 @@ TODO: image of GUI.
 
 ### ラインσのパラメタ
 
-TODO: image of GUI.
+<img width="500" height="598" alt="Image of GUI of Curve" src="https://github.com/user-attachments/assets/6dd02ab8-572c-4cc1-8e53-36e3795f8629" />
 
 ####  終点X, 終点Y
 
@@ -365,7 +362,7 @@ TODO: image of GUI.
 
 ### スパイラルσのパラメタ
 
-TODO: image of GUI.
+<img width="500" height="668" alt="Image of GUI of Spiral" src="https://github.com/user-attachments/assets/80139642-b9c0-4cba-98e2-a322f62a11db" />
 
 ####  傾き
 
@@ -388,12 +385,10 @@ TODO: image of GUI.
 
 螺旋の種類を指定します．
 
-TODO: images.
-
 | 形状 | 例 |
 |:---:|:---|
-| `アルキメデス螺旋` |  |
-| `対数螺旋` |  |
+| `アルキメデス螺旋` | <img width="240" height="240" alt="Archimedean Spiral" src="https://github.com/user-attachments/assets/a9a55709-a623-4bf1-a33f-339fc44de4e3" /> |
+| `対数螺旋` | <img width="240" height="240" alt="Logarithmic Spiral" src="https://github.com/user-attachments/assets/2c3f425a-56b0-40a4-889b-ab64b8452216" /> |
 
 初期値は `対数螺旋`.
 
@@ -421,7 +416,7 @@ TODO: images.
 
 ### アローσのパラメタ
 
-TODO: image of GUI.
+<img width="500" height="842" alt="Image of GUI of Arrow" src="https://github.com/user-attachments/assets/68520881-ca71-4826-b7c3-6b1dd603ae28" />
 
 ####  色
 
@@ -433,14 +428,12 @@ TODO: image of GUI.
 
 矢じり部分の配置を指定します．
 
-TODO: images.
-
 | 矢じり配置 | 例 |
 |:---:|:---:|
-| `なし` |  |
-| `終点` |  |
-| `両方` |  |
-| `双方向` |  |
+| `なし` | <img width="240" height="160" alt="Example of no arrowheads" src="https://github.com/user-attachments/assets/6daf1471-8611-4638-b423-dc1f8da017d5" /> |
+| `終点` | <img width="240" height="160" alt="Example of arrowhead on the end" src="https://github.com/user-attachments/assets/56c92338-d48b-4a09-abad-14f2b2349a76" /> |
+| `両方` | <img width="240" height="160" alt="Example of two arrowheads with the same directions" src="https://github.com/user-attachments/assets/fd51402e-c87e-4cde-a8ba-aa918691328a" /> |
+| `双方向` | <img width="240" height="160" alt="Example of two arrowheads with the opposite directions" src="https://github.com/user-attachments/assets/aeccddf4-4647-4625-b0d7-061adbfaa72d" /> |
 
 初期値は `終点`.
 
@@ -478,7 +471,9 @@ TODO: images.
 
 ### パスマスクσ / パスマスク(ライン)σ / パス部分フィルタσのパラメタ
 
-TODO: images of GUIs.
+<img width="500" height="562" alt="Image of GUI of Clip by Path (Area)" src="https://github.com/user-attachments/assets/58e45f51-7cb0-464e-85c2-605cfe565ab4" />
+<img width="500" height="772" alt="Image of GUI of Clip by Path (Line)" src="https://github.com/user-attachments/assets/475f8dfb-55f2-44c2-b8d8-bb3527e3524d" />
+<img width="500" height="528" alt="Image of GUI of Partial Filter by Path" src="https://github.com/user-attachments/assets/a79a205b-49b2-4a45-8560-7384d58e9821" />
 
 ####  強さ
 
@@ -521,7 +516,7 @@ TODO: images of GUIs.
 
 ### パスに沿って配置σのパラメタ
 
-TODO: image of GUI.
+<img width="500" height="458" alt="Image of GUI of Place Along Path" src="https://github.com/user-attachments/assets/386e1f7a-63ac-422d-8671-21eed9d1daa6" />
 
 ####  位置
 
