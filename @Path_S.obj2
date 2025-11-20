@@ -23,7 +23,7 @@ SOFTWARE.
 https://mit-license.org/
 ]]
 @パス図形σ
---information:パス図形σ@Path_S v1.00-rc8 (for beta20) by σ軸
+--information:パス図形σ@Path_S v1.00 (for beta20) by σ軸
 --label:Path_S\図形
 --value@num_points:頂点数,4
 --select@path_type:線タイプ=3,折れ線=0,補間移動=1,2次ベジェ曲線=2,3次ベジェ曲線=3
@@ -222,7 +222,7 @@ if (line > 0 and alpha_line > 0) or alpha_fill > 0 then
 end
 
 @ラインσ
---information:ラインσ@Path_S v1.00-rc8 (for beta20) by σ軸
+--information:ラインσ@Path_S v1.00 (for beta20) by σ軸
 --label:Path_S\図形
 --track0:終点X,-4000,4000,256,0.01
 --track1:終点Y,-4000,4000,0,0.01
@@ -447,7 +447,7 @@ obj.effect("パスマスク(ライン)σ@Path_S", "点リスト", "", "PI",
 obj.cx, obj.cy = -w / 2 - L + th, -h / 2 - T + th;
 
 @スパイラルσ
---information:スパイラルσ@Path_S v1.00-rc8 (for beta20) by σ軸
+--information:スパイラルσ@Path_S v1.00 (for beta20) by σ軸
 --label:Path_S\図形
 --track@slope:傾き,-200,200,10,0.001
 --color@color:色,0xffffff
@@ -625,7 +625,7 @@ obj.effect("パスマスク(ライン)σ@Path_S", "点リスト", "", "PI",
 obj.cx, obj.cy = -w / 2 - L + th, -h / 2 - T + th;
 
 @アローσ
---information:アローσ@Path_S v1.00-rc8 (for beta20) by σ軸
+--information:アローσ@Path_S v1.00 (for beta20) by σ軸
 --label:Path_S\図形
 --color@color:色,0xffffff
 --track@line:ライン幅,0,1000,5,0.01
