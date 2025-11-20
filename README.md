@@ -2,7 +2,7 @@
 
 折れ線やベジェ曲線で図形を描画したり，その図形を利用したフィルタ効果をかける AivUtl ExEdit 2 のスクリプトです．
 
-[ダウンロードはこちら．](https://github.com/sigma-axis/aviutl2_script_Path_S/releases) \[紹介動画準備中．\]
+[ダウンロードはこちら．](https://github.com/sigma-axis/aviutl2_script_Path_S/releases) [紹介動画．](https://www.nicovideo.jp/watch/sm45647149)
 
 次が追加されます:
 
