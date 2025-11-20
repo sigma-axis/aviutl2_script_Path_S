@@ -340,7 +340,7 @@
 | `直線` | $y=0$ |
 | `正弦波` | $y=\cos 2\pi x$  |
 | `三角波` | $y=2\left\lvert 2\langle x \rangle - 1\right\rvert - 1$  |
-| `矩形波` | $y=\begin{cases} +1 & \left(\langle x \rangle < \frac{1}{2}\right) \\ -1 & (\text{otherwise}) \end{cases}$ |
+| `矩形波` | $$ y=\begin{cases} +1 & \left(\langle x \rangle < \frac{1}{2}\right) \\\ -1 & (\text{otherwise}) \end{cases} $$ |
 | `のこぎり波` | $y=1 - 2 \langle x \rangle$ |
 - ここに $\langle x \rangle = x - \lfloor x \rfloor$ は $x$ の小数部分．
 
