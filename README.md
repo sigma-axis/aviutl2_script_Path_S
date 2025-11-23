@@ -99,7 +99,7 @@
 
 [パラメタの説明 :arrow_down:](#スクウェアσのパラメタ) [共通のパラメタの説明 :arrow_down:](#共通の設定項目)
 
-TODO: image.
+<img width="480" height="200" alt="Image of two rounded rectangles" src="https://github.com/user-attachments/assets/2e54c079-5344-4884-a09e-cdd78b45db93" />
 
 - 初期状態だと「オブジェクトを追加」メニューの「Path_S :arrow_right: 図形」に「スクウェアσ@Path_S」が追加されています．
 
@@ -485,7 +485,7 @@ TODO: image.
 
 ### スクウェアσのパラメタ
 
-TODO: image of GUI.
+<img width="500" height="948" alt="Image of GUI of Round Rect" src="https://github.com/user-attachments/assets/5be99d54-d947-422d-96e0-9fef576534f0" />
 
 ####  幅, 高さ
 
