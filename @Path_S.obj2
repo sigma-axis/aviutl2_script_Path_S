@@ -23,7 +23,7 @@ SOFTWARE.
 https://mit-license.org/
 ]]
 @パス図形σ
---information:パス図形σ@Path_S v1.01 (for beta20) by σ軸
+--information:パス図形σ@Path_S v1.10-rc1 (for beta21) by σ軸
 --label:Path_S\図形
 --value@num_points:頂点数,4
 --select@path_type:線タイプ=3,折れ線=0,補間移動=1,2次ベジェ曲線=2,3次ベジェ曲線=3
@@ -222,7 +222,7 @@ if (line > 0 and alpha_line > 0) or alpha_fill > 0 then
 end
 
 @ラインσ
---information:ラインσ@Path_S v1.01 (for beta20) by σ軸
+--information:ラインσ@Path_S v1.10-rc1 (for beta21) by σ軸
 --label:Path_S\図形
 --track0:終点X,-4000,4000,256,0.01
 --track1:終点Y,-4000,4000,0,0.01
@@ -447,7 +447,7 @@ obj.effect("パスマスク(ライン)σ@Path_S", "点リスト", "", "PI",
 obj.cx, obj.cy = -w / 2 - L + th, -h / 2 - T + th;
 
 @スパイラルσ
---information:スパイラルσ@Path_S v1.01 (for beta20) by σ軸
+--information:スパイラルσ@Path_S v1.10-rc1 (for beta21) by σ軸
 --label:Path_S\図形
 --track@slope:傾き,-200,200,10,0.001
 --color@color:色,0xffffff
@@ -625,7 +625,7 @@ obj.effect("パスマスク(ライン)σ@Path_S", "点リスト", "", "PI",
 obj.cx, obj.cy = -w / 2 - L + th, -h / 2 - T + th;
 
 @アローσ
---information:アローσ@Path_S v1.01 (for beta20) by σ軸
+--information:アローσ@Path_S v1.10-rc1 (for beta21) by σ軸
 --label:Path_S\図形
 --color@color:色,0xffffff
 --track@line:ライン幅,0,1000,5,0.01
@@ -891,3 +891,264 @@ end
 
 -- adjust the center.
 obj.cx, obj.cy = cx, cy;
+
+@スクウェアσ
+--information:スクウェアσ@Path_S v1.10-rc1 (for beta21) by σ軸
+--label:Path_S\図形
+--track@width:幅,0,4000,100,0.01
+--track@height:高さ,0,4000,100,0.01
+--track@align_x:水平揃え,-100,100,0,0.001
+--track@align_y:垂直揃え,-100,100,0,0.001
+--track@radius:角半径,0,2000,40,0.01
+--check@uniform:半径均一,true
+--track@r_RT:右上半径,0,2000,40,0.01
+--track@r_RB:右下半径,0,2000,40,0.01
+--track@r_LB:左下半径,0,2000,40,0.01
+--track@aspect:丸角縦横比,-100,100,0,0.001
+--check@fixed_aspect:丸角縦横比固定,true
+--track@antialias:ぼかし幅,0,1000,1,0.01
+--color@color_line:ライン色,0x808080
+--track@alpha_line:ライン透明度,0,100,0,0.01
+--track@line:ライン幅,0,1000,5,0.01
+--track@start_pos:開始位置,-200,200,0,0.001
+--track@end_pos:終了位置,-200,200,100,0.001
+--select@end_shape:端の形状=0,円=0,四角=1
+--value@dash_pat:破線パターン,{100,0}
+--track@dash_pos:破線位置,-4000,4000,0,0.01
+--color@color_fill:塗り色,0xffffff
+--track@alpha_fill:塗り透明度,0,100,0,0.01
+--track@inflation:塗り追加幅,0,1000,0,0.01
+--track@rand_period:ランダム周期,4,1024,32,0.001
+--track@rand_amplify:ランダム振幅,0,1024,0,0.01
+--track@rand_seed:ランダムシード,-65536,65535,10000,1
+--value@PI:PI,{}
+local path_s = require "Path_S";
+local obj, math, tonumber, type = obj, math, tonumber, type;
+
+-- take parameters.
+local function apply_aspect(r, a)
+	return math.min(1 - a, 1) * r, math.min(1 + a, 1) * r;
+end
+radius = math.max(radius, 0);
+aspect = math.min(math.max(aspect / 100, -1), 1);
+local radii = {
+	{ apply_aspect(radius, aspect) },
+	{ apply_aspect(uniform and radius or math.max(r_RT, 0), aspect) },
+	{ apply_aspect(uniform and radius or math.max(r_RB, 0), aspect) },
+	{ apply_aspect(uniform and radius or math.max(r_LB, 0), aspect) },
+};
+
+--[==[
+	PI = {
+		width:			number?,
+		height:			number?,
+		align_x:		number?,
+		align_y:		number?,
+		radii:			table|number|nil,
+		fixed_aspect:	boolean|number|nil,
+		antialias:		number?,
+		color_line:		number?,
+		alpha_line:		number?,
+		line:			number?,
+		start_pos:		number?,
+		end_pos:		number?,
+		end_shape:		string?,
+		dash_pat:		table?,
+		dash_pos:		number?,
+		color_fill:		number?,
+		alpha_fill:		number?,
+		inflation:		number?,
+		rand_period:	number?,
+		rand_amplify:	number?,
+		rand_seed:		number?,
+	}
+]==]
+local function as_bool(t, v)
+	if type(t) == "boolean" then return t;
+	elseif type(t) == "number" then return t ~= 0;
+	else return v end
+end
+local function as_pair(c)
+	if type(c) == "number" then return c, c;
+	elseif type(c) == "table" then
+		local x, y = tonumber(c[1]), tonumber(c[2]);
+		if x and y then return x, y end
+	end
+	return nil;
+end
+width = tonumber(PI.width) or width;
+height = tonumber(PI.height) or height;
+align_x = tonumber(PI.align_x) or align_x;
+align_y = tonumber(PI.align_y) or align_y;
+if type(PI.radii) == "number" then
+	local r = PI.radii;
+	radii = { { r, r }, { r, r }, { r, r }, { r, r } };
+elseif type(PI.radii) == "table" then
+	if PI.radii.uniform then
+		local x, y = as_pair(PI.radii.uniform);
+		if x then radii = { { x, y }, { x, y }, { x, y }, { x, y } } end
+	end
+	for i = 1, 4 do
+		local x, y = as_pair(PI.radii[i]);
+		if x then radii[i] = { x, y } end
+	end
+end
+fixed_aspect = as_bool(PI.fixed_aspect, fixed_aspect);
+antialias = tonumber(PI.antialias) or antialias;
+color_line = tonumber(PI.color_line) or color_line;
+alpha_line = tonumber(PI.alpha_line) or alpha_line;
+line = tonumber(PI.line) or line;
+start_pos = tonumber(PI.start_pos) or start_pos;
+end_pos = tonumber(PI.end_pos) or end_pos;
+
+if type(PI.end_shape) == "string" then
+	local name2num = {
+		["円"] = 0, ["四角"] = 1,
+	};
+	end_shape = name2num[PI.end_shape] or end_shape;
+end
+if type(PI.dash_pat) == "table" then dash_pat = PI.dash_pat end
+dash_pos = tonumber(PI.dash_pos) or dash_pos;
+color_fill = tonumber(PI.color_fill) or color_fill;
+alpha_fill = tonumber(PI.alpha_fill) or alpha_fill;
+inflation = tonumber(PI.inflation) or inflation;
+rand_period = tonumber(PI.rand_period) or rand_period;
+rand_amplify = tonumber(PI.rand_amplify) or rand_amplify;
+rand_seed = tonumber(PI.rand_seed) or rand_seed;
+
+-- normalize parameters.
+if width <= 0 or height <= 0 then return end -- early return if empty.
+align_x = math.min(math.max(align_x / 100, -1), 1);
+align_y = math.min(math.max(align_y / 100, -1), 1);
+for i = 1, 4 do
+	radii[i][1], radii[i][2] = math.max(radii[i][1], 0), math.max(radii[i][2], 0);
+end
+antialias = math.max(antialias, 0);
+color_line = color_line % 2 ^ 24;
+alpha_line = math.min(math.max(1 - alpha_line / 100, 0), 1);
+line = math.max(line, 0);
+end_shape = math.min(math.max(math.floor(0.5 + end_shape), 0), 1);
+color_fill = color_fill % 2 ^ 24;
+alpha_fill = math.min(math.max(1 - alpha_fill / 100, 0), 1);
+inflation = math.max(inflation, 0);
+rand_period = math.max(rand_period, 4);
+rand_amplify = math.max(rand_amplify, 0);
+rand_seed = math.min(math.max(math.floor(0.5 + rand_seed), -2 ^ 16), 2 ^ 16 - 1);
+
+-- avoid corner sizes from being too large.
+do local prev = {
+		{ radii[1][1], radii[1][2] },
+		{ radii[2][1], radii[2][2] },
+		{ radii[3][1], radii[3][2] },
+		{ radii[4][1], radii[4][2] },
+	};
+	for i = 1, 4 do
+		local j, r1, r2, m = 2 - (i % 2),
+			radii[i], radii[(i % 4) + 1],
+			(i % 2) > 0 and width or height;
+		if r1[j] + r2[j] >= m then
+			local c1, c2 = r1[j], r2[j];
+			if c1 <= m / 2 then c2 = m - c1;
+			elseif c2 <= m / 2 then c1 = m - c2;
+			else c1, c2 = m / 2, m / 2 end
+			r1[j], r2[j] = c1, c2;
+		end
+	end
+	-- adjust aspect ratios if specified to be fixed.
+	if fixed_aspect then
+		for i = 1, 4 do
+			local r, r0 = radii[i], prev[i];
+			local u, v = r[1] * r0[2], r[2] * r0[1];
+			if u > v then r[1] = v / r0[2];
+			elseif u < v then r[2] = u / r0[1] end
+		end
+	end
+end
+
+-- generate a path.
+local pts, n_pts = { (radii[1][1] - radii[2][1]) / 2, -height / 2 }, 1;
+for i = 1, 4 do
+	local r, precision = radii[(i % 4) + 1], 0.25; -- difference at most 0.25 pixels is allowed.
+	local rx, ry, a0 = r[1], r[2], (i / 2 - 1) * math.pi;
+	local N = math.ceil(2 ^ -2.5 * math.pi * (math.max(rx, ry) / precision) ^ 0.5);
+
+	local cx, cy = width / 2 - rx, height / 2 - ry;
+	if i > 2 then cx = -cx end
+	if (i % 4) < 2 then cy = -cy end
+	for j = 0, N do
+		local a = a0 + (j / math.max(N, 1)) * math.pi / 2;
+		n_pts = n_pts + 1;
+		pts[2 * n_pts - 1], pts[2 * n_pts] =
+			cx + rx * math.cos(a), cy + ry * math.sin(a);
+	end
+end
+n_pts = n_pts + 1;
+pts[2 * n_pts - 1], pts[2 * n_pts] = pts[1], pts[2];
+
+if rand_amplify > 0 then
+	-- randomize the path.
+	pts, n_pts = path_s.randomize(pts, n_pts, rand_period, rand_amplify,
+		2, rand_seed);
+end
+
+-- measure the path.
+local L, R, T, B, len = path_s.measure(pts, n_pts);
+local th = math.max(line * (end_shape == 1 and 0.5 ^ 0.5 or 0.5), inflation) + antialias;
+L, T = math.floor(L - th), math.floor(T - th);
+R, B = math.max(math.ceil(R + th), L + 1), math.max(math.ceil(B + th), T + 1);
+
+-- calculate the end points from the calculated length.
+local endpt_buff = nil;
+if end_shape == 1 and line > 0 and alpha_line > 0 then
+	endpt_buff = { 0.0, 0.0, 0.0, 0.0; 0.0, 0.0, 0.0, 0.0 };
+
+	local st, ed = start_pos / 100, end_pos / 100;
+	if loop then st, ed = st % 1, ed % 1
+	else st, ed = math.min(math.max(st, 0), 1), math.min(math.max(ed, 0), 1) end
+
+	local i, j, l = path_s.find_index(-st, pts, n_pts);
+	endpt_buff[1], endpt_buff[2], endpt_buff[3], endpt_buff[4] =
+		(1 - j) * pts[2 * i - 1] + j * pts[2 * i + 1] - L,
+		(1 - j) * pts[2 * i - 0] + j * pts[2 * i + 2] - T,
+		pts[2 * i + 1] - pts[2 * i - 1],
+		pts[2 * i + 2] - pts[2 * i - 0];
+	i, j = path_s.find_index(-ed, l);
+	endpt_buff[5], endpt_buff[6], endpt_buff[7], endpt_buff[8] =
+		(1 - j) * pts[2 * i - 1] + j * pts[2 * i + 1] - L,
+		(1 - j) * pts[2 * i - 0] + j * pts[2 * i + 2] - T,
+		pts[2 * i + 1] - pts[2 * i - 1],
+		pts[2 * i + 2] - pts[2 * i - 0];
+end
+
+-- prepare the canvas.
+obj.setoption("drawtarget", "tempbuffer", R - L, B - T);
+obj.copybuffer("object", "tempbuffer");
+obj.cx, obj.cy = -(L + R + align_x * width) / 2, -(T + B + align_y * height) / 2;
+
+-- draw the figures.
+if (line > 0 and alpha_line > 0 and end_pos >= start_pos) or alpha_fill > 0 then
+	local cache_name = "cache:path_s/coords";
+	path_s.send(pts, n_pts, -L, -T, cache_name);
+
+	-- draw the shape of the filling part.
+	if alpha_fill > 0 then
+		obj.clearbuffer("object", color_fill);
+		obj.effect("パスマスクσ@Path_S", "点リスト", "", "PI",
+			([[num_points=%d,antialias=%s,inflation=%s,pt_buff=%q]]):format(
+				n_pts, antialias, inflation, cache_name));
+		obj.draw(0, 0, 0, 1, alpha_fill);
+	end
+
+	-- then the outline part.
+	if line > 0 and alpha_line > 0 then
+		obj.clearbuffer("object", color_line);
+		obj.effect("パスマスク(ライン)σ@Path_S", "点リスト", "", "PI",
+			([[line=%s,num_points=%d,antialias=%s,loop=true,start_pos=%s,end_pos=%s,end_shape=%q,dash_pat={%s},dash_adj=%s,dash_pos=%s,pt_buff=%q,len_buff=%s%s]]):format(
+				line, n_pts, antialias,
+				start_pos, end_pos, ({ "円", "四角" })[end_shape + 1],
+				("%s,"):rep(#dash_pat):format(unpack(dash_pat)), tostring(dash_adj), dash_pos,
+				cache_name, len, endpt_buff and (",endpt_buff={%s,%s,%s,%s;%s,%s,%s,%s}"):format(unpack(endpt_buff)) or ""));
+		obj.draw(0, 0, 0, 1, alpha_line);
+	end
+	obj.copybuffer("object", "tempbuffer");
+end
