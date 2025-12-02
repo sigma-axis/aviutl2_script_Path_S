@@ -23,23 +23,27 @@ SOFTWARE.
 https://mit-license.org/
 ]]
 @パスマスクσ
---information:パスマスクσ@Path_S v1.10 (for beta21) by σ軸
+--information:パスマスクσ@Path_S v1.11-beta2 (for beta22a) by σ軸
 --label:Path_S\クリッピング
 --track@intensity:強さ,0,100,100,0.01
+--check@invert:反転,false
+--group:パス設定,true
 --value@num_points:頂点数,4
 --select@path_type:線タイプ=3,折れ線=0,補間移動=1,2次ベジェ曲線=2,3次ベジェ曲線=3
 --value@points:点リスト,{0,-100,55.23,-100,100,-55.23,100,0,100,55.23,55.23,100,0,100,-55.23,100,-100,55.23,-100,0,-100,-55.23,-55.23,-100}
 --track@precision:曲線精度,1,128,8,1
---track@antialias:ぼかし幅,0,1000,1,0.01
+--group:塗り設定,false
 --track@inflation:追加幅,0,1000,0,0.01
 --select@mode_fill:範囲=0,内側=0,奇偶=1,内側反転=2,奇偶反転=3
---check@invert:反転,false
+--group:配置,false
 --track0:移動X,-4000,4000,0,0.01
 --track1:移動Y,-4000,4000,0,0.01
 --track@zoom:拡大率,0,5000,100,0.001
 --track@rotate:回転,-720,720,0,0.01
---value@PI:PI,{}
 --check@toggle_gui:アンカー切り替え,false
+--group:その他,false
+--track@antialias:ぼかし幅,0,1000,1,0.01
+--value@PI:PI,{}
 --[[pixelshader@carve:
 Texture2D<half4> coords : register(t0);
 cbuffer constant0 : register(b0) {
@@ -219,29 +223,33 @@ obj.pixelshader("carve", "object", pt_buff,
 }, "mask");
 
 @パスマスク(ライン)σ
---information:パスマスク(ライン)σ@Path_S v1.10 (for beta21) by σ軸
+--information:パスマスク(ライン)σ@Path_S v1.11-beta2 (for beta22a) by σ軸
 --label:Path_S\クリッピング
---track@line:ライン幅,0,1000,5,0.01
 --track@intensity:強さ,0,100,100,0.01
+--check@invert:反転,false
+--track@line:ライン幅,0,1000,5,0.01
+--group:パス設定,true
 --value@num_points:頂点数,4
 --select@path_type:線タイプ=3,折れ線=0,補間移動=1,2次ベジェ曲線=2,3次ベジェ曲線=3
 --value@points:点リスト,{-100.00,50.00,-75.00,0.00,-50.00,-50.00,-25.00,-50.00,0.00,-50.00,0.00,50.00,25.00,50.00,50.00,50.00,75.00,0.00,100.00,-50.00}
---track@precision:曲線精度,1,128,8,1
---track@antialias:ぼかし幅,0,1000,1,0.01
 --check@loop:ループ,false
+--track@precision:曲線精度,1,128,8,1
+--group:ライン設定,false
 --track@start_pos:開始位置,-200,200,0,0.001
 --track@end_pos:終了位置,-200,200,100,0.001
 --select@end_shape:端の形状=0,円=0,四角=1
 --value@dash_pat:破線パターン,{100,0}
 --check@dash_adj:破線周期補正,true
 --track@dash_pos:破線位置,-4000,4000,0,0.01
---check@invert:反転,false
+--group:配置,false
 --track0:移動X,-4000,4000,0,0.01
 --track1:移動Y,-4000,4000,0,0.01
 --track@zoom:拡大率,0,5000,100,0.001
 --track@rotate:回転,-720,720,0,0.01
---value@PI:PI,{}
 --check@toggle_gui:アンカー切り替え,false
+--group:その他,false
+--track@antialias:ぼかし幅,0,1000,1,0.01
+--value@PI:PI,{}
 --[[pixelshader@carve:
 Texture2D<half4> coords : register(t0);
 cbuffer constant0 : register(b0) {
@@ -655,22 +663,26 @@ else
 end
 
 @パス部分フィルタσ
---information:パス部分フィルタσ@Path_S v1.10 (for beta21) by σ軸
+--information:パス部分フィルタσ@Path_S v1.11-beta2 (for beta22a) by σ軸
 --label:Path_S\加工
+--check@invert:反転,false
+--group:パス設定,true
 --value@num_points:頂点数,4
 --select@path_type:線タイプ=3,折れ線=0,補間移動=1,2次ベジェ曲線=2,3次ベジェ曲線=3
 --value@points:点リスト,{0,-100,55.23,-100,100,-55.23,100,0,100,55.23,55.23,100,0,100,-55.23,100,-100,55.23,-100,0,-100,-55.23,-55.23,-100}
 --track@precision:曲線精度,1,128,8,1
---track@antialias:ぼかし幅,0,1000,1,0.01
+--group:塗り設定,false
 --track@inflation:追加幅,0,1000,0,0.01
 --select@mode_fill:範囲=0,内側=0,奇偶=1,内側反転=2,奇偶反転=3
---check@invert:反転,false
+--group:配置,false
 --track0:移動X,-4000,4000,0,0.01
 --track1:移動Y,-4000,4000,0,0.01
 --track@zoom:拡大率,0,5000,100,0.001
 --track@rotate:回転,-720,720,0,0.01
---value@PI:PI,{}
 --check@toggle_gui:アンカー切り替え,false
+--group:その他,false
+--track@antialias:ぼかし幅,0,1000,1,0.01
+--value@PI:PI,{}
 --[[pixelshader@interpolate:
 Texture2D ori : register(t0);
 Texture2D eff : register(t1);
@@ -786,20 +798,22 @@ obj.cx, obj.cy  = cx, cy;
 obj.draw();
 
 @パスに沿って配置σ
---information:パスに沿って配置σ@Path_S v1.10 (for beta21) by σ軸
+--information:パスに沿って配置σ@Path_S v1.11-beta2 (for beta22a) by σ軸
 --label:Path_S\配置
 --track@position:位置,-200,200,0,0.001
 --track@rotate:回転,-720,720,0,0.01
 --check@rot_tangent:パスに沿って回転,true
 --track@ofs_indiv:個別位置ズレ,-200,200,-5,0.001
 --select@out_of_range:範囲外=0,非表示=0,始点のみ表示=1,終点のみ表示=2,表示=3
+--group:パス設定,true
 --value@num_points:頂点数,4
 --select@path_type:線タイプ=3,折れ線=0,補間移動=1,2次ベジェ曲線=2,3次ベジェ曲線=3
 --value@points:点リスト,{0,-100,55.23,-100,100,-55.23,100,0,100,55.23,55.23,100,0,100,-55.23,100,-100,55.23,-100,0,-100,-55.23,-55.23,-100}
---track@precision:曲線精度,1,128,8,1
 --check@loop:ループ,true
---value@PI:PI,{}
+--track@precision:曲線精度,1,128,8,1
 --check@toggle_gui:パスの表示,false
+--group:その他,false
+--value@PI:PI,{}
 local path_s = require "Path_S";
 local obj, math, tonumber, type = obj, math, tonumber, type;
 

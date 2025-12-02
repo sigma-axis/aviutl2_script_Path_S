@@ -23,31 +23,36 @@ SOFTWARE.
 https://mit-license.org/
 ]]
 @パス図形σ
---information:パス図形σ@Path_S v1.10 (for beta21) by σ軸
+--information:パス図形σ@Path_S v1.11-beta2 (for beta22a) by σ軸
 --label:Path_S\図形
+--track@line:ライン幅,0,1000,5,0.01
+--color@color_line:ライン色,0x808080
+--color@color_fill:塗り色,0xffffff
+--group:パス設定,true
 --value@num_points:頂点数,4
 --select@path_type:線タイプ=3,折れ線=0,補間移動=1,2次ベジェ曲線=2,3次ベジェ曲線=3
 --value@points:点リスト,{0,-100,55.23,-100,100,-55.23,100,0,100,55.23,55.23,100,0,100,-55.23,100,-100,55.23,-100,0,-100,-55.23,-55.23,-100}
---track@precision:曲線精度,1,128,8,1
---track@antialias:ぼかし幅,0,1000,1,0.01
---color@color_line:ライン色,0x808080
---track@alpha_line:ライン透明度,0,100,0,0.01
---track@line:ライン幅,0,1000,5,0.01
 --check@loop:ループ,true
+--track@precision:曲線精度,1,128,8,1
+--group:ライン設定,false
+--track@alpha_line:ライン透明度,0,100,0,0.01
 --track@start_pos:開始位置,-200,200,0,0.001
 --track@end_pos:終了位置,-200,200,100,0.001
 --select@end_shape:端の形状=0,円=0,四角=1
 --value@dash_pat:破線パターン,{100,0}
 --check@dash_adj:破線周期補正,true
 --track@dash_pos:破線位置,-4000,4000,0,0.01
---color@color_fill:塗り色,0xffffff
---track@alpha_fill:塗り透明度,0,100,0,0.01
+--group:塗り設定,false
 --track@inflation:塗り追加幅,0,1000,0,0.01
+--track@alpha_fill:塗り透明度,0,100,0,0.01
 --select@mode_fill:塗り範囲=0,内側=0,奇偶=1
+--group:ランダム変化,false
 --track@rand_period:ランダム周期,4,1024,32,0.001
 --track@rand_amplify:ランダム振幅,0,1024,0,0.01
 --check@rand_fix_end:ランダム固定端,true
 --track@rand_seed:ランダムシード,-65536,65535,10000,1
+--group:その他,false
+--track@antialias:ぼかし幅,0,1000,1,0.01
 --value@PI:PI,{}
 local path_s = require "Path_S";
 local obj, math, tonumber, type = obj, math, tonumber, type;
@@ -222,24 +227,28 @@ if (line > 0 and alpha_line > 0) or alpha_fill > 0 then
 end
 
 @ラインσ
---information:ラインσ@Path_S v1.10 (for beta21) by σ軸
+--information:ラインσ@Path_S v1.11-beta2 (for beta22a) by σ軸
 --label:Path_S\図形
 --track0:終点X,-4000,4000,256,0.01
 --track1:終点Y,-4000,4000,0,0.01
---color@color:色,0xffffff
 --track@line:ライン幅,0,1000,5,0.01
---select@end_shape:端の形状=0,円=0,四角=1
+--color@color:色,0xffffff
+--group:曲線設定,true
 --select@line_shape:形状=1,直線=0,正弦波=1,三角波=2,矩形波=3,のこぎり波=4
---track@antialias:ぼかし幅,0,1000,1,0.01
 --track@line_period:周期,4,1024,64,0.001
 --track@line_phase:周期位置,-4000,4000,0,0.01
 --track@line_amplify:振幅,0,1024,32,0.01
+--group:ライン設定,false
+--select@end_shape:端の形状=0,円=0,四角=1
 --value@dash_pat:破線パターン,{100,0}
 --track@dash_pos:破線位置,-4000,4000,0,0.01
+--group:ランダム変化,false
 --track@rand_period:ランダム周期,4,1024,32,0.01
 --track@rand_amplify:ランダム振幅,0,1024,0,0.001
 --check@rand_fix_end:ランダム固定端,true
 --track@rand_seed:ランダムシード,-65536,65535,10000,1
+--group:その他,false
+--track@antialias:ぼかし幅,0,1000,1,0.01
 --value@PI:PI,{}
 local path_s = require "Path_S";
 local obj, math, tonumber, type = obj, math, tonumber, type;
@@ -447,26 +456,30 @@ obj.effect("パスマスク(ライン)σ@Path_S", "点リスト", "", "PI",
 obj.cx, obj.cy = -w / 2 - L + th, -h / 2 - T + th;
 
 @スパイラルσ
---information:スパイラルσ@Path_S v1.10 (for beta21) by σ軸
+--information:スパイラルσ@Path_S v1.11-beta2 (for beta22a) by σ軸
 --label:Path_S\図形
---track@slope:傾き,-200,200,10,0.001
---color@color:色,0xffffff
---track@line:ライン幅,0,1000,5,0.01
---select@end_shape:端の形状=0,円=0,四角=1
---select@line_shape:形状=1,アルキメデス螺旋=0,対数螺旋=1
---track@precision:曲線精度,1,128,8,1
---track@antialias:ぼかし幅,0,1000,1,0.01
 --track@start_radius:開始半径,0,2000,0,0.01
 --track@end_radius:終了半径,0,2000,256,0.01
+--track@line:ライン幅,0,1000,5,0.01
+--color@color:色,0xffffff
+--group:螺旋設定,true
+--select@line_shape:形状=1,アルキメデス螺旋=0,対数螺旋=1
+--track@slope:傾き,-200,200,10,0.001
 --track@rotate:回転,-720,720,0,0.01
 --track0:ずれX,-4000,4000,0,0.01
 --track1:ずれY,-4000,4000,0,0.01
+--group:ライン設定,false
+--select@end_shape:端の形状=0,円=0,四角=1
+--track@precision:曲線精度,1,128,8,1
 --value@dash_pat:破線パターン,{100,0}
 --track@dash_pos:破線位置,-4000,4000,0,0.01
+--group:ランダム変化,false
 --track@rand_period:ランダム周期,4,1024,32,0.01
 --track@rand_amplify:ランダム振幅,0,1024,0,0.001
 --check@rand_fix_end:ランダム固定端,false
 --track@rand_seed:ランダムシード,-65536,65535,10000,1
+--group:その他,false
+--track@antialias:ぼかし幅,0,1000,1,0.01
 --value@PI:PI,{}
 local path_s = require "Path_S";
 local obj, math, tonumber, type = obj, math, tonumber, type;
@@ -625,31 +638,36 @@ obj.effect("パスマスク(ライン)σ@Path_S", "点リスト", "", "PI",
 obj.cx, obj.cy = -w / 2 - L + th, -h / 2 - T + th;
 
 @アローσ
---information:アローσ@Path_S v1.10 (for beta21) by σ軸
+--information:アローσ@Path_S v1.11-beta2 (for beta22a) by σ軸
 --label:Path_S\図形
---color@color:色,0xffffff
 --track@line:ライン幅,0,1000,5,0.01
---select@head_type:矢じり配置=1,なし=0,終点=1,両方=2,双方向=3
---figure@head_fig:矢じり図形,三角形
 --track@head_size:矢じりサイズ,0,1024,32,0.01
---track@head_width:矢じり幅,0,800,100,0.001
---track@head_center:矢じり中心,-100,100,-50,0.001
---track@head_rot:矢じり角度,-720,720,0,0.01
---track@head_pos:矢じり位置,-100,100,0,0.001
+--color@color:色,0xffffff
+--group:パス設定,true
 --value@num_points:頂点数,4
 --select@path_type:線タイプ=3,折れ線=0,補間移動=1,2次ベジェ曲線=2,3次ベジェ曲線=3
 --value@points:点リスト,{-100.00,50.00,-75.00,0.00,-50.00,-50.00,-25.00,-50.00,0.00,-50.00,0.00,50.00,25.00,50.00,50.00,50.00,75.00,0.00,100.00,-50.00}
 --track@precision:曲線精度,1,128,8,1
---track@antialias:ぼかし幅,0,1000,1,0.01
+--group:ライン設定,false
 --track@start_pos:開始位置,0,100,0,0.001
 --track@end_pos:終了位置,0,100,100,0.001
 --select@end_shape:端の形状=0,円=0,四角=1
 --value@dash_pat:破線パターン,{100,0}
 --track@dash_pos:破線位置,-4000,4000,0,0.01
+--group:矢じり設定,false
+--select@head_type:矢じり配置=1,なし=0,終点=1,両方=2,双方向=3
+--figure@head_fig:矢じり図形,三角形
+--track@head_width:矢じり幅,0,800,100,0.001
+--track@head_center:矢じり中心,-100,100,-50,0.001
+--track@head_rot:矢じり角度,-720,720,0,0.01
+--track@head_pos:矢じり位置,-100,100,0,0.001
+--group:ランダム変化,false
 --track@rand_period:ランダム周期,4,1024,32,0.001
 --track@rand_amplify:ランダム振幅,0,1024,0,0.01
 --check@rand_fix_end:ランダム固定端,true
 --track@rand_seed:ランダムシード,-65536,65535,10000,1
+--group:その他,false
+--track@antialias:ぼかし幅,0,1000,1,0.01
 --value@PI:PI,{}
 local path_s = require "Path_S";
 local obj, math, tonumber, type = obj, math, tonumber, type;
@@ -893,34 +911,40 @@ end
 obj.cx, obj.cy = cx, cy;
 
 @スクウェアσ
---information:スクウェアσ@Path_S v1.10 (for beta21) by σ軸
+--information:スクウェアσ@Path_S v1.11-beta2 (for beta22a) by σ軸
 --label:Path_S\図形
 --track@width:幅,0,4000,100,0.01
 --track@height:高さ,0,4000,100,0.01
+--track@line:ライン幅,0,1000,5,0.01
+--color@color_line:ライン色,0x808080
+--color@color_fill:塗り色,0xffffff
+--track@radius:角半径,0,2000,40,0.01
+--group:整列,false
 --track@align_x:水平揃え,-100,100,0,0.001
 --track@align_y:垂直揃え,-100,100,0,0.001
---track@radius:角半径,0,2000,40,0.01
+--group:丸角設定,false
 --check@uniform:半径均一,true
 --track@r_RT:右上半径,0,2000,40,0.01
 --track@r_RB:右下半径,0,2000,40,0.01
 --track@r_LB:左下半径,0,2000,40,0.01
 --track@aspect:丸角縦横比,-100,100,0,0.001
 --check@fixed_aspect:丸角縦横比固定,true
---track@antialias:ぼかし幅,0,1000,1,0.01
---color@color_line:ライン色,0x808080
+--group:ライン設定,false
 --track@alpha_line:ライン透明度,0,100,0,0.01
---track@line:ライン幅,0,1000,5,0.01
 --track@start_pos:開始位置,-200,200,0,0.001
 --track@end_pos:終了位置,-200,200,100,0.001
 --select@end_shape:端の形状=0,円=0,四角=1
 --value@dash_pat:破線パターン,{100,0}
 --track@dash_pos:破線位置,-4000,4000,0,0.01
---color@color_fill:塗り色,0xffffff
---track@alpha_fill:塗り透明度,0,100,0,0.01
+--group:塗り設定,false
 --track@inflation:塗り追加幅,0,1000,0,0.01
+--track@alpha_fill:塗り透明度,0,100,0,0.01
+--group:ランダム変化,false
 --track@rand_period:ランダム周期,4,1024,32,0.001
 --track@rand_amplify:ランダム振幅,0,1024,0,0.01
 --track@rand_seed:ランダムシード,-65536,65535,10000,1
+--group:その他,false
+--track@antialias:ぼかし幅,0,1000,1,0.01
 --value@PI:PI,{}
 local path_s = require "Path_S";
 local obj, math, tonumber, type = obj, math, tonumber, type;
