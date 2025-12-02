@@ -311,7 +311,7 @@
 
 ### パス図形σのパラメタ
 
-<img width="500" height="842" alt="Image of GUI of Figure" src="https://github.com/user-attachments/assets/4f09f33e-65cc-44e9-b9b6-d77a5c250e33" />
+<img width="500" height="1052" alt="Image of GUI of Figure" src="https://github.com/user-attachments/assets/db98e5eb-91c7-4956-a62e-d0cef192d3c7" />
 
 ####  ライン色, ライン透明度
 
@@ -330,7 +330,7 @@
 
 ### ラインσのパラメタ
 
-<img width="500" height="598" alt="Image of GUI of Curve" src="https://github.com/user-attachments/assets/6dd02ab8-572c-4cc1-8e53-36e3795f8629" />
+<img width="500" height="772" alt="Image of GUI of Curve" src="https://github.com/user-attachments/assets/1bbc84af-bd0c-4cbb-9315-f648c3c2ba96" />
 
 ####  終点X, 終点Y
 
@@ -375,7 +375,7 @@
 
 ### スパイラルσのパラメタ
 
-<img width="500" height="668" alt="Image of GUI of Spiral" src="https://github.com/user-attachments/assets/80139642-b9c0-4cba-98e2-a322f62a11db" />
+<img width="500" height="842" alt="Image of GUI of Spiral" src="https://github.com/user-attachments/assets/a44b065a-82d1-47da-9de6-10425c82f65a" />
 
 ####  傾き
 
@@ -430,7 +430,7 @@
 
 ### アローσのパラメタ
 
-<img width="500" height="842" alt="Image of GUI of Arrow" src="https://github.com/user-attachments/assets/68520881-ca71-4826-b7c3-6b1dd603ae28" />
+<img width="500" height="1052" alt="Image of GUI of Arrow" src="https://github.com/user-attachments/assets/e878b7c9-801c-4b10-b29a-2b88e091c4db" />
 
 ####  色
 
@@ -485,7 +485,7 @@
 
 ### スクウェアσのパラメタ
 
-<img width="500" height="948" alt="Image of GUI of Round Rect" src="https://github.com/user-attachments/assets/5be99d54-d947-422d-96e0-9fef576534f0" />
+<img width="500" height="1192" alt="Image of GUI of Round Rect" src="https://github.com/user-attachments/assets/2daa8080-8816-4b6f-a0ab-51ae1173fa6c" />
 
 ####  幅, 高さ
 
@@ -553,9 +553,9 @@
 
 ### パスマスクσ / パスマスク(ライン)σ / パス部分フィルタσのパラメタ
 
-<img width="500" height="562" alt="Image of GUI of Clip by Path (Area)" src="https://github.com/user-attachments/assets/58e45f51-7cb0-464e-85c2-605cfe565ab4" />
-<img width="500" height="772" alt="Image of GUI of Clip by Path (Line)" src="https://github.com/user-attachments/assets/475f8dfb-55f2-44c2-b8d8-bb3527e3524d" />
-<img width="500" height="528" alt="Image of GUI of Partial Filter by Path" src="https://github.com/user-attachments/assets/a79a205b-49b2-4a45-8560-7384d58e9821" />
+<img width="500" height="702" alt="Image of GUI of Clip by Path (Area)" src="https://github.com/user-attachments/assets/744a1c17-3c34-4b7c-a2b3-c9bbec823827" />
+<img width="500" height="912" alt="Image of GUI of Clip by Path (Line)" src="https://github.com/user-attachments/assets/19a729f3-da7d-4ed7-ba49-4ab53aebc74a" />
+<img width="500" height="668" alt="Image of GUI of Partial Filter by Path" src="https://github.com/user-attachments/assets/0ac4089e-ce38-47ad-84d1-a44e2222d2e8" />
 
 ####  強さ
 
@@ -598,7 +598,7 @@
 
 ### パスに沿って配置σのパラメタ
 
-<img width="500" height="458" alt="Image of GUI of Place Along Path" src="https://github.com/user-attachments/assets/386e1f7a-63ac-422d-8671-21eed9d1daa6" />
+<img width="500" height="528" alt="Image of GUI of Place Along Path" src="https://github.com/user-attachments/assets/5e828666-1ee6-479b-adbf-e292274b6a8d" />
 
 ####  位置
 
