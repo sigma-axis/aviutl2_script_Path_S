@@ -23,8 +23,9 @@ SOFTWARE.
 https://mit-license.org/
 ]]
 @パスマスクσ
---information:パスマスクσ@Path_S v1.11 (for beta22a) by σ軸
+--information:パスマスクσ@Path_S v1.12 (for beta25) by σ軸
 --label:Path_S\クリッピング
+--filter
 --track@intensity:強さ,0,100,100,0.01
 --check@invert:反転,false
 --group:パス設定,true
@@ -223,8 +224,9 @@ obj.pixelshader("carve", "object", pt_buff,
 }, "mask");
 
 @パスマスク(ライン)σ
---information:パスマスク(ライン)σ@Path_S v1.11 (for beta22a) by σ軸
+--information:パスマスク(ライン)σ@Path_S v1.12 (for beta25) by σ軸
 --label:Path_S\クリッピング
+--filter
 --track@intensity:強さ,0,100,100,0.01
 --check@invert:反転,false
 --track@line:ライン幅,0,1000,5,0.01
@@ -663,7 +665,7 @@ else
 end
 
 @パス部分フィルタσ
---information:パス部分フィルタσ@Path_S v1.11 (for beta22a) by σ軸
+--information:パス部分フィルタσ@Path_S v1.12 (for beta25) by σ軸
 --label:Path_S\加工
 --check@invert:反転,false
 --group:パス設定,true
@@ -798,7 +800,7 @@ obj.cx, obj.cy  = cx, cy;
 obj.draw();
 
 @パスに沿って配置σ
---information:パスに沿って配置σ@Path_S v1.11 (for beta22a) by σ軸
+--information:パスに沿って配置σ@Path_S v1.12 (for beta25) by σ軸
 --label:Path_S\配置
 --track@position:位置,-200,200,0,0.001
 --track@rotate:回転,-720,720,0,0.01

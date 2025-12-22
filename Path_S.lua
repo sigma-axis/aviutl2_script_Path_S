@@ -24,7 +24,7 @@ https://mit-license.org/
 ]]
 
 --
--- v1.11 (for beta22a)
+-- v1.12 (for beta25)
 --
 
 local obj, math, tonumber, bit, ffi, buffer = obj, math, tonumber, bit, require("ffi"), require("string.buffer");
