@@ -42,20 +42,18 @@
 
 ## 導入方法
 
-以下のフォルダのいずれかに `@Path_S.obj2`, `@Path_S.anm2`, `Path_S.lua` の 3 つのファイルをコピーしてください．
+ダウンロードした `aviutl2_script_Path_S-v*.**.au2pkg.zip` を AviUtl2 のウィンドウにドラッグ & ドロップしてください．
 
-1.  スクリプトフォルダ
-    - AviUtl2 のメニューの「その他」 :arrow_right: 「アプリケーションデータ」 :arrow_right: 「スクリプトフォルダ」で表示されます．
-1.  (1) のフォルダにある任意の名前のフォルダ
-
-- AviUtl2 のウィンドウにドラッグ&ドロップする方法での導入はできません．
+初期状態だと「オブジェクトを追加」や「フィルタ効果を追加」メニューの「Path_S」以下に各種オブジェクトやフィルタ効果などが追加されています．
+- 「オブジェクト追加メニューの設定」や「トラックバー移動メニューの設定」の「ラベル」項目で分類を変更できます．
 
 ### For non-Japanese speaking users
 
-You may be able to find language translation file for this script from [this repository](https://github.com/sigma-axis/aviutl2_translations_sigma-axis). 
-Translation files enable names and parameters of the scripts / filters to be displayed in other languages.
+You may be able to find language translation file for this script / plugin from [this repository](https://github.com/sigma-axis/aviutl2_translations_sigma-axis).
 
-Although, usage documentations for this script in languages other than Japanese are not available now.
+Translation files enable names, parameters and commands of the scripts / plugins to be displayed in other languages.
+
+Although, usage documentations for this script / plugin in languages other than Japanese are not available now.
 
 ##  スクリプトの種類
 
@@ -979,7 +977,7 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
 
 ##  既知の問題
 
-1.  [「パス部分フィルタσ」](#パス部分フィルタσ)では，一部のフィルタ効果は後続に置いても「部分的に適用」されるような挙動にはなりません．
+1.  [「パス部分フィルタσ」](#パス部分フィルタσ)では，一部のフィルタ効果は後続に置いたり，スクリプトで呼び出しても「部分的に適用」されるような挙動にはなりません．
 
     「ランダム移動」や「球体(カメラ制御)」など，フレームバッファに直接描画したり，カメラ制御を前提としたり，配置を変えるフィルタ効果などが当てはまることが多いです．
 
@@ -989,10 +987,21 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
 
 - **v1.20 (for beta42)** (2026-??-??)
 
-  - 「スクウェアσ」で「四角」の端点が正しく描画されなかったことがあったのを修正．
   - 「パス部分フィルタσ」で後続フィルタの代わりにスクリプトの直接記入をできるように．
+  - 「スクウェアσ」で「四角」の端点が正しく描画されなかったことがあったのを修正．
   - 前回更新からの AviUtl2 本体のスクリプト機能追加を適用 (`--trackgroup` 指定やトラックバーの操作倍率など). それに伴って一部トラックバーの最大・最小の範囲を拡大．
   - 大幅コード整理．
+
+  - 配布形式を `.au2pkg.zip` (AviUtl2 のパッケージ形式) に変更．
+    - **以前のバージョンから更新する際は，以前の導入時にコピーしたファイルを一度削除してから導入してください．**
+
+      同名ファイルが複数フォルダに分散して重複して認識されないようにするためで，次のファイルが削除対象です:
+
+      1.  `@Path_S.anm2`
+      1.  `@Path_S.obj2`
+      1.  `Path_S.lua`
+
+      スクリプトフォルダ，またはその 1 階層下のサブフォルダ内に配置されています．
 
   - `beta42` での動作確認．
 
