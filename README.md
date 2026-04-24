@@ -955,7 +955,15 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
 
 1.  [「パス部分フィルタσ」](#パス部分フィルタσ)は，1つのオブジェクトに対して複数設定できません (つまり「入れ子」のような構造は指定不可能).
 
-1.  AviUtl2 では「個別オブジェクト」が有効の時にはパスやアンカーが表示されないため，[「パスに沿って配置σ」](#パスに沿って配置σ)などを「個別オブジェクト」に対して適用した場合はパスが表示されません．この場合，一時的に「個別オブジェクト」を解除してからパスを調整，そのあとに「個別オブジェクト」を再度有効にしてください．
+##  次の改版予定
+
+- **v1.13 (for beta42)** (2026-??-??)
+
+  - 「スクウェアσ」で「四角」の端点が正しく描画されなかったことがあったのを修正．
+
+  - 大幅コード整理．
+
+  - `beta42` での動作確認．
 
 ##  改版履歴
 
@@ -991,7 +999,7 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
 
 The MIT License (MIT)
 
-Copyright (C) 2025 sigma-axis
+Copyright (C) 2025-2026 sigma-axis
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 

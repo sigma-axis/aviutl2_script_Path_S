@@ -1,6 +1,7 @@
+-- under development for v1.13 (for beta42) r1
 --[[
 MIT License
-Copyright (c) 2025 sigma-axis
+Copyright (c) 2025-2026 sigma-axis
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -27,21 +28,43 @@ https://mit-license.org/
 -- v1.12 (for beta25)
 --
 
-local obj, math, tonumber, bit, ffi, buffer = obj, math, tonumber, bit, require("ffi"), require("string.buffer");
+local obj, print, math, tonumber, bit, ffi, buffer = obj, print, math, tonumber, bit, require("ffi"), require("string.buffer");
 
-if obj.getinfo("version") < 2002000 then
-	error([[AviUtl ExEdit beta20 以降が必要です！]], 2);
+if obj.getinfo("version") < 2004001 then
+	error([[AviUtl ExEdit beta40a 以降が必要です！]], 2);
 end
+
+---@alias path_type # パスの種類．
+---| 0 # 折れ線
+---| 1 # 補間移動
+---| 2 # 2次 Bezier
+---| 3 # 3次 Bezier
+
+---@alias mode_fill # 塗りつぶし範囲の指定．
+---| 0 # 通常
+---| 1 # 奇偶
+---| 2 # 反転
+---| 3 # 奇偶反転
+
+---@class end_points 曲線の両端の情報を記述．2点の座標と正方向への方向ベクトル．
+---@field [1] number? X1
+---@field [2] number? Y1
+---@field [3] number? dx1
+---@field [4] number? dy1
+---@field [5] number? X2
+---@field [6] number? Y2
+---@field [7] number? dx2
+---@field [8] number? dy2
 
 local function pt(pts, i) return tonumber(pts[i]) or 0 end
 
 ---places anchors for the path.
----@param var_name string the name of the variable of the path points.
----@param path_type 0|1|2|3 specifies a type of a path.
----@param pts { [integer]: number? } the array of the points in the form `{ x1, y1, x2, y2, x3, y3, ... }`.
----@param n_segs integer the number of segments of the path.
----@param loop boolean whether the path is closed.
----@return integer n_anchors the number of anchor points for the path.
+---@param var_name string 点列を受け取る変数の名前．
+---@param path_type path_type パスの種類．
+---@param pts { [integer]: number? } 点列の配列， `{ x1, y1, x2, y2, x3, y3, ... }` の形式．
+---@param n_segs integer パスの分割区間の個数．
+---@param loop boolean 閉じたパスかどうか．
+---@return integer n_anchors 設定したアンカーの個数．
 local function anchor(var_name, path_type, pts, n_segs, loop)
 	local n_anchors = (loop and 0 or 1) + n_segs * (
 		path_type == 0 and 1 or
@@ -106,21 +129,21 @@ local function poll_section(curve, apriori, ...)
 	end
 end
 
----converts path into a sequence of secants.
----@param path_type 0|1|2|3 specifies a type of a path.
----@param pts { [integer]: number? } the array of the points in the form `{ x1, y1, x2, y2, x3, y3, ... }`.
----@param n_segs integer the number of segments of the path.
----@param looping boolean whether the path is closed.
----@param prec number the maximum length allowed for a secant.
----@return { [integer]: number } pts2 the array of numbers representing the sequence of end points of the secants.
----@return integer n_pts2 the number of points contained in `pts2`.
-local function poll(path_type, pts, n_segs, looping, prec)
+---曲線を表すパスを折れ線の列に変換する．
+---@param path_type path_type パスの種類．折れ線の場合は実質 shallow copy が取られる．
+---@param pts { [integer]: number? } 点列の配列， `{ x1, y1, x2, y2, x3, y3, ... }` の形式．
+---@param n_segs integer パスの分割区間の個数．
+---@param loop boolean 閉じたパスかどうか．
+---@param prec number 折れ線の許容最長距離．
+---@return { [integer]: number } pts2 結果の折れ線の頂点を表す点列．
+---@return integer n_pts2 `pts2` に含まれる点の個数．
+local function poll(path_type, pts, n_segs, loop, prec)
 	local ret, n_ret;
 	if path_type == 0 then
 		ret, n_ret = {}, n_segs + 1;
 		-- essentially a shallow copy of `pts`.
 		for i = 1, 2 * n_ret do ret[i] = pt(pts, i) end
-		if looping then
+		if loop then
 			-- place a copy of the first point at the end.
 			ret[2 * n_ret - 1], ret[2 * n_ret] = ret[1], ret[2];
 		end
@@ -136,7 +159,7 @@ local function poll(path_type, pts, n_segs, looping, prec)
 					pt(pts, 2 * i - 3), pt(pts, 2 * i - 2),
 					pt(pts, 2 * i + 1), pt(pts, 2 * i + 2),
 					pt(pts, 2 * i + 3), pt(pts, 2 * i + 4);
-				if looping then
+				if loop then
 					if i == 1 then x0, y0 = pt(pts, 2 * n_segs - 1), pt(pts, 2 * n_segs) end
 					if i >= n_segs - 1 then
 						local j = i - n_segs;
@@ -156,7 +179,7 @@ local function poll(path_type, pts, n_segs, looping, prec)
 		elseif path_type == 2 then
 			-- quadratic Bezier curve.
 			for i = 1, n_segs do
-				local j = (i >= n_segs and looping) and 0 or i;
+				local j = (i >= n_segs and loop) and 0 or i;
 				local x1, y1, x2, y2 =
 					pt(pts, 4 * i - 1), pt(pts, 4 * i - 0),
 					pt(pts, 4 * j + 1), pt(pts, 4 * j + 2);
@@ -169,7 +192,7 @@ local function poll(path_type, pts, n_segs, looping, prec)
 		else
 			-- cubic Bezier curve.
 			for i = 1, n_segs do
-				local j = (i >= n_segs and looping) and 0 or i;
+				local j = (i >= n_segs and loop) and 0 or i;
 				local x1, y1, x2, y2, x3, y3 =
 					pt(pts, 6 * i - 3), pt(pts, 6 * i - 2),
 					pt(pts, 6 * i - 1), pt(pts, 6 * i - 0),
@@ -200,11 +223,11 @@ local function poll(path_type, pts, n_segs, looping, prec)
 	return ret, n_ret;
 end
 
----measure the bounding box and the length of the path.
----@param pts { [integer]: number } the array to numbers representing the sequence of points.
----@param n_pts integer the number of points contained in `pts`.
----@return number L, number R, number T, number B represent the bounding box.
----@return number length the length of the whole path.
+---折れ線の bounding box と長さを計算．
+---@param pts { [integer]: number } 折れ線の頂点を表す点列．
+---@param n_pts integer `pts` に含まれる点の個数．
+---@return number L, number R, number T, number B bounding box の座標．
+---@return number length 折れ線の長さ．
 local function measure(pts, n_pts)
 	local x0, y0 = pts[1], pts[2];
 	local L, R, T, B, length = x0, x0, y0, y0, 0;
@@ -218,13 +241,13 @@ local function measure(pts, n_pts)
 	return L, R, T, B, length;
 end
 
----find the index position where the length measured from the starting point is `pos`, using binary search.
----@param pos number if non-negative, the length measured from the starting point to find the position. if negative, it must be `>= -1.0` and its absolute value specifies the ratio relative to the length of the whole path.
----@param tbl { [integer]: number } either an array of points of the form `{ x1, y1, x2, y2, ... }`, in which case `n_pts` must be set, or an array of lengths `{ 0, l1, l2, ... }`, in which case `n_pts` must be `nil`.
----@param n_pts integer? the number of points contained in `tbl` when `tbl` specifies an array of points; otherwise must be `nil`.
----@return integer int_part the index of the section where `pos` is lying on.
----@return number frac_part the relative position of `pos` in the `int_part`-th section, from `0.0` to `1.0`.
----@return { [integer]: number } lengths an array of accumulated lengths measured from the starting point, which can be reused later.
+---折れ線を表す配列で，始点から `pos` だけ離れた位置にある点の前後にある頂点のインデックスを二分法で検索．
+---@param pos number 始点からの距離．0 以上の場合はピクセル数で指定，負の場合は `pos >= -1.0` の必要があり，パスの総長との比を絶対値で指定．
+---@param tbl { [integer]: number } `n_pts` を指定した場合，点列を `{ x1, y1, x2, y2, ... }` の形式で指定．`n_pts` が `nil` の場合，各頂点の始点からの累計距離の配列を `{ 0, l1, l2, ... }` の形式で指定．
+---@param n_pts integer? `tbl` に点列を指定した場合， `tbl` に含まれる点の個数． 累計距離の配列の場合は `nil`.
+---@return integer int_part `pos` の前後位置にある頂点のインデックスのうち小さいほう．
+---@return number frac_part `int_part` から次の頂点までの相対位置を表す，0.0 から 1.0 までの数値．
+---@return { [integer]: number } lengths 各頂点の始点からの累計距離の配列．2回目以降の呼び出しで使うと一部計算を省略できる．
 local function find_index(pos, tbl, n_pts)
 	if n_pts then
 		-- construct an array of accumulated lengths.
@@ -254,13 +277,45 @@ local function find_index(pos, tbl, n_pts)
 	return i, j, tbl;
 end
 
----transforms a sequence of points by the specified scaling / rotation and translation.
----@param pts { [integer]: number } the array to numbers representing the sequence of points. its contents will be modified.
----@param n_pts integer the number of points contained in `pts`.
----@param scale number the scaling rate of the transform.
----@param rotate number the rotation angle of the transform, in radians.
----@param dx number? the translation along x-axis. it's applied after the scaling and rotation, defaults to 0.
----@param dy number? the translation along y-axis. it's applied after the scaling and rotation, defaults to 0.
+---曲線の両端の情報 (2点の座標と正方向への方向ベクトル) を計算・取得する．
+---@param pts { [integer]: number } 折れ線の頂点を表す点列．
+---@param n_pts integer `pts` に含まれる点の個数．
+---@param loop boolean 閉じたパスかどうか．
+---@param start_pos number パスの始点の位置をパス全体の長さからの比で 0.0 から 1.0 に正規化した数値．ただしループの場合はこの範囲を超えることもある．
+---@param end_pos number パスの終点の位置をパス全体の長さからの比で 0.0 から 1.0 に正規化した数値．ただしループの場合はこの範囲を超えることもある．
+---@param offset_x number 両端位置の X 方向の移動量．
+---@param offset_y number 両端位置の Y 方向の移動量．
+---@return end_points # 曲線の両端の情報を記述．2点の座標と正方向への方向ベクトル．
+local function find_end_points(pts, n_pts, loop, start_pos, end_pos, offset_x, offset_y)
+	-- calculate the end points from the calculated length.
+	if loop then start_pos, end_pos = start_pos % 1, end_pos % 1
+	else start_pos, end_pos = math.min(math.max(start_pos, 0), 1), math.min(math.max(end_pos, 0), 1) end
+
+	local ret = { 0.0, 0.0, 0.0, 0.0; 0.0, 0.0, 0.0, 0.0 };
+	local i, j, l = find_index(-start_pos, pts, n_pts);
+	ret[1], ret[2], ret[3], ret[4] =
+		(1 - j) * pts[2 * i - 1] + j * pts[2 * i + 1] + offset_x,
+		(1 - j) * pts[2 * i - 0] + j * pts[2 * i + 2] + offset_y,
+		pts[2 * i + 1] - pts[2 * i - 1],
+		pts[2 * i + 2] - pts[2 * i - 0];
+
+	i, j = find_index(-end_pos, l);
+	ret[5], ret[6], ret[7], ret[8] =
+		(1 - j) * pts[2 * i - 1] + j * pts[2 * i + 1] + offset_x,
+		(1 - j) * pts[2 * i - 0] + j * pts[2 * i + 2] + offset_y,
+		pts[2 * i + 1] - pts[2 * i - 1],
+		pts[2 * i + 2] - pts[2 * i - 0];
+
+	return ret;
+end
+
+---点列に対して拡縮回転平行移動を適用する．
+---@param pts { [integer]: number } 適用先の点列．このテーブルの内容を書き換える．
+---@param n_pts integer `pts` に含まれる点の個数．
+---@param scale number 拡縮の比率．
+---@param rotate number ラジアン単位の回転角．
+---@param dx number? X方向の平行移動量．省略時は 0. 拡縮回転の後に適用される．
+---@param dy number? Y方向の平行移動量．省略時は 0. 拡縮回転の後に適用される．
 local function transform(pts, n_pts, scale, rotate, dx, dy)
 	dx, dy = dx or 0, dy or 0;
 	local c, s = scale * math.cos(rotate), scale * math.sin(rotate);
@@ -289,15 +344,15 @@ local disk_rand do
 		return setmetatable({ 1, seed, radius }, mt_disk_rand);
 	end
 end
----applies random moves to the path. this function uses `obj.rand1()` for PRNG.
----@param pts { [integer]: number } the array of points of the path. path is assumed to be an array of straight secants.
----@param n_pts integer the number of points contained in `pts`.
----@param period number the period in the length of the path per PRNG invocation. must be positive.
----@param rand_range number the radius of the random range in pixels.
----@param end_mode 0|1|2 0: no special behavior, 1: the ends do not move, 2: the two ends move the same.
----@param seed number the random seed for `obj.rand1()` function.
----@return { [integer]: number } pts2 the new array of points representing the randomized path.
----@return integer n_pts2 the number points contained in `pts2`.
+---パスに対してランダム移動を適用する．乱数器は `obj.rand1()`．
+---@param pts { [integer]: number } 適用先の点列．このテーブルの内容は書き換わらない．
+---@param n_pts integer `pts` に含まれる点の個数．
+---@param period number ランダムを適用する距離周期，ピクセル単位．
+---@param rand_range number 各点がランダム移動する最大距離，ピクセル単位．
+---@param end_mode 0|1|2 両端での特別扱いを指定．0: 特になし, 1: 両端は固定, 2: 両端のランダム移動量を揃える (ループ用).
+---@param seed number `obj.rand1()` へ渡す乱数シード値．
+---@return { [integer]: number } pts2 ランダム移動で得られた新しい点列．
+---@return integer n_pts2 `pts2` に含まれる点の個数．
 local function randomize(pts, n_pts, period, rand_range, end_mode, seed)
 	local rng = disk_rand(seed, rand_range);
 	local x_r0, y_r0 = rng();
@@ -358,12 +413,12 @@ local function to_userdata(ptr)
 	-- 0x05: lightud64. (https://luajit.org/ext_buffer.html)
 	return buffer.decode("\x05"..buffer.encode(ffi.cast(intptr_t, ptr)):sub(2));
 end
----sends the coordinates of the points in `pts` to the buffer specified by `target`.
----@param pts { [integer]: number } the array to numbers representing the sequence of points.
----@param n_pts integer the number of points contained in `pts`.
----@param dx number? offset x-coordinate applied to each point, defaults to 0.
----@param dy number? offset y-coordinate applied to each point, defaults to 0.
----@param target string? either `"tempbuffer"` or of the form `"cache:..."` that specifies the destination buffer. defaults to `"tempbuffer"`.
+---点列 `pts` の情報を `target` で指定したバッファに転送する．転送したデータはシェーダーで点列として読み取れるようになる．
+---@param pts { [integer]: number } 折れ線の頂点を表す点列．
+---@param n_pts integer `pts` に含まれる点の個数．
+---@param dx number? X方向の平行移動量．省略時は 0.
+---@param dy number? Y方向の平行移動量．省略時は 0.
+---@param target string? `"tempbuffer"` あるいは `"cache:..."` の形式でバッファを指定．省略時は `"tempbuffer"`.
 local function send(pts, n_pts, dx, dy, target)
 	dx, dy = dx or 0, dy or 0;
 	local max_width = 2 ^ 12;
@@ -378,10 +433,10 @@ local function send(pts, n_pts, dx, dy, target)
 	obj.putpixeldata(target or "tempbuffer", to_userdata(data), w, h);
 end
 
----retrieves the coordinates of the points from the buffer specified by `target`.
----@param n_pts integer the number of points expected to be retrieved from the buffer.
----@param target string? either `"tempbuffer"` or of the form `"cache:..."` that specifies the source buffer. defaults to `"tempbuffer"`.
----@return { [integer]: number }? pts the desired array of numbers representing the sequence of points, or nil if the buffer did not fit `n_pts`.
+---`target` で指定したバッファから点列情報を復元する．
+---@param n_pts integer バッファに含まれている点の個数．
+---@param target string? `"tempbuffer"` あるいは `"cache:..."` の形式でバッファを指定．省略時は `"tempbuffer"`.
+---@return { [integer]: number }? pts 求める点列を表す配列．もしバッファのサイズが `n_pts` と想定されない場合は `nil`.
 local function retrieve(n_pts, target)
 	local max_width = 2 ^ 12;
 	local w, h =
@@ -394,14 +449,346 @@ local function retrieve(n_pts, target)
 	return ret;
 end
 
+---パスマスクσ をバッファに送った点列データを元に適用する．
+---@param intensity number 「強さ」を 0.0 から 1.0 で指定．
+---@param invert boolean 反転するかどうか．
+---@param mode_fill mode_fill 塗りつぶし範囲の指定．
+---@param inflation number 「追加幅」をピクセル単位で指定．
+---@param antialias number 「ぼかし幅」をピクセル単位で指定．
+---@param buffer_name string 折れ線の頂点データのあるバッファ名．
+---@param num_points integer バッファに含まれる頂点数．
+---@param target_buffer { name: string, w: integer, h: integer }? マスク適用先のバッファ名 (e.g. "object", "cache:foo") とその幅と高さを指定．省略時は `{ name = "object", w = obj.w, h = obj.h }`.
+local function path_mask_area_buffered(
+	intensity, invert, mode_fill,
+	inflation, antialias,
+	buffer_name, num_points,
+	target_buffer)
+	-- unwrap target_buffer.
+	local tgt_name = target_buffer and target_buffer.name or "object";
+
+	local alpha_map0, alpha_map1;
+	if invert then alpha_map0, alpha_map1 = 1, -intensity;
+	else alpha_map0, alpha_map1 = 1 - intensity, intensity end
+
+	-- mask with the path.
+	obj.pixelshader("carve@パスマスクσ@Path_S", tgt_name, buffer_name,
+	{
+		alpha_map1, alpha_map0;
+		num_points, mode_fill,
+		inflation, antialias,
+	}, "mask");
+end
+
+---パスマスクσ を点列を元に適用する．
+---@param intensity number 「強さ」を 0.0 から 1.0 で指定．
+---@param invert boolean 反転するかどうか．
+---@param mode_fill mode_fill 塗りつぶし範囲の指定．
+---@param inflation number 「追加幅」をピクセル単位で指定．
+---@param antialias number 「ぼかし幅」をピクセル単位で指定．
+---@param path_type path_type 「線タイプ」(パスの種類) を指定．
+---@param pts { [integer]: number? } 点列の配列， `{ x1, y1, x2, y2, x3, y3, ... }` の形式．
+---@param n_segs integer パスの分割区間の個数．
+---@param prec number 「曲線精度」(折れ線の許容最長距離) を指定．
+---@param scale number 「拡大率」を指定．
+---@param rotate number 「回転」を指定．
+---@param dx number 「移動X」を指定．拡縮回転の後に適用．省略時は 0.
+---@param dy number 「移動Y」を指定．拡縮回転の後に適用．省略時は 0.
+---@param target_buffer { name: string, w: integer, h: integer }? マスク適用先のバッファ名 (e.g. "object", "cache:foo") とその幅と高さを指定．省略時は `{ name = "object", w = obj.w, h = obj.h }`.
+---@param temp_buffer_name string? 頂点データを転送する先のバッファ名 (e.g. "tempbuffer", "cache:foo"). 省略時は "tempbuffer".
+local function path_mask_area(
+	intensity, invert, mode_fill,
+	inflation, antialias,
+	path_type, pts, n_segs, prec,
+	scale, rotate, dx, dy,
+	target_buffer, temp_buffer_name)
+	-- unwrap target_buffer.
+	local tgt_name, tgt_w, tgt_h = "object", obj.w, obj.h;
+	if target_buffer then
+		tgt_name, tgt_w, tgt_h = target_buffer.name, target_buffer.w, target_buffer.h;
+	end
+
+	-- make the curve into the sequence of secants.
+	local points, num_points = poll(path_type, pts, n_segs, true,
+		prec / math.min(math.max(scale, 1 / 64), 1));
+
+	-- apply translation / scaling / rotation.
+	transform(points, num_points, scale, rotate, dx, dy);
+	local L, R, T, B = measure(points, num_points);
+	local th = inflation + antialias;
+	L, R, T, B = L - th, R + th, T - th, B + th;
+
+	-- check if the path overlaps this object.
+	if L >= tgt_w / 2 or R <= -tgt_w / 2 or T >= tgt_h / 2 or B <= -tgt_h / 2 then
+		-- the path does not overlap this object.
+		local alpha = invert == (mode_fill >= 2) and 1 - intensity or 1;
+		if alpha <= 0 then obj.clearbuffer(tgt_name);
+		elseif alpha < 1 then
+			obj.pixelshader("const_alpha@パスマスクσ@Path_S", tgt_name, nil, { alpha }, "mask");
+		end
+		return;
+	end
+
+	-- send the coordinates to tempbuffer.
+	temp_buffer_name = temp_buffer_name or "tempbuffer";
+	send(points, num_points, tgt_w / 2, tgt_h / 2, temp_buffer_name);
+
+	path_mask_area_buffered(
+		intensity, invert, mode_fill,
+		inflation, antialias, temp_buffer_name, num_points,
+		target_buffer);
+end
+
+---パスマスク(ライン)σ をバッファに送った点列データを元に適用する．
+---@param intensity number 「強さ」を 0.0 から 1.0 で指定．
+---@param invert boolean 反転するかどうか．
+---@param line_width number 「ライン幅」をピクセル単位で指定．
+---@param antialias number 「ぼかし幅」をピクセル単位で指定．
+---@param buffer_name string 折れ線の頂点データのあるバッファ名．
+---@param num_points integer バッファに含まれる頂点数．
+---@param len_path number バッファに含まれる折れ線の累計長さ．
+---@param loop boolean 閉じたパスかどうか．
+---@param start_pos number 「開始位置」を 0.0 から 1.0 に正規化した数値で指定．ただしループの場合はこの範囲を超えることもある．
+---@param end_pos number 「終了位置」を 0.0 から 1.0 に正規化した数値で指定．ただしループの場合はこの範囲を超えることもある．
+---@param end_shape 0|1 「端の形状」を指定．`1` (四角) を指定した場合，`end_points` を省略せず指定すること．
+---@param end_points end_points|nil `end_shape` が `1` のときのみ有効．曲線の両端の情報を記述．2点の座標と正方向への方向ベクトル．
+---@param dash_pat { [integer]: number } 「破線パターン」を `{ opaque_len1, blank_len1, opaque_len2, blank_len2, ... }` の形式で指定．
+---@param dash_pos number 「破線位置」をピクセル単位で指定．
+---@param dash_adj boolean 「破線周期補正」を指定．
+---@param target_buffer { name: string, w: integer, h: integer }? マスク適用先のバッファ名 (e.g. "object", "cache:foo") とその幅と高さを指定．省略時は `{ name = "object", w = obj.w, h = obj.h }`.
+local function path_mask_line_buffered(
+	intensity, invert, line_width, antialias,
+	buffer_name, num_points, len_path, loop,
+	start_pos, end_pos, end_shape, end_points,
+	dash_pat, dash_pos, dash_adj,
+	target_buffer)
+	-- unwrap target_buffer.
+	local tgt_name = target_buffer and target_buffer.name or "object";
+
+	local alpha_map0, alpha_map1;
+	if invert then alpha_map0, alpha_map1 = 1, -intensity;
+	else alpha_map0, alpha_map1 = 1 - intensity, intensity end
+	if line_width < 1 then
+		-- fade out the line as the width approaches zero.
+		alpha_map0, alpha_map1 = line_width * alpha_map0, line_width * alpha_map1;
+	end
+
+	local phase_whole0, phase_whole1, phase_whole2;
+	if end_pos < start_pos then
+		phase_whole0, phase_whole1, phase_whole2 = 2, 0, 0;
+	elseif loop then
+		start_pos, end_pos = start_pos % 1, end_pos - math.floor(start_pos);
+		if end_pos - start_pos >= 1 then
+			phase_whole0, phase_whole1, phase_whole2 = 0, 2, 0;
+		elseif end_pos <= 1 then
+			phase_whole0, phase_whole1, phase_whole2 = start_pos, end_pos - start_pos, 2;
+		else
+			phase_whole0, phase_whole1, phase_whole2 = 0, end_pos - 1, 1 + start_pos - end_pos;
+		end
+	else
+		start_pos = math.min(math.max(start_pos, 0), 1);
+		end_pos = math.min(math.max(end_pos, 0), 1);
+		phase_whole0 = math.max(start_pos, 0);
+		phase_whole1 = math.max(end_pos - phase_whole0, 0);
+		phase_whole2 = 2;
+	end
+
+	-- dash pattern.
+	local dash_len0, dash_idx0, sum_dash_len = 0, 0, 0;
+	if #dash_pat <= 256 then
+		for i,v in ipairs(dash_pat) do
+			v = math.max(tonumber(v) or 0, 0);
+			sum_dash_len = sum_dash_len + v;
+			dash_pat[i] = v;
+		end
+	end
+	if sum_dash_len > 0 then
+		-- normalize so zero does not occur other than the head.
+		local j, pat, len_rest = 1, { 0 }, (-dash_pos) % sum_dash_len;
+		for i, v in ipairs(dash_pat) do
+			if v ~= 0 then
+				if (i - j) % 2 ~= 0 then
+					pat[j] = pat[j] + v;
+				else
+					j = j + 1;
+					pat[j] = v;
+				end
+
+				if len_rest >= 0 then
+					len_rest = len_rest - v;
+					if len_rest < 0 then
+						dash_len0 = -len_rest;
+						dash_idx0 = j;
+					end
+				end
+			end
+		end
+		if j % 2 == 1 then
+			pat[1] = pat[j];
+			pat[j] = nil;
+			j = j - 1;
+		end
+
+		dash_pat = pat; -- replace with the normalized one.
+		if j <= 2 then
+			if j < 2 or pat[1] == 0 then
+				sum_dash_len = 0; -- all opaque.
+			end
+		end
+	end
+	if sum_dash_len <= 0 then
+		dash_len0, dash_idx0 = len_path * 2, 2;
+		dash_pat = { 0, len_path * 2 };
+	elseif loop and dash_adj then
+		local adj = len_path / sum_dash_len;
+		adj = adj / math.max(math.floor(0.5 + adj), 1);
+		sum_dash_len = adj * sum_dash_len;
+		dash_len0 = adj * dash_len0;
+		for i, v in ipairs(dash_pat) do dash_pat[i] = adj * v end
+	end
+
+	-- handle the shape of the end points.
+	local endpt = {
+		-- dummy, out-of-bound data.
+		-2, -2, 4 * math.max(line_width + antialias, 4), 0,
+		-2, -2, 4 * math.max(line_width + antialias, 4), 0,
+	};
+	if end_shape == 1 and end_points and start_pos <= end_pos and (not loop or start_pos + 1 > end_pos) then
+		for i = 1, 5, 4 do
+			if sum_dash_len > 0 then
+				-- identify the position in the dash pattern.
+				local pos = i > 1 and end_pos or start_pos;
+				if loop then pos = pos % 1 end
+				pos = (-dash_pos + dash_pat[1] + len_path * pos) % sum_dash_len;
+				for k, v in ipairs(dash_pat) do
+					pos = pos - v;
+					if pos < 0 then
+						-- invalidate when on a non-stroke part.
+						if k % 2 == 1 then end_points[i] = nil end
+						break;
+					end
+				end
+			end
+
+			local x, y, z, w = end_points[i], end_points[i + 1], end_points[i + 2], end_points[i + 3];
+			if x and y and z and w then
+				local l = (z ^ 2 + w ^ 2) ^ 0.5;
+				if l > 0 then z, w = z / l, w / l else z, w = 1, 0 end
+				if i > 1 then z, w = -z, -w end
+				endpt[i], endpt[i + 1], endpt[i + 2], endpt[i + 3] = x, y, z, w;
+			end
+		end
+	end
+
+	-- mask with the path.
+	if end_pos - start_pos >= 1 and sum_dash_len <= 0 then
+		obj.pixelshader("carve@パスマスク(ライン)σ@Path_S", tgt_name, buffer_name,
+		{
+			alpha_map1, alpha_map0;
+			num_points, math.max(line_width - 1, 0) / 2, antialias; 0, 0, 0;
+
+			endpt[1], endpt[2], endpt[3], endpt[4];
+			endpt[5], endpt[6], endpt[7], endpt[8];
+		}, "mask");
+	else
+		obj.pixelshader("carve_dash@パスマスク(ライン)σ@Path_S", tgt_name, buffer_name,
+		{
+			alpha_map1, alpha_map0;
+			num_points, math.max(line_width - 1, 0) / 2, antialias;
+			#dash_pat, dash_len0, dash_idx0 - 1;
+
+			endpt[1], endpt[2], endpt[3], endpt[4];
+			endpt[5], endpt[6], endpt[7], endpt[8];
+
+			len_path * phase_whole0, len_path * phase_whole1, len_path * phase_whole2, len_path * 2;
+			unpack(dash_pat)
+		}, "mask");
+	end
+end
+
+---パスマスク(ライン)σ を点列を元に適用する．
+---@param intensity number 「強さ」を 0.0 から 1.0 で指定．
+---@param invert boolean 反転するかどうか．
+---@param line_width number 「ライン幅」をピクセル単位で指定．
+---@param antialias number 「ぼかし幅」をピクセル単位で指定．
+---@param path_type path_type 「線タイプ」(パスの種類) を指定．
+---@param pts { [integer]: number? } 点列の配列， `{ x1, y1, x2, y2, x3, y3, ... }` の形式．
+---@param n_segs integer パスの分割区間の個数．
+---@param loop boolean 閉じたパスかどうか．
+---@param prec number 「曲線精度」(折れ線の許容最長距離) を指定．
+---@param start_pos number 「開始位置」を 0.0 から 1.0 に正規化した数値で指定．ただしループの場合はこの範囲を超えることもある．
+---@param end_pos number 「終了位置」を 0.0 から 1.0 に正規化した数値で指定．ただしループの場合はこの範囲を超えることもある．
+---@param end_shape 0|1 「端の形状」を指定．
+---@param dash_pat { [integer]: number } 「破線パターン」を `{ opaque_len1, blank_len1, opaque_len2, blank_len2, ... }` の形式で指定．
+---@param dash_pos number 「破線位置」をピクセル単位で指定．
+---@param dash_adj boolean 「破線周期補正」を指定．
+---@param scale number 「拡大率」を指定．
+---@param rotate number 「回転」を指定．
+---@param dx number? 「移動X」を指定．拡縮回転の後に適用．省略時は 0.
+---@param dy number? 「移動Y」を指定．拡縮回転の後に適用．省略時は 0.
+---@param target_buffer { name: string, w: integer, h: integer }? マスク適用先のバッファ名 (e.g. "object", "cache:foo") とその幅と高さを指定．省略時は `{ name = "object", w = obj.w, h = obj.h }`.
+---@param temp_buffer_name string? 頂点データを転送する先のバッファ名 (e.g. "tempbuffer", "cache:foo"). 省略時は "tempbuffer".
+local function path_mask_line(
+	intensity, invert, line_width, antialias,
+	path_type, pts, n_segs, loop, prec,
+	start_pos, end_pos, end_shape, dash_pat, dash_pos, dash_adj,
+	scale, rotate, dx, dy,
+	target_buffer, temp_buffer_name)
+	-- unwrap target_buffer.
+	local tgt_name, tgt_w, tgt_h = "object", obj.w, obj.h;
+	if target_buffer then
+		tgt_name, tgt_w, tgt_h = target_buffer.name, target_buffer.w, target_buffer.h;
+	end
+
+	-- make the curve into the sequence of secants.
+	local points, num_points = poll(path_type, pts, n_segs, loop,
+		prec / math.min(math.max(scale, 1.0 / 64), 1));
+
+	-- apply translation / scaling / rotation.
+	transform(points, num_points, scale, rotate, dx, dy);
+	local L, R, T, B, len = measure(points, num_points);
+	local th = line_width / 2 + antialias;
+	L, R, T, B = L - th, R + th, T - th, B + th;
+
+	-- check if the path overlaps this object.
+	if L >= tgt_w / 2 or R <= -tgt_w / 2 or T >= tgt_h / 2 or B <= -tgt_h / 2 then
+		local alpha = invert and 1 or 1 - intensity;
+		if alpha <= 0 then obj.clearbuffer("object");
+		elseif alpha < 1 then
+			obj.pixelshader("const_alpha@パスマスクσ@Path_S", tgt_name, nil, { alpha }, "mask");
+		end
+		return;
+	end
+
+	-- send the coordinates to tempbuffer.
+	temp_buffer_name = temp_buffer_name or "tempbuffer";
+	send(points, num_points, tgt_w / 2, tgt_h / 2, temp_buffer_name);
+
+	-- calculate the end points from the calculated length.
+	local end_points = end_shape == 1 and
+		find_end_points(points, num_points, loop, start_pos, end_pos, tgt_w / 2, tgt_h / 2) or nil;
+
+	path_mask_line_buffered(
+		intensity, invert, line_width, antialias,
+		temp_buffer_name, num_points, len, loop,
+		start_pos, end_pos, end_shape, end_points,
+		dash_pat, dash_pos, dash_adj,
+		target_buffer);
+end
+
 -- return the table containing the exported functions.
 return {
 	anchor = anchor,
 	poll = poll,
 	measure = measure,
 	find_index = find_index,
+	find_end_points = find_end_points,
 	transform = transform,
 	randomize = randomize,
 	send = send,
 	retrieve = retrieve,
+
+	path_mask_area_buffered = path_mask_area_buffered,
+	path_mask_area = path_mask_area,
+	path_mask_line_buffered = path_mask_line_buffered,
+	path_mask_line = path_mask_line,
 };

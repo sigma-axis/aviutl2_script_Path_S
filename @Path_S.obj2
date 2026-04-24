@@ -1,6 +1,7 @@
+-- under development for v1.13 (for beta42) r1
 --[[
 MIT License
-Copyright (c) 2025 sigma-axis
+Copyright (c) 2025-2026 sigma-axis
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +26,7 @@ https://mit-license.org/
 @パス図形σ
 --information:パス図形σ@Path_S v1.12 (for beta25) by σ軸
 --label:Path_S\図形
+--require:2004001
 --track@line:ライン幅,0,1000,5,0.01
 --color@color_line:ライン色,0x808080
 --color@color_fill:塗り色,0xffffff
@@ -144,6 +146,8 @@ antialias = math.max(antialias, 0);
 color_line = color_line % 2 ^ 24;
 alpha_line = math.min(math.max(1 - alpha_line / 100, 0), 1);
 line = math.max(line, 0);
+start_pos = start_pos / 100;
+end_pos = end_pos / 100;
 end_shape = math.min(math.max(math.floor(0.5 + end_shape), 0), 1);
 color_fill = color_fill % 2 ^ 24;
 alpha_fill = math.min(math.max(1 - alpha_fill / 100, 0), 1);
@@ -166,26 +170,9 @@ L, T = math.floor(L - th), math.floor(T - th);
 R, B = math.max(math.ceil(R + th), L + 1), math.max(math.ceil(B + th), T + 1);
 
 -- calculate the end points from the calculated length.
-local endpt_buff = nil;
-if end_shape == 1 and line > 0 and alpha_line > 0 then
-	endpt_buff = { 0.0, 0.0, 0.0, 0.0; 0.0, 0.0, 0.0, 0.0 };
-
-	local st, ed = start_pos / 100, end_pos / 100;
-	if loop then st, ed = st % 1, ed % 1
-	else st, ed = math.min(math.max(st, 0), 1), math.min(math.max(ed, 0), 1) end
-
-	local i, j, l = path_s.find_index(-st, points, num_points);
-	endpt_buff[1], endpt_buff[2], endpt_buff[3], endpt_buff[4] =
-		(1 - j) * points[2 * i - 1] + j * points[2 * i + 1] - L,
-		(1 - j) * points[2 * i - 0] + j * points[2 * i + 2] - T,
-		points[2 * i + 1] - points[2 * i - 1],
-		points[2 * i + 2] - points[2 * i - 0];
-	i, j = path_s.find_index(-ed, l);
-	endpt_buff[5], endpt_buff[6], endpt_buff[7], endpt_buff[8] =
-		(1 - j) * points[2 * i - 1] + j * points[2 * i + 1] - L,
-		(1 - j) * points[2 * i - 0] + j * points[2 * i + 2] - T,
-		points[2 * i + 1] - points[2 * i - 1],
-		points[2 * i + 2] - points[2 * i - 0];
+local end_points = nil;
+if end_shape == 1 and line > 0 and alpha_line > 0 and start_pos <= end_pos then
+	end_points = path_s.find_end_points(points, num_points, loop, start_pos, end_pos, -L, -T);
 end
 
 -- prepare the canvas.
@@ -194,7 +181,7 @@ obj.copybuffer("object", "tempbuffer");
 obj.cx, obj.cy = -(L + R) / 2, -(T + B) / 2;
 
 -- draw the figures.
-if (line > 0 and alpha_line > 0) or alpha_fill > 0 then
+if (line > 0 and alpha_line > 0 and start_pos <= end_pos) or alpha_fill > 0 then
 	local cache_name, num_segments = "cache:path_s/coords", num_points;
 	if not loop and alpha_fill > 0 then
 		-- close the loop for drawing the filling part.
@@ -206,21 +193,20 @@ if (line > 0 and alpha_line > 0) or alpha_fill > 0 then
 	-- draw the shape of the filling part.
 	if alpha_fill > 0 then
 		obj.clearbuffer("object", color_fill);
-		obj.effect("パスマスクσ@Path_S", "点リスト", "", "PI",
-			([[num_points=%d,antialias=%s,inflation=%s,mode_fill=%q,pt_buff=%q]]):format(
-				num_points, antialias, inflation, ({ "内側", "奇偶" })[mode_fill + 1], cache_name));
+		path_s.path_mask_area_buffered(
+			1, false, mode_fill, inflation, antialias,
+			cache_name, num_points);
 		obj.draw(0, 0, 0, 1, alpha_fill);
 	end
 
 	-- then the outline part.
-	if line > 0 and alpha_line > 0 then
+	if line > 0 and alpha_line > 0 and start_pos <= end_pos then
 		obj.clearbuffer("object", color_line);
-		obj.effect("パスマスク(ライン)σ@Path_S", "点リスト", "", "PI",
-			([[line=%s,num_points=%d,antialias=%s,loop=%s,start_pos=%s,end_pos=%s,end_shape=%q,dash_pat={%s},dash_adj=%s,dash_pos=%s,pt_buff=%q,len_buff=%s%s]]):format(
-				line, num_segments, antialias,
-				tostring(loop), start_pos, end_pos, ({ "円", "四角" })[end_shape + 1],
-				("%s,"):rep(#dash_pat):format(unpack(dash_pat)), tostring(dash_adj), dash_pos,
-				cache_name, len, endpt_buff and (",endpt_buff={%s,%s,%s,%s;%s,%s,%s,%s}"):format(unpack(endpt_buff)) or ""));
+		path_s.path_mask_line_buffered(
+			1, false, line, antialias,
+			cache_name, num_segments, len, loop,
+			start_pos, end_pos, end_shape, end_points,
+			dash_pat, dash_pos, dash_adj);
 		obj.draw(0, 0, 0, 1, alpha_line);
 	end
 	obj.copybuffer("object", "tempbuffer");
@@ -229,8 +215,9 @@ end
 @ラインσ
 --information:ラインσ@Path_S v1.12 (for beta25) by σ軸
 --label:Path_S\図形
---track0:終点X,-4000,4000,256,0.01
---track1:終点Y,-4000,4000,0,0.01
+--require:2004001
+--track@X:終点X,-4000,4000,256,0.01
+--track@Y:終点Y,-4000,4000,0,0.01
 --track@line:ライン幅,0,1000,5,0.01
 --color@color:色,0xffffff
 --group:曲線設定,true
@@ -255,7 +242,7 @@ local obj, math, tonumber, type = obj, math, tonumber, type;
 
 -- set anchors.
 if obj.getoption("gui") then
-	obj.setanchor("track", 0, "star", "line");
+	obj.setanchor("X,Y", 0, "star", "line");
 end
 
 -- take parameters.
@@ -283,9 +270,8 @@ local function as_bool(t, v)
 	elseif type(t) == "number" then return t ~= 0;
 	else return v end
 end
-local X, Y =
-	tonumber(PI.X) or obj.track0,
-	tonumber(PI.Y) or obj.track1;
+X = tonumber(PI.X) or X;
+Y = tonumber(PI.Y) or Y;
 color = tonumber(PI.color) or color;
 line = tonumber(PI.line) or line;
 if type(PI.end_shape) == "string" then
@@ -427,37 +413,24 @@ end
 path_s.transform(pts, n_pts, 1, math.atan2(Y, X));
 local L, R, T, B, len = path_s.measure(pts, n_pts);
 local th = math.ceil(line * (end_shape == 1 and 0.5 ^ 0.5 or 0.5) + antialias);
-
--- record the end points.
-local endpt_buff = nil;
-if end_shape == 1 then
-	endpt_buff = {
-		pts[1] - L + th, pts[2] - T + th, pts[3] - pts[1], pts[4] - pts[2];
-		pts[2 * n_pts - 1] - L + th, pts[2 * n_pts] - T + th,
-		pts[2 * n_pts - 1] - pts[2 * n_pts - 3], pts[2 * n_pts] - pts[2 * n_pts - 2];
-	};
-end
+L, T = math.floor(L - th), math.floor(T - th);
+R, B = math.max(math.ceil(R + th), L + 1), math.max(math.ceil(B + th), T + 1);
 
 -- prepare the canvas.
-local w, h = math.ceil(R - L) + 2 * th, math.ceil(B - T) + 2 * th;
-obj.setoption("drawtarget", "tempbuffer", w, h);
-obj.copybuffer("object", "tempbuffer");
-obj.clearbuffer("object", color);
+obj.cx, obj.cy = -(L + R) / 2, -(T + B) / 2;
+obj.clearbuffer("object", R - L, B - T, color);
 
 -- draw the line.
-path_s.send(pts, n_pts, -L + th, -T + th);
-obj.effect("パスマスク(ライン)σ@Path_S", "点リスト", "", "PI",
-	([[line=%s,num_points=%d,antialias=%s,end_shape=%q,dash_pat={%s},dash_pos=%s,pt_buff=%q,len_buff=%s%s]]):format(
-		line, n_pts, antialias, ({ "円", "四角" })[end_shape + 1],
-		("%s,"):rep(#dash_pat):format(unpack(dash_pat)), dash_pos,
-		"tempbuffer", len, endpt_buff and (",endpt_buff={%s,%s,%s,%s;%s,%s,%s,%s}"):format(unpack(endpt_buff)) or ""));
-
--- adjust the position.
-obj.cx, obj.cy = -w / 2 - L + th, -h / 2 - T + th;
+path_s.path_mask_line(
+	1, false, line, antialias,
+	0, pts, n_pts - 1, false, 1,
+	0, 1, end_shape, dash_pat, dash_pos, false,
+	1, 0, obj.cx, obj.cy);
 
 @スパイラルσ
 --information:スパイラルσ@Path_S v1.12 (for beta25) by σ軸
 --label:Path_S\図形
+--require:2004001
 --track@start_radius:開始半径,0,2000,0,0.01
 --track@end_radius:終了半径,0,2000,256,0.01
 --track@line:ライン幅,0,1000,5,0.01
@@ -466,8 +439,8 @@ obj.cx, obj.cy = -w / 2 - L + th, -h / 2 - T + th;
 --select@line_shape:形状=1,アルキメデス螺旋=0,対数螺旋=1
 --track@slope:傾き,-200,200,10,0.001
 --track@rotate:回転,-720,720,0,0.01
---track0:ずれX,-4000,4000,0,0.01
---track1:ずれY,-4000,4000,0,0.01
+--track@X:ずれX,-4000,4000,0,0.01
+--track@Y:ずれY,-4000,4000,0,0.01
 --group:ライン設定,false
 --select@end_shape:端の形状=0,円=0,四角=1
 --track@precision:曲線精度,1,128,8,1
@@ -486,7 +459,7 @@ local obj, math, tonumber, type = obj, math, tonumber, type;
 
 -- set anchors.
 if obj.getoption("gui") then
-	obj.setanchor("track", 0, "star", "line");
+	obj.setanchor("X,Y", 0, "star", "line");
 end
 
 -- take parameters.
@@ -536,7 +509,8 @@ antialias = tonumber(PI.antialias) or antialias;
 start_radius = tonumber(PI.start_radius) or start_radius;
 end_radius = tonumber(PI.end_radius) or end_radius;
 rotate = tonumber(PI.rotate) or rotate;
-local X, Y = tonumber(PI.X) or obj.track0, tonumber(PI.Y) or obj.track1;
+X = tonumber(PI.X) or X;
+Y = tonumber(PI.Y) or Y;
 dash_pat = type(PI.dash_pat) == "table" and PI.dash_pat or dash_pat;
 dash_pos = tonumber(PI.dash_pos) or dash_pos;
 rand_period = tonumber(PI.rand_period) or rand_period;
@@ -609,37 +583,34 @@ end
 -- measure and move the path.
 local L, R, T, B, len = path_s.measure(pts, n_pts);
 local th = math.ceil(line * (end_shape == 1 and 0.5 ^ 0.5 or 0.5) + antialias);
+L, T = math.floor(L - th), math.floor(T - th);
+R, B = math.max(math.ceil(R + th), L + 1), math.max(math.ceil(B + th), T + 1);
 
 -- record the end points.
-local endpt_buff = nil;
+local end_points = nil;
 if end_shape == 1 then
-	endpt_buff = {
-		pts[1] - L + th, pts[2] - T + th, pts[3] - pts[1], pts[4] - pts[2];
-		pts[2 * n_pts - 1] - L + th, pts[2 * n_pts] - T + th,
+	end_points = {
+		pts[1] - L, pts[2] - T, pts[3] - pts[1], pts[4] - pts[2];
+		pts[2 * n_pts - 1] - L, pts[2 * n_pts] - T,
 		pts[2 * n_pts - 1] - pts[2 * n_pts - 3], pts[2 * n_pts] - pts[2 * n_pts - 2];
 	};
 end
 
 -- prepare the canvas.
-local w, h = math.ceil(R - L) + 2 * th, math.ceil(B - T) + 2 * th;
-obj.setoption("drawtarget", "tempbuffer", w, h);
-obj.copybuffer("object", "tempbuffer");
-obj.clearbuffer("object", color);
+obj.cx, obj.cy = -(L + R) / 2, -(T + B) / 2;
+obj.clearbuffer("object", R - L, B - T, color);
 
 -- draw the path.
-path_s.send(pts, n_pts, -L + th, -T + th);
-obj.effect("パスマスク(ライン)σ@Path_S", "点リスト", "", "PI",
-	([[line=%s,num_points=%d,antialias=%s,end_shape=%q,dash_pat={%s},dash_pos=%s,pt_buff=%q,len_buff=%s%s]]):format(
-		line, n_pts, antialias, ({ "円", "四角" })[end_shape + 1],
-		("%s,"):rep(#dash_pat):format(unpack(dash_pat)), dash_pos,
-		"tempbuffer", len, endpt_buff and (",endpt_buff={%s,%s,%s,%s;%s,%s,%s,%s}"):format(unpack(endpt_buff)) or ""));
-
--- adjust the position.
-obj.cx, obj.cy = -w / 2 - L + th, -h / 2 - T + th;
+path_s.path_mask_line(
+	1, false, line, antialias,
+	0, pts, n_pts - 1, false, 1,
+	0, 1, end_shape, dash_pat, dash_pos, false,
+	1, 0, obj.cx, obj.cy);
 
 @アローσ
 --information:アローσ@Path_S v1.12 (for beta25) by σ軸
 --label:Path_S\図形
+--require:2004001
 --track@line:ライン幅,0,1000,5,0.01
 --track@head_size:矢じりサイズ,0,1024,32,0.01
 --color@color:色,0xffffff
@@ -808,41 +779,18 @@ end
 L, T = math.floor(L - th), math.floor(T - th);
 R, B = math.max(math.ceil(R + th), L + 1), math.max(math.ceil(B + th), T + 1);
 
--- calculate the end points from the calculated length.
-local endpt_buff = nil;
-if end_shape == 1 then
-	endpt_buff = { 0.0, 0.0, 0.0, 0.0; 0.0, 0.0, 0.0, 0.0 };
-	local i, j, l = path_s.find_index(-start_pos, points, num_points);
-	endpt_buff[1], endpt_buff[2], endpt_buff[3], endpt_buff[4] =
-		(1 - j) * points[2 * i - 1] + j * points[2 * i + 1] - L,
-		(1 - j) * points[2 * i - 0] + j * points[2 * i + 2] - T,
-		points[2 * i + 1] - points[2 * i - 1],
-		points[2 * i + 2] - points[2 * i - 0];
-	i, j = path_s.find_index(-end_pos, l);
-	endpt_buff[5], endpt_buff[6], endpt_buff[7], endpt_buff[8] =
-		(1 - j) * points[2 * i - 1] + j * points[2 * i + 1] - L,
-		(1 - j) * points[2 * i - 0] + j * points[2 * i + 2] - T,
-		points[2 * i + 1] - points[2 * i - 1],
-		points[2 * i + 2] - points[2 * i - 0];
-end
-
--- prepare the canvas.
-obj.setoption("drawtarget", "tempbuffer", R - L, B - T);
-obj.copybuffer("object", "tempbuffer");
-local cx, cy = -(L + R) / 2, -(T + B) / 2;
-
 -- draw the path.
-path_s.send(points, num_points, -L, -T);
-obj.clearbuffer("object", color);
-obj.effect("パスマスク(ライン)σ@Path_S", "点リスト", "", "PI",
-	([[line=%s,num_points=%d,antialias=%s,start_pos=%s,end_pos=%s,end_shape=%q,dash_pat={%s},dash_pos=%s,pt_buff="tempbuffer",len_buff=%s%s]]):format(
-		line, num_points, antialias,
-		100 * start_pos, 100 * end_pos, ({ "円", "四角" })[end_shape + 1],
-		("%s,"):rep(#dash_pat):format(unpack(dash_pat)), dash_pos,
-		len, endpt_buff and (",endpt_buff={%s,%s,%s,%s;%s,%s,%s,%s}"):format(unpack(endpt_buff)) or ""));
+local cx, cy = -(L + R) / 2, -(T + B) / 2;
+obj.clearbuffer("object", R - L, B - T, color);
+path_s.path_mask_line(
+	1, false, line, antialias,
+	0, points, num_points - 1, false, 1,
+	start_pos, end_pos, end_shape, dash_pat, dash_pos, false,
+	1, 0, cx, cy);
 
 -- draw the arrow heads.
 if head_type ~= 0 and head_size > 0 and head_width > 0 then
+	obj.setoption("drawtarget", "tempbuffer");
 	obj.copybuffer("tempbuffer", "object");
 	obj.load("figure", head_fig, color, math.ceil(head_size * math.max(head_width, 1)));
 	if obj.w > 0 and obj.h > 0 then
@@ -902,7 +850,7 @@ if head_type ~= 0 and head_size > 0 and head_width > 0 then
 		-- "alpha_max" does not seem to work well with obj.drawpoly().
 		-- obj.setoption("blend", "alpha_max");
 		obj.drawpoly(vts);
-		-- obj.setoption("blend", "none");
+		-- obj.setoption("blend");
 	end
 	obj.copybuffer("object", "tempbuffer");
 end
@@ -913,6 +861,7 @@ obj.cx, obj.cy = cx, cy;
 @スクウェアσ
 --information:スクウェアσ@Path_S v1.12 (for beta25) by σ軸
 --label:Path_S\図形
+--require:2004001
 --track@width:幅,0,4000,100,0.01
 --track@height:高さ,0,4000,100,0.01
 --track@line:ライン幅,0,1000,5,0.01
@@ -1051,6 +1000,8 @@ antialias = math.max(antialias, 0);
 color_line = color_line % 2 ^ 24;
 alpha_line = math.min(math.max(1 - alpha_line / 100, 0), 1);
 line = math.max(line, 0);
+start_pos = start_pos / 100;
+end_pos = end_pos / 100;
 end_shape = math.min(math.max(math.floor(0.5 + end_shape), 0), 1);
 color_fill = color_fill % 2 ^ 24;
 alpha_fill = math.min(math.max(1 - alpha_fill / 100, 0), 1);
@@ -1122,26 +1073,9 @@ L, T = math.floor(L - th), math.floor(T - th);
 R, B = math.max(math.ceil(R + th), L + 1), math.max(math.ceil(B + th), T + 1);
 
 -- calculate the end points from the calculated length.
-local endpt_buff = nil;
-if end_shape == 1 and line > 0 and alpha_line > 0 then
-	endpt_buff = { 0.0, 0.0, 0.0, 0.0; 0.0, 0.0, 0.0, 0.0 };
-
-	local st, ed = start_pos / 100, end_pos / 100;
-	if loop then st, ed = st % 1, ed % 1
-	else st, ed = math.min(math.max(st, 0), 1), math.min(math.max(ed, 0), 1) end
-
-	local i, j, l = path_s.find_index(-st, pts, n_pts);
-	endpt_buff[1], endpt_buff[2], endpt_buff[3], endpt_buff[4] =
-		(1 - j) * pts[2 * i - 1] + j * pts[2 * i + 1] - L,
-		(1 - j) * pts[2 * i - 0] + j * pts[2 * i + 2] - T,
-		pts[2 * i + 1] - pts[2 * i - 1],
-		pts[2 * i + 2] - pts[2 * i - 0];
-	i, j = path_s.find_index(-ed, l);
-	endpt_buff[5], endpt_buff[6], endpt_buff[7], endpt_buff[8] =
-		(1 - j) * pts[2 * i - 1] + j * pts[2 * i + 1] - L,
-		(1 - j) * pts[2 * i - 0] + j * pts[2 * i + 2] - T,
-		pts[2 * i + 1] - pts[2 * i - 1],
-		pts[2 * i + 2] - pts[2 * i - 0];
+local end_points = nil;
+if end_shape == 1 and line > 0 and alpha_line > 0 and end_pos >= start_pos then
+	end_points = path_s.find_end_points(pts, n_pts, true, start_pos, end_pos, -L, -T);
 end
 
 -- prepare the canvas.
@@ -1150,28 +1084,26 @@ obj.copybuffer("object", "tempbuffer");
 obj.cx, obj.cy = -(L + R + align_x * width) / 2, -(T + B + align_y * height) / 2;
 
 -- draw the figures.
-if (line > 0 and alpha_line > 0 and end_pos >= start_pos) or alpha_fill > 0 then
+if (line > 0 and alpha_line > 0 and start_pos <= end_pos) or alpha_fill > 0 then
 	local cache_name = "cache:path_s/coords";
 	path_s.send(pts, n_pts, -L, -T, cache_name);
 
 	-- draw the shape of the filling part.
 	if alpha_fill > 0 then
 		obj.clearbuffer("object", color_fill);
-		obj.effect("パスマスクσ@Path_S", "点リスト", "", "PI",
-			([[num_points=%d,antialias=%s,inflation=%s,pt_buff=%q]]):format(
-				n_pts, antialias, inflation, cache_name));
+		path_s.path_mask_area_buffered(
+			1, false, 0, inflation, antialias,
+			cache_name, n_pts);
 		obj.draw(0, 0, 0, 1, alpha_fill);
 	end
 
 	-- then the outline part.
-	if line > 0 and alpha_line > 0 then
+	if line > 0 and alpha_line > 0 and start_pos <= end_pos then
 		obj.clearbuffer("object", color_line);
-		obj.effect("パスマスク(ライン)σ@Path_S", "点リスト", "", "PI",
-			([[line=%s,num_points=%d,antialias=%s,loop=true,start_pos=%s,end_pos=%s,end_shape=%q,dash_pat={%s},dash_adj=%s,dash_pos=%s,pt_buff=%q,len_buff=%s%s]]):format(
-				line, n_pts, antialias,
-				start_pos, end_pos, ({ "円", "四角" })[end_shape + 1],
-				("%s,"):rep(#dash_pat):format(unpack(dash_pat)), tostring(dash_adj), dash_pos,
-				cache_name, len, endpt_buff and (",endpt_buff={%s,%s,%s,%s;%s,%s,%s,%s}"):format(unpack(endpt_buff)) or ""));
+		path_s.path_mask_line_buffered(
+			1, false, line, antialias,
+			cache_name, n_pts, len, true,
+			start_pos, end_pos, end_shape, end_points, dash_pat, dash_pos, true);
 		obj.draw(0, 0, 0, 1, alpha_line);
 	end
 	obj.copybuffer("object", "tempbuffer");

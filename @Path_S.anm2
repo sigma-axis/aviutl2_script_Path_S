@@ -1,6 +1,7 @@
+-- under development for v1.13 (for beta42) r1
 --[[
 MIT License
-Copyright (c) 2025 sigma-axis
+Copyright (c) 2025-2026 sigma-axis
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +27,7 @@ https://mit-license.org/
 --information:パスマスクσ@Path_S v1.12 (for beta25) by σ軸
 --label:Path_S\クリッピング
 --filter
+--require:2004001
 --track@intensity:強さ,0,100,100,0.01
 --check@invert:反転,false
 --group:パス設定,true
@@ -37,14 +39,24 @@ https://mit-license.org/
 --track@inflation:追加幅,0,1000,0,0.01
 --select@mode_fill:範囲=0,内側=0,奇偶=1,内側反転=2,奇偶反転=3
 --group:配置,false
---track0:移動X,-4000,4000,0,0.01
---track1:移動Y,-4000,4000,0,0.01
+--track@X:移動X,-4000,4000,0,0.01
+--track@Y:移動Y,-4000,4000,0,0.01
+--trackgroup@X,Y:Position
 --track@zoom:拡大率,0,5000,100,0.001
 --track@rotate:回転,-720,720,0,0.01
 --check@toggle_gui:アンカー切り替え,false
 --group:その他,false
 --track@antialias:ぼかし幅,0,1000,1,0.01
 --value@PI:PI,{}
+--[[pixelshader@const_alpha:
+cbuffer constant0 : register(b0) {
+	float alpha;
+};
+float4 const_alpha(float4 pos : SV_Position) : SV_Target
+{
+	return float4(0, 0, 0, alpha);
+}
+]]
 --[[pixelshader@carve:
 Texture2D<half4> coords : register(t0);
 cbuffer constant0 : register(b0) {
@@ -111,6 +123,8 @@ float4 carve(float4 pos : SV_Position) : SV_Target
 	return float4(0, 0, 0, dot(alpha_map, float2(a, 1)));
 }
 ]]
+do local intensity,invert,num_points,path_type,points,precision,inflation,mode_fill,X,Y,zoom,rotate,toggle_gui,antialias,PI=intensity,invert,num_points,path_type,points,precision,inflation,mode_fill,X,Y,zoom,rotate,toggle_gui,antialias,PI
+
 local path_s = require "Path_S";
 local obj, math, tonumber, type = obj, math, tonumber, type;
 
@@ -120,7 +134,7 @@ if pt_buff and pt_buff ~= "tempbuffer" and not pt_buff:match("^cache:.+$") then 
 
 -- set anchors.
 if obj.getoption("gui") and not pt_buff then
-	if toggle_gui then obj.setanchor("track", 0, "line") else
+	if toggle_gui then obj.setanchor("X,Y", 0, "line") else
 		num_points = math.max(math.floor(0.5 + (tonumber(num_points) or 4)), 3);
 		path_type = math.min(math.max(math.floor(0.5 + path_type), 0), 3);
 		path_s.anchor("points", path_type, points, num_points, true);
@@ -170,7 +184,8 @@ if type(PI.mode_fill) == "string" then
 	mode_fill = name2num[PI.mode_fill] or mode_fill;
 end
 invert = as_bool(PI.invert, invert);
-local X, Y = tonumber(PI.X) or obj.track0, tonumber(PI.Y) or obj.track1;
+X = tonumber(PI.X) or X;
+Y = tonumber(PI.Y) or Y;
 zoom = tonumber(PI.zoom) or zoom;
 rotate = tonumber(PI.rotate) or rotate;
 
@@ -187,46 +202,26 @@ rotate = math.pi / 180 * (rotate % 360);
 if intensity <= 0 then return end
 
 -- further calculations.
-local alpha_map0, alpha_map1;
-if invert then alpha_map0, alpha_map1 = 1, -intensity;
-else alpha_map0, alpha_map1 = 1 - intensity, intensity end
-
--- if the points are already buffered, skip evaluating the table.
-if not pt_buff then
-	-- make the curve into the sequence of secants.
-	points, num_points = path_s.poll(path_type, points, num_points, true,
-		precision / math.min(math.max(zoom, 1.0 / 64), 1));
-
-	-- apply translation / scaling / rotation.
-	path_s.transform(points, num_points, zoom, rotate, X, Y);
-	local L, R, T, B = path_s.measure(points, num_points);
-	local th = inflation + antialias;
-	L, R, T, B = L - th, R + th, T - th, B + th;
-	if L >= obj.w / 2 or R <= -obj.w / 2 or T >= obj.h / 2 or B <= -obj.h / 2 then
-		-- the path does not overlap this object.
-		if invert == (mode_fill >= 2) then
-			obj.effect("斜めクリッピング", "中心Y", -obj.h - 1, "ぼかし", 0);
-		end
-		return;
-	end
-
-	-- send the coordinates to tempbuffer.
-	path_s.send(points, num_points, obj.w / 2, obj.h / 2);
-	pt_buff = "tempbuffer";
+if pt_buff then
+	path_s.path_mask_area_buffered(
+		intensity, invert, mode_fill,
+		inflation, antialias,
+		pt_buff, num_points);
+else
+	path_s.path_mask_area(
+		intensity, invert, mode_fill,
+		inflation, antialias,
+		path_type, points, num_points, precision,
+		zoom, rotate, X, Y);
 end
 
--- mask with the path.
-obj.pixelshader("carve", "object", pt_buff,
-{
-	alpha_map1, alpha_map0;
-	num_points, mode_fill,
-	inflation, antialias,
-}, "mask");
+end
 
 @パスマスク(ライン)σ
 --information:パスマスク(ライン)σ@Path_S v1.12 (for beta25) by σ軸
 --label:Path_S\クリッピング
 --filter
+--require:2004001
 --track@intensity:強さ,0,100,100,0.01
 --check@invert:反転,false
 --track@line:ライン幅,0,1000,5,0.01
@@ -244,8 +239,9 @@ obj.pixelshader("carve", "object", pt_buff,
 --check@dash_adj:破線周期補正,true
 --track@dash_pos:破線位置,-4000,4000,0,0.01
 --group:配置,false
---track0:移動X,-4000,4000,0,0.01
---track1:移動Y,-4000,4000,0,0.01
+--track@X:移動X,-4000,4000,0,0.01
+--track@Y:移動Y,-4000,4000,0,0.01
+--trackgroup@X,Y:Position
 --track@zoom:拡大率,0,5000,100,0.001
 --track@rotate:回転,-720,720,0,0.01
 --check@toggle_gui:アンカー切り替え,false
@@ -381,6 +377,8 @@ float4 carve_dash(float4 pos : SV_Position) : SV_Target
 	return float4(0, 0, 0, dot(alpha_map, float2(a, 1)));
 }
 ]]
+do local intensity,invert,line,num_points,path_type,points,loop,precision,start_pos,end_pos,end_shape,dash_pat,dash_adj,dash_pos,X,Y,zoom,rotate,toggle_gui,antialias,PI=intensity,invert,line,num_points,path_type,points,loop,precision,start_pos,end_pos,end_shape,dash_pat,dash_adj,dash_pos,X,Y,zoom,rotate,toggle_gui,antialias,PI
+
 local path_s = require "Path_S";
 local obj, math, tonumber, type = obj, math, tonumber, type;
 
@@ -393,7 +391,7 @@ if (pt_buff and pt_buff ~= "tempbuffer" and not pt_buff:match("^cache:.+$")) or 
 
 -- set anchors.
 if obj.getoption("gui") and not pt_buff then
-	if toggle_gui then obj.setanchor("track", 0, "line") else
+	if toggle_gui then obj.setanchor("X,Y", 0, "line") else
 		num_points = math.max(math.floor(0.5 + (tonumber(num_points) or 4)), 2);
 		path_type = math.min(math.max(math.floor(0.5 + path_type), 0), 3);
 		path_s.anchor("points", path_type, points, num_points - (loop and 0 or 1), loop);
@@ -457,7 +455,8 @@ if type(PI.dash_pat) == "table" then dash_pat = PI.dash_pat end
 dash_adj = as_bool(PI.dash_adj, dash_adj);
 dash_pos = tonumber(PI.dash_pos) or dash_pos;
 invert = as_bool(PI.invert, invert);
-local X, Y = tonumber(PI.X) or obj.track0, tonumber(PI.Y) or obj.track1;
+X = tonumber(PI.X) or X;
+Y = tonumber(PI.Y) or Y;
 zoom = tonumber(PI.zoom) or zoom;
 rotate = tonumber(PI.rotate) or rotate;
 
@@ -475,198 +474,27 @@ zoom = math.min(math.max(zoom / 100, 0), 50);
 rotate = math.pi / 180 * (rotate % 360);
 if intensity <= 0 then return end
 
--- further calculations.
-local alpha_map0, alpha_map1;
-if invert then alpha_map0, alpha_map1 = 1, -intensity;
-else alpha_map0, alpha_map1 = 1 - intensity, intensity end
-if line < 1 then
-	-- fade out the line as the width approaches zero.
-	alpha_map0, alpha_map1 = line * alpha_map0, line * alpha_map1;
-end
-
-local phase_whole0, phase_whole1, phase_whole2;
-if end_pos < start_pos then
-	phase_whole0, phase_whole1, phase_whole2 = 2, 0, 0;
-elseif loop then
-	start_pos, end_pos = start_pos % 1, end_pos - math.floor(start_pos);
-	if end_pos - start_pos >= 1 then
-		phase_whole0, phase_whole1, phase_whole2 = 0, 2, 0;
-	elseif end_pos <= 1 then
-		phase_whole0, phase_whole1, phase_whole2 = start_pos, end_pos - start_pos, 2;
-	else
-		phase_whole0, phase_whole1, phase_whole2 = 0, end_pos - 1, 1 + start_pos - end_pos;
-	end
+if pt_buff then
+	path_s.path_mask_line_buffered(
+		intensity, invert, line, antialias,
+		pt_buff, num_points, len_buff, loop,
+		start_pos, end_pos, end_shape, endpt_buff,
+		dash_pat, dash_pos, dash_adj);
 else
-	start_pos = math.min(math.max(start_pos, 0), 1);
-	end_pos = math.min(math.max(end_pos, 0), 1);
-	phase_whole0 = math.max(start_pos, 0);
-	phase_whole1 = math.max(end_pos - phase_whole0, 0);
-	phase_whole2 = 2;
+	path_s.path_mask_line(
+		intensity, invert, line, antialias,
+		path_type, points, num_points - (loop and 0 or 1), loop, precision,
+		start_pos, end_pos, end_shape,
+		dash_pat, dash_pos, dash_adj,
+		zoom, rotate, X, Y);
 end
 
--- dash pattern.
-local dash_len0, dash_idx0, sum_dash_len = 0, 0, 0;
-if #dash_pat <= 256 then
-	for i,v in ipairs(dash_pat) do
-		v = math.max(tonumber(v) or 0, 0);
-		sum_dash_len = sum_dash_len + v;
-		dash_pat[i] = v;
-	end
-end
-if sum_dash_len > 0 then
-	-- normalize so zero does not occur other than the head.
-	local j, pat, len_rest = 1, { 0 }, (-dash_pos) % sum_dash_len;
-	for i, v in ipairs(dash_pat) do
-		if v ~= 0 then
-			if (i - j) % 2 ~= 0 then
-				pat[j] = pat[j] + v;
-			else
-				j = j + 1;
-				pat[j] = v;
-			end
-
-			if len_rest >= 0 then
-				len_rest = len_rest - v;
-				if len_rest < 0 then
-					dash_len0 = -len_rest;
-					dash_idx0 = j;
-				end
-			end
-		end
-	end
-	if j % 2 == 1 then
-		pat[1] = pat[j];
-		pat[j] = nil;
-		j = j - 1;
-	end
-
-	dash_pat = pat; -- replace with the normalized one.
-	if j <= 2 then
-		if j < 2 or pat[1] == 0 then
-			sum_dash_len = 0; -- all opaque.
-		end
-	end
-end
-
--- if the points are already buffered, skip evaluating the table.
-if not pt_buff then
-	-- make the curve into the sequence of secants.
-	points, num_points = path_s.poll(path_type, points, num_points - (loop and 0 or 1), loop,
-		precision / math.min(math.max(zoom, 1.0 / 64), 1));
-
-	-- apply translation / scaling / rotation.
-	path_s.transform(points, num_points, zoom, rotate, X, Y);
-	local L, R, T, B, len = path_s.measure(points, num_points);
-	local th = line / 2 + antialias;
-	L, R, T, B = L - th, R + th, T - th, B + th;
-	if L >= obj.w / 2 or R <= -obj.w / 2 or T >= obj.h / 2 or B <= -obj.h / 2 then
-		-- the path does not overlap this object.
-		if not invert then
-			obj.effect("斜めクリッピング", "中心Y", -obj.h - 1, "ぼかし", 0);
-		end
-		return;
-	end
-
-	-- send the coordinates to tempbuffer.
-	path_s.send(points, num_points, obj.w / 2, obj.h / 2);
-	pt_buff = "tempbuffer";
-	len_buff = len;
-
-	-- calculate the end points from the calculated length.
-	if end_shape == 1 then
-		endpt_buff = { 0.0, 0.0, 0.0, 0.0; 0.0, 0.0, 0.0, 0.0 };
-
-		local st, ed = start_pos, end_pos;
-		if loop then st, ed = st % 1, ed % 1
-		else st, ed = math.min(math.max(st, 0), 1), math.min(math.max(ed, 0), 1) end
-
-		local i, j, l = path_s.find_index(-st, points, num_points);
-		endpt_buff[1], endpt_buff[2], endpt_buff[3], endpt_buff[4] =
-			(1 - j) * points[2 * i - 1] + j * points[2 * i + 1] + obj.w / 2,
-			(1 - j) * points[2 * i - 0] + j * points[2 * i + 2] + obj.h / 2,
-			points[2 * i + 1] - points[2 * i - 1],
-			points[2 * i + 2] - points[2 * i - 0];
-		i, j = path_s.find_index(-ed, l);
-		endpt_buff[5], endpt_buff[6], endpt_buff[7], endpt_buff[8] =
-			(1 - j) * points[2 * i - 1] + j * points[2 * i + 1] + obj.w / 2,
-			(1 - j) * points[2 * i - 0] + j * points[2 * i + 2] + obj.h / 2,
-			points[2 * i + 1] - points[2 * i - 1],
-			points[2 * i + 2] - points[2 * i - 0];
-	end
-end
-
-if sum_dash_len <= 0 then
-	dash_len0, dash_idx0 = len_buff * 2, 2;
-	dash_pat = { 0, len_buff * 2 };
-elseif loop and dash_adj then
-	local adj = len_buff / sum_dash_len;
-	adj = adj / math.max(math.floor(0.5 + adj), 1);
-	sum_dash_len = adj * sum_dash_len;
-	dash_len0 = adj * dash_len0;
-	for i, v in ipairs(dash_pat) do dash_pat[i] = adj * v end
-end
-
--- handle the shape of the end points.
-local end_points = {
-	-- dummy, out-of-bound data.
-	-2, -2, 4 * math.max(line + antialias, 4), 0,
-	-2, -2, 4 * math.max(line + antialias, 4), 0,
-};
-if end_shape == 1 and start_pos <= end_pos and (not loop or start_pos + 1 > end_pos) then
-	for i = 1, 5, 4 do
-		if sum_dash_len > 0 then
-			-- identify the position in the dash pattern.
-			local pos = i > 1 and end_pos or start_pos;
-			if loop then pos = pos % 1 end
-			pos = (-dash_pos + dash_pat[1] + len_buff * pos) % sum_dash_len;
-			for k, v in ipairs(dash_pat) do
-				pos = pos - v;
-				if pos < 0 then
-					-- invalidate when on a non-stroke part.
-					if k % 2 == 1 then endpt_buff[i] = nil end
-					break;
-				end
-			end
-		end
-
-		local x, y, z, w = endpt_buff[i], endpt_buff[i + 1], endpt_buff[i + 2], endpt_buff[i + 3];
-		if x and y and z and w then
-			local l = (z ^ 2 + w ^ 2) ^ 0.5;
-			if l > 0 then z, w = z / l, w / l else z, w = 1, 0 end
-			if i > 1 then z, w = -z, -w end
-			end_points[i], end_points[i + 1], end_points[i + 2], end_points[i + 3] = x, y, z, w;
-		end
-	end
-end
-
--- mask with the path.
-if end_pos - start_pos >= 1 and sum_dash_len <= 0 then
-	obj.pixelshader("carve", "object", pt_buff,
-	{
-		alpha_map1, alpha_map0;
-		num_points, math.max(line - 1, 0) / 2, antialias; 0, 0, 0;
-
-		end_points[1], end_points[2], end_points[3], end_points[4];
-		end_points[5], end_points[6], end_points[7], end_points[8];
-	}, "mask");
-else
-	obj.pixelshader("carve_dash", "object", pt_buff,
-	{
-		alpha_map1, alpha_map0;
-		num_points, math.max(line - 1, 0) / 2, antialias;
-		#dash_pat, dash_len0, dash_idx0 - 1;
-
-		end_points[1], end_points[2], end_points[3], end_points[4];
-		end_points[5], end_points[6], end_points[7], end_points[8];
-
-		len_buff * phase_whole0, len_buff * phase_whole1, len_buff * phase_whole2, len_buff * 2;
-		unpack(dash_pat)
-	}, "mask");
 end
 
 @パス部分フィルタσ
 --information:パス部分フィルタσ@Path_S v1.12 (for beta25) by σ軸
 --label:Path_S\加工
+--require:2004001
 --check@invert:反転,false
 --group:パス設定,true
 --value@num_points:頂点数,4
@@ -677,8 +505,9 @@ end
 --track@inflation:追加幅,0,1000,0,0.01
 --select@mode_fill:範囲=0,内側=0,奇偶=1,内側反転=2,奇偶反転=3
 --group:配置,false
---track0:移動X,-4000,4000,0,0.01
---track1:移動Y,-4000,4000,0,0.01
+--track@X:移動X,-4000,4000,0,0.01
+--track@Y:移動Y,-4000,4000,0,0.01
+--trackgroup@X,Y:Position
 --track@zoom:拡大率,0,5000,100,0.001
 --track@rotate:回転,-720,720,0,0.01
 --check@toggle_gui:アンカー切り替え,false
@@ -700,12 +529,14 @@ float4 interpolate(float4 pos : SV_Position) : SV_Target
 		rate.Load(int3(pos.xy, 0)).a);
 }
 ]]
+do local invert,num_points,path_type,points,precision,inflation,mode_fill,X,Y,zoom,rotate,toggle_gui,antialias,PI=invert,num_points,path_type,points,precision,inflation,mode_fill,X,Y,zoom,rotate,toggle_gui,antialias,PI;
+
 local path_s = require "Path_S";
 local obj, math, tonumber, type, tostring = obj, math, tonumber, type, tostring;
 
 -- set anchors.
 if obj.getoption("gui") then
-	if toggle_gui then obj.setanchor("track", 0, "line") else
+	if toggle_gui then obj.setanchor("X,Y", 0, "line") else
 		num_points = math.max(math.floor(0.5 + (tonumber(num_points) or 4)), 3);
 		path_type = math.min(math.max(math.floor(0.5 + path_type), 0), 3);
 		path_s.anchor("points", path_type, points, num_points, true);
@@ -752,12 +583,23 @@ if type(PI.mode_fill) == "string" then
 	mode_fill = name2num[PI.mode_fill] or mode_fill;
 end
 invert = as_bool(PI.invert, invert);
-local X, Y = tonumber(PI.X) or obj.track0, tonumber(PI.Y) or obj.track1;
+X = tonumber(PI.X) or X;
+Y = tonumber(PI.Y) or Y;
 zoom = tonumber(PI.zoom) or zoom;
 rotate = tonumber(PI.rotate) or rotate;
 
+-- normalize parameters.
+num_points = math.max(math.floor(0.5 + num_points), 3);
+path_type = math.min(math.max(math.floor(0.5 + path_type), 0), 3);
+precision = math.max(precision, 1);
+antialias = math.max(antialias, 1 / 1024);
+inflation = math.max(inflation, 0);
+mode_fill = math.min(math.max(math.floor(0.5 + mode_fill), 0), 3);
+zoom = math.min(math.max(zoom / 100, 0), 50);
+rotate = math.pi / 180 * (rotate % 360);
+
 -- backup the current image.
-local cache_name_ori, cache_name_eff = "cache:path_s/part/ori", "cache:path_s/part/eff";
+local cache_name_ori, cache_name_eff = "cache:path_s/part/ori#"..obj.effect_id, "cache:path_s/part/eff#"..obj.effect_id;
 obj.copybuffer(cache_name_ori, "object");
 
 -- apply following filters.
@@ -777,16 +619,13 @@ local w, h, cx, cy do
 	w, h = math.ceil(R - L), math.ceil(B - T);
 	cx, cy = -(2 * L + w) / 2, -(2 * T + h) / 2;
 end
-obj.setoption("drawtarget", "tempbuffer", w, h);
-obj.copybuffer("object", "tempbuffer");
 
 -- create the shape of the path.
-obj.clearbuffer("object", 0x000000);
-obj.effect("パスマスクσ@Path_S", "点リスト", "", "PI",
-	([[num_points=%d,path_type=%q,points={%s},precision=%s,antialias=%s,inflation=%s,mode_fill=%q,invert=%s,X=%s,Y=%s,zoom=%s,rotate=%s]]):format(
-		num_points, ({ "折れ線", "補間移動", "2次ベジェ曲線", "3次ベジェ曲線" })[path_type + 1],
-		("%s,"):rep(#points):format(unpack(points)), precision, antialias, inflation,
-		({ "内側", "奇偶", "内側反転", "奇偶反転" })[mode_fill + 1], tostring(invert), X + (cx - cx0), Y + (cy - cy0), zoom, rotate));
+obj.clearbuffer("object", w, h, 0x000000);
+path_s.path_mask_area(
+	1, invert, mode_fill, inflation, antialias,
+	path_type, points, num_points, precision,
+	zoom, rotate, X + (cx - cx0), Y + (cy - cy0));
 
 -- interpolate the original and effected buffers by that shape.
 obj.pixelshader("interpolate", "object", { cache_name_ori, cache_name_eff, "object" }, {
@@ -799,9 +638,12 @@ obj.setoption("drawtarget", "framebuffer");
 obj.cx, obj.cy  = cx, cy;
 obj.draw();
 
+end
+
 @パスに沿って配置σ
 --information:パスに沿って配置σ@Path_S v1.12 (for beta25) by σ軸
 --label:Path_S\配置
+--require:2004001
 --track@position:位置,-200,200,0,0.001
 --track@rotate:回転,-720,720,0,0.01
 --check@rot_tangent:パスに沿って回転,true
@@ -816,6 +658,8 @@ obj.draw();
 --check@toggle_gui:パスの表示,false
 --group:その他,false
 --value@PI:PI,{}
+do local position,rotate,rot_tangent,ofs_indiv,out_of_range,num_points,path_type,points,loop,precision,toggle_gui,PI=position,rotate,rot_tangent,ofs_indiv,out_of_range,num_points,path_type,points,loop,precision,toggle_gui,PI;
+
 local path_s = require "Path_S";
 local obj, math, tonumber, type = obj, math, tonumber, type;
 
@@ -901,29 +745,25 @@ if toggle_gui then
 	T, B = math.floor(T) - 1, math.ceil(B) + 1;
 
 	-- prepare the canvas.
-	obj.setoption("drawtarget", "tempbuffer", R - L, B - T);
-	obj.copybuffer("object", "tempbuffer");
-	obj.clearbuffer("object", 0xffffff);
-
-	-- send the coordinates to tempbuffer.
-	path_s.send(pts, num_points, -L, -T);
+	obj.clearbuffer("object", R - L, B - T, 0xffffff);
 
 	-- carve by the path.
-	obj.effect("パスマスク(ライン)σ@Path_S", "PI",
-		([[num_points=%d,line=2,loop=%s,dash_pat={6,10},pt_buff="tempbuffer",len_buff=%s]]):format(
-			num_points, tostring(loop), len));
+	path_s.path_mask_line(
+		1, false, 2, 1,
+		0, points, num_points - (loop and 0 or 1), loop, 1,
+		0, 1, 0, { 6, 10 }, 0, true,
+		1, 0, -(L + R) / 2, -(T + B) / 2);
 
 	-- adjust the position.
-	local cx, cy = obj.cx, obj.cy;
-	obj.cx, obj.cy =
-		cx + (rate - 1) * (cx + obj.getvalue("cx")) - (R + L) / 2,
-		cy + (rate - 1) * (cx + obj.getvalue("cy")) - (B + T) / 2;
+	local cx, cy = obj.getvalue("center");
+	cx, cy, obj.cx, obj.cy = obj.cx, obj.cy,
+		rate * obj.cx + (rate - 1) * cx - (R + L) / 2,
+		rate * obj.cy + (rate - 1) * cy - (B + T) / 2;
 
 	-- then draw to the framebuffer.
-	obj.setoption("drawtarget", "framebuffer");
 	obj.setoption("blend", "diff");
 	obj.draw(0, 0, 0, 1 / rate);
-	obj.setoption("blend", "none");
+	obj.setoption("blend");
 	obj.setoption("draw_state", false);
 
 	-- rewind the states.
@@ -974,24 +814,27 @@ end
 
 -- convert anchor coordinates to screen coordinates.
 local Z = 0 do
-	X, Y, Z =
-		X - obj.cx - obj.getvalue("cx"),
-		Y - obj.cy - obj.getvalue("cy"),
-		Z - obj.cz - obj.getvalue("cz");
+	local x, y, z = obj.getvalue("center");
+	X, Y, Z = X - obj.cx - x, Y - obj.cy - y, Z - obj.cz - z;
 
-	X, Y, Z =
-		obj.sx * obj.getvalue("sx") * X,
-		obj.sy * obj.getvalue("sy") * Y,
-		obj.sz * obj.getvalue("sz") * Z;
+	x, y, z = obj.getvalue("scale");
+	X, Y, Z = obj.sx * x * X, obj.sy * y * Y, obj.sz * z * Z;
 
-	local a = math.pi / 180 * (obj.rx + obj.getvalue("rx"));
-	X, Y = math.cos(a) * X - math.sin(a) * Y, math.sin(a) * X + math.cos(a) * Y;
-	a = math.pi / 180 * (obj.ry + obj.getvalue("ry"));
-	Z, X = math.cos(a) * Z - math.sin(a) * X, math.sin(a) * Z + math.cos(a) * X;
-	a = math.pi / 180 * (obj.rx + obj.getvalue("rx"));
-	Y, Z = math.cos(a) * Y - math.sin(a) * Z, math.sin(a) * Y + math.cos(a) * Z;
+	x, y, z = obj.getvalue("angle");
+	x, y, z =
+		math.pi / 180 * (obj.rx + x),
+		math.pi / 180 * (obj.ry + y),
+		math.pi / 180 * (obj.rz + z);
+	local c, s = math.cos(x), math.sin(x);
+	X, Y = c * X - s * Y, s * X + c * Y;
+	c, s = math.cos(y), math.sin(y);
+	Z, X = c * Z - s * X, s * Z + c * X;
+	c, s = math.cos(z), math.sin(z);
+	Y, Z = c * Y - s * Z, s * Y + c * Z;
 end
 
 -- apply the position and the angle.
 obj.ox, obj.oy, obj.oz = obj.ox + X, obj.oy + Y, obj.oz + Z;
 obj.rz = obj.rz + rotate + A;
+
+end
