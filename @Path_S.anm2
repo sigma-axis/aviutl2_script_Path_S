@@ -1,4 +1,4 @@
--- under development for v1.13 (for beta42) r1
+-- under development for v1.20 (for beta42) r3
 --[[
 MIT License
 Copyright (c) 2025-2026 sigma-axis
@@ -137,7 +137,8 @@ if obj.getoption("gui") and not pt_buff then
 	if toggle_gui then obj.setanchor("X,Y", 0, "line") else
 		num_points = math.max(math.floor(0.5 + (tonumber(num_points) or 4)), 3);
 		path_type = math.min(math.max(math.floor(0.5 + path_type), 0), 3);
-		path_s.anchor("points", path_type, points, num_points, true);
+		local _, pts = path_s.anchor("points", path_type, points, num_points, true);
+		points = pts;
 	end
 end
 
@@ -394,7 +395,8 @@ if obj.getoption("gui") and not pt_buff then
 	if toggle_gui then obj.setanchor("X,Y", 0, "line") else
 		num_points = math.max(math.floor(0.5 + (tonumber(num_points) or 4)), 2);
 		path_type = math.min(math.max(math.floor(0.5 + path_type), 0), 3);
-		path_s.anchor("points", path_type, points, num_points - (loop and 0 or 1), loop);
+		local _, pts = path_s.anchor("points", path_type, points, num_points - (loop and 0 or 1), loop);
+		points = pts;
 	end
 end
 
@@ -542,7 +544,8 @@ if obj.getoption("gui") then
 	if toggle_gui then obj.setanchor("X,Y", 0, "line") else
 		num_points = math.max(math.floor(0.5 + (tonumber(num_points) or 4)), 3);
 		path_type = math.min(math.max(math.floor(0.5 + path_type), 0), 3);
-		path_s.anchor("points", path_type, points, num_points, true);
+		local _, pts = path_s.anchor("points", path_type, points, num_points, true);
+		points = pts;
 	end
 end
 
@@ -691,7 +694,8 @@ local obj, math, tonumber, type = obj, math, tonumber, type;
 if obj.getoption("gui") then
 	num_points = math.max(math.floor(0.5 + (tonumber(num_points) or 4)), 2);
 	path_type = math.min(math.max(math.floor(0.5 + path_type), 0), 3);
-	path_s.anchor("points", path_type, points, num_points - (loop and 0 or 1), loop);
+	local _, pts = path_s.anchor("points", path_type, points, num_points - (loop and 0 or 1), loop);
+	points = pts;
 end
 
 -- take parameters.

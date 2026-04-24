@@ -1,4 +1,4 @@
--- under development for v1.13 (for beta42) r1
+-- under development for v1.20 (for beta42) r3
 --[[
 MIT License
 Copyright (c) 2025-2026 sigma-axis
@@ -28,7 +28,7 @@ https://mit-license.org/
 -- v1.12 (for beta25)
 --
 
-local obj, print, math, tonumber, bit, ffi, buffer = obj, print, math, tonumber, bit, require("ffi"), require("string.buffer");
+local obj, print, math, tonumber, ipairs, unpack, bit, ffi, buffer = obj, print, math, tonumber, ipairs, unpack, bit, require("ffi"), require("string.buffer");
 
 if obj.getinfo("version") < 2004001 then
 	error([[AviUtl ExEdit beta40a 以降が必要です！]], 2);
@@ -56,171 +56,209 @@ end
 ---@field [7] number? dx2
 ---@field [8] number? dy2
 
-local function pt(pts, i) return tonumber(pts[i]) or 0 end
+local anchor, poll do
+	local function pt(pts, i) return tonumber(pts[i]) or 0 end
+	local function unpack1(x) if x ~= nil then return x end end
 
----places anchors for the path.
----@param var_name string 点列を受け取る変数の名前．
----@param path_type path_type パスの種類．
----@param pts { [integer]: number? } 点列の配列， `{ x1, y1, x2, y2, x3, y3, ... }` の形式．
----@param n_segs integer パスの分割区間の個数．
----@param loop boolean 閉じたパスかどうか．
----@return integer n_anchors 設定したアンカーの個数．
-local function anchor(var_name, path_type, pts, n_segs, loop)
-	local n_anchors = (loop and 0 or 1) + n_segs * (
-		path_type == 0 and 1 or
-		path_type == 1 and 1 or
-		path_type == 2 and 2 or 3);
-	if path_type == 3 then
-		obj.setanchor(var_name, n_anchors);
-		for i = 1, n_segs do
-			local I, J = 6 * i, 6 * (loop and (i % n_segs) or i);
-			obj.setanchor({
-				pt(pts, I - 3), pt(pts, I - 2),
-				pt(pts, I - 5), pt(pts, I - 4),
-				pt(pts, J + 1), pt(pts, J + 2),
-				pt(pts, I - 1), pt(pts, I - 0),
-			}, 4, "line");
-		end
-	else obj.setanchor(var_name, n_anchors, loop and "loop" or "line") end
-	return n_anchors;
-end
+	---places anchors for the path.
+	---@param var_name string 点列を受け取る変数の名前．
+	---@param path_type path_type パスの種類．
+	---@param pts { [integer]: number? } 点列の配列， `{ x1, y1, x2, y2, x3, y3, ... }` の形式．
+	---@param n_segs integer パスの分割区間の個数．
+	---@param loop boolean 閉じたパスかどうか．
+	---@return integer n_anchors 設定したアンカーの個数．
+	---@return table pts_corrected 足りない点や余剰な点を補正した点列．補正の必要がない場合は `pts` そのもの．
+	function anchor(var_name, path_type, pts, n_segs, loop)
+		local pts_per_seg =
+			path_type == 0 and 1 or
+			path_type == 1 and 1 or
+			path_type == 2 and 2 or 3;
+		local n_anchors = (loop and 0 or 1) + pts_per_seg * n_segs;
+		local alt_pts = nil;
+		if 2 * n_anchors ~= #pts then
+			alt_pts = {};
+			local n = math.min(n_anchors, math.floor(#pts / 2));
+			for i = 1, 2 * n do alt_pts[i] = pt(pts, i) end
 
-local interpolation = obj.interpolation;
-local function bezier2_1d(t, a0, a1, a2)
-	return (1 - t) ^ 2 * a0 + 2 * t * (1 - t) * a1 + t ^ 2 * a2;
-end
-local function bezier2(t, x0, y0, x1, y1, x2, y2)
-	return bezier2_1d(t, x0, x1, x2), bezier2_1d(t, y0, y1, y2);
-end
-local function bezier3_1d(t, a0, a1, a2, a3)
-	return (1 - t) ^ 3 * a0 + 3 * t * (1 - t) ^ 2 * a1 + 3 * t ^ 2 * (1 - t) * a2 + t ^ 3 * a3;
-end
-local function bezier3(t, x0, y0, x1, y1, x2, y2, x3, y3)
-	return bezier3_1d(t, x0, x1, x2, x3), bezier3_1d(t, y0, y1, y2, y3);
-end
-
-local pts2, n_pts2, stack, r2 = {}, 0, {}, 0;
-local function poll_section(curve, apriori, ...)
-	local rem = 0;
-	-- firstly, collect certain number of mid-points.
-	for i = 1, apriori do
-		local t = 1 - (i - 1) / apriori;
-		rem = rem + 1;
-		stack[3 * rem - 2], stack[3 * rem - 1], stack[3 * rem] = t, curve(t, ...);
-	end
-
-	-- iterate until the stack clears up.
-	local s = 0;
-	while rem > 0 do
-		local x, y, t, X, Y =
-			pts2[2 * n_pts2 - 1], pts2[2 * n_pts2],
-			stack[3 * rem - 2], stack[3 * rem - 1], stack[3 * rem];
-		if (X - x) ^ 2 + (Y - y) ^ 2 < r2 then
-			-- point near enough.
-			rem = rem - 1;
-			n_pts2 = n_pts2 + 1;
-			s, pts2[2 * n_pts2 - 1], pts2[2 * n_pts2] = t, X, Y;
-		else
-			-- too far, calculate the intermediate.
-			local u = (s + t) / 2;
-			rem = rem + 1;
-			stack[3 * rem - 2], stack[3 * rem - 1], stack[3 * rem] = u, curve(u, ...);
-		end
-	end
-end
-
----曲線を表すパスを折れ線の列に変換する．
----@param path_type path_type パスの種類．折れ線の場合は実質 shallow copy が取られる．
----@param pts { [integer]: number? } 点列の配列， `{ x1, y1, x2, y2, x3, y3, ... }` の形式．
----@param n_segs integer パスの分割区間の個数．
----@param loop boolean 閉じたパスかどうか．
----@param prec number 折れ線の許容最長距離．
----@return { [integer]: number } pts2 結果の折れ線の頂点を表す点列．
----@return integer n_pts2 `pts2` に含まれる点の個数．
-local function poll(path_type, pts, n_segs, loop, prec)
-	local ret, n_ret;
-	if path_type == 0 then
-		ret, n_ret = {}, n_segs + 1;
-		-- essentially a shallow copy of `pts`.
-		for i = 1, 2 * n_ret do ret[i] = pt(pts, i) end
-		if loop then
-			-- place a copy of the first point at the end.
-			ret[2 * n_ret - 1], ret[2 * n_ret] = ret[1], ret[2];
-		end
-	else
-		-- replace the curve into a sequence of secants.
-		-- prepare poll_section() function.
-		pts2, n_pts2, stack, r2 = { pt(pts, 1), pt(pts, 2) }, 1, {}, prec ^ 2;
-
-		if path_type == 1 then
-			-- built-in interpolation function.
-			for i = 1, n_segs do
-				local x0, y0, x2, y2, x3, y3 =
-					pt(pts, 2 * i - 3), pt(pts, 2 * i - 2),
-					pt(pts, 2 * i + 1), pt(pts, 2 * i + 2),
-					pt(pts, 2 * i + 3), pt(pts, 2 * i + 4);
+			if n < n_anchors then
+				-- find a suitable placeholder point.
+				local k = 1 + math.floor((n - 1) / pts_per_seg) * pts_per_seg;
+				local X, Y = pt(pts, 2 * k - 1), pt(pts, 2 * k); -- last point.
+				local dx, dy;
 				if loop then
-					if i == 1 then x0, y0 = pt(pts, 2 * n_segs - 1), pt(pts, 2 * n_segs) end
-					if i >= n_segs - 1 then
-						local j = i - n_segs;
-						x3, y3 = pt(pts, 2 * j + 3), pt(pts, 2 * j + 4);
-						if j >= 0 then x2, y2 = pt(pts, 2 * j + 1), pt(pts, 2 * j + 2) end
-					end
+					dx, dy = (pt(pts, 1) - X) / 2, (pt(pts, 2) - Y) / 2;
 				else
-					if i == 1 then x0, y0 = pts2[1], pts2[2] end
-					if i >= n_segs then x3, y3 = x2, y2 end
+					k = math.max(1, k - pts_per_seg);
+					dx, dy = (X - pt(pts, 2 * k - 1)) / 2, (Y - pt(pts, 2 * k)) / 2;
 				end
-				local x1, y1 = pts2[2 * n_pts2 - 1], pts2[2 * n_pts2];
-				if x0 ~= x1 or x0 ~= x2 or x0 ~= x3 or y0 ~= y1 or y0 ~= y2 or y0 ~= y3 then
-					poll_section(interpolation, 4,
-						x0, y0, x1, y1, x2, y2, x3, y3);
+				local l = dx ^ 2 + dy ^ 2;
+				if l > 100 ^ 2 then
+					l = 100 / l ^ 0.5; -- at most 100 pixel far.
+					dx, dy = l * dx, l * dy;
 				end
-			end
-		elseif path_type == 2 then
-			-- quadratic Bezier curve.
-			for i = 1, n_segs do
-				local j = (i >= n_segs and loop) and 0 or i;
-				local x1, y1, x2, y2 =
-					pt(pts, 4 * i - 1), pt(pts, 4 * i - 0),
-					pt(pts, 4 * j + 1), pt(pts, 4 * j + 2);
-				local x0, y0 = pts2[2 * n_pts2 - 1], pts2[2 * n_pts2];
-				if x0 ~= x1 or x0 ~= x2 or y0 ~= y1 or y0 ~= y2 then
-					poll_section(bezier2, 2,
-						x0, y0, x1, y1, x2, y2);
-				end
-			end
-		else
-			-- cubic Bezier curve.
-			for i = 1, n_segs do
-				local j = (i >= n_segs and loop) and 0 or i;
-				local x1, y1, x2, y2, x3, y3 =
-					pt(pts, 6 * i - 3), pt(pts, 6 * i - 2),
-					pt(pts, 6 * i - 1), pt(pts, 6 * i - 0),
-					pt(pts, 6 * j + 1), pt(pts, 6 * j + 2);
-				local x0, y0 = pts2[2 * n_pts2 - 1], pts2[2 * n_pts2];
-				if x0 == x1 and y0 == y1 and x2 == x3 and y2 == y3 then
-					if x1 ~= x2 or y1 ~= y2 then
-						n_pts2 = n_pts2 + 1;
-						pts2[2 * n_pts2 - 1], pts2[2 * n_pts2] = x3, y3;
-					end
-				else
-					poll_section(bezier3, 4,
-						x0, y0, x1, y1, x2, y2, x3, y3);
+				X, Y = X + dx, Y + dy;
+
+				-- fill the rest with that placeholder.
+				for i = n + 1, n_anchors do
+					alt_pts[2 * i - 1], alt_pts[2 * i] = X, Y;
 				end
 			end
 		end
+		if path_type == 3 then
+			obj.setanchor(var_name, n_anchors, unpack1(alt_pts));
 
-		if n_pts2 < 2 then
-			-- ensure to have at least two points.
-			n_pts2 = n_pts2 + 1;
-			pts2[2 * n_pts2 - 1], pts2[2 * n_pts2] = pts2[1], pts2[2];
-		end
-
-		-- store the result.
-		ret, n_ret, pts2, n_pts2, stack, r2 = pts2, n_pts2, {}, 0, {}, 0;
+			-- draw handles.
+			local pts2 = alt_pts or pts;
+			for i = 1, n_segs do
+				local I, J = 6 * i, 6 * (loop and (i % n_segs) or i);
+				obj.setanchor({
+					pt(pts2, I - 3), pt(pts2, I - 2),
+					pt(pts2, I - 5), pt(pts2, I - 4),
+					pt(pts2, J + 1), pt(pts2, J + 2),
+					pt(pts2, I - 1), pt(pts2, I - 0),
+				}, 4, "line");
+			end
+		else obj.setanchor(var_name, n_anchors, loop and "loop" or "line", unpack1(alt_pts)) end
+		return n_anchors, alt_pts or pts;
 	end
 
-	return ret, n_ret;
+	local interpolation = obj.interpolation;
+	local function bezier2_1d(t, a0, a1, a2)
+		return (1 - t) ^ 2 * a0 + 2 * t * (1 - t) * a1 + t ^ 2 * a2;
+	end
+	local function bezier2(t, x0, y0, x1, y1, x2, y2)
+		return bezier2_1d(t, x0, x1, x2), bezier2_1d(t, y0, y1, y2);
+	end
+	local function bezier3_1d(t, a0, a1, a2, a3)
+		return (1 - t) ^ 3 * a0 + 3 * t * (1 - t) ^ 2 * a1 + 3 * t ^ 2 * (1 - t) * a2 + t ^ 3 * a3;
+	end
+	local function bezier3(t, x0, y0, x1, y1, x2, y2, x3, y3)
+		return bezier3_1d(t, x0, x1, x2, x3), bezier3_1d(t, y0, y1, y2, y3);
+	end
+
+	local pts2, n_pts2, stack, r2 = {}, 0, {}, 0;
+	local function poll_section(curve, apriori, ...)
+		local rem = 0;
+		-- firstly, collect certain number of mid-points.
+		for i = 1, apriori do
+			local t = 1 - (i - 1) / apriori;
+			rem = rem + 1;
+			stack[3 * rem - 2], stack[3 * rem - 1], stack[3 * rem] = t, curve(t, ...);
+		end
+
+		-- iterate until the stack clears up.
+		local s = 0;
+		while rem > 0 do
+			local x, y, t, X, Y =
+				pts2[2 * n_pts2 - 1], pts2[2 * n_pts2],
+				stack[3 * rem - 2], stack[3 * rem - 1], stack[3 * rem];
+			if (X - x) ^ 2 + (Y - y) ^ 2 < r2 then
+				-- point near enough.
+				rem = rem - 1;
+				n_pts2 = n_pts2 + 1;
+				s, pts2[2 * n_pts2 - 1], pts2[2 * n_pts2] = t, X, Y;
+			else
+				-- too far, calculate the intermediate.
+				local u = (s + t) / 2;
+				rem = rem + 1;
+				stack[3 * rem - 2], stack[3 * rem - 1], stack[3 * rem] = u, curve(u, ...);
+			end
+		end
+	end
+
+	---曲線を表すパスを折れ線の列に変換する．
+	---@param path_type path_type パスの種類．折れ線の場合は実質 shallow copy が取られる．
+	---@param pts { [integer]: number? } 点列の配列， `{ x1, y1, x2, y2, x3, y3, ... }` の形式．
+	---@param n_segs integer パスの分割区間の個数．
+	---@param loop boolean 閉じたパスかどうか．
+	---@param prec number 折れ線の許容最長距離．
+	---@return { [integer]: number } pts2 結果の折れ線の頂点を表す点列．`loop` が true の場合は末尾には最初と同じ点が格納される．
+	---@return integer n_pts2 `pts2` に含まれる点の個数．
+	function poll(path_type, pts, n_segs, loop, prec)
+		local ret, n_ret;
+		if path_type == 0 then
+			ret, n_ret = {}, n_segs + 1;
+			-- essentially a shallow copy of `pts`.
+			for i = 1, 2 * n_ret do ret[i] = pt(pts, i) end
+			if loop then
+				-- place a copy of the first point at the end.
+				ret[2 * n_ret - 1], ret[2 * n_ret] = ret[1], ret[2];
+			end
+		else
+			-- replace the curve into a sequence of secants.
+			-- prepare poll_section() function.
+			pts2, n_pts2, stack, r2 = { pt(pts, 1), pt(pts, 2) }, 1, {}, prec ^ 2;
+
+			if path_type == 1 then
+				-- built-in interpolation function.
+				for i = 1, n_segs do
+					local x0, y0, x2, y2, x3, y3 =
+						pt(pts, 2 * i - 3), pt(pts, 2 * i - 2),
+						pt(pts, 2 * i + 1), pt(pts, 2 * i + 2),
+						pt(pts, 2 * i + 3), pt(pts, 2 * i + 4);
+					if loop then
+						if i == 1 then x0, y0 = pt(pts, 2 * n_segs - 1), pt(pts, 2 * n_segs) end
+						if i >= n_segs - 1 then
+							local j = i - n_segs;
+							x3, y3 = pt(pts, 2 * j + 3), pt(pts, 2 * j + 4);
+							if j >= 0 then x2, y2 = pt(pts, 2 * j + 1), pt(pts, 2 * j + 2) end
+						end
+					else
+						if i == 1 then x0, y0 = pts2[1], pts2[2] end
+						if i >= n_segs then x3, y3 = x2, y2 end
+					end
+					local x1, y1 = pts2[2 * n_pts2 - 1], pts2[2 * n_pts2];
+					if x0 ~= x1 or x0 ~= x2 or x0 ~= x3 or y0 ~= y1 or y0 ~= y2 or y0 ~= y3 then
+						poll_section(interpolation, 4,
+							x0, y0, x1, y1, x2, y2, x3, y3);
+					end
+				end
+			elseif path_type == 2 then
+				-- quadratic Bezier curve.
+				for i = 1, n_segs do
+					local j = (i >= n_segs and loop) and 0 or i;
+					local x1, y1, x2, y2 =
+						pt(pts, 4 * i - 1), pt(pts, 4 * i - 0),
+						pt(pts, 4 * j + 1), pt(pts, 4 * j + 2);
+					local x0, y0 = pts2[2 * n_pts2 - 1], pts2[2 * n_pts2];
+					if x0 ~= x1 or x0 ~= x2 or y0 ~= y1 or y0 ~= y2 then
+						poll_section(bezier2, 2,
+							x0, y0, x1, y1, x2, y2);
+					end
+				end
+			else
+				-- cubic Bezier curve.
+				for i = 1, n_segs do
+					local j = (i >= n_segs and loop) and 0 or i;
+					local x1, y1, x2, y2, x3, y3 =
+						pt(pts, 6 * i - 3), pt(pts, 6 * i - 2),
+						pt(pts, 6 * i - 1), pt(pts, 6 * i - 0),
+						pt(pts, 6 * j + 1), pt(pts, 6 * j + 2);
+					local x0, y0 = pts2[2 * n_pts2 - 1], pts2[2 * n_pts2];
+					if x0 == x1 and y0 == y1 and x2 == x3 and y2 == y3 then
+						if x1 ~= x2 or y1 ~= y2 then
+							n_pts2 = n_pts2 + 1;
+							pts2[2 * n_pts2 - 1], pts2[2 * n_pts2] = x3, y3;
+						end
+					else
+						poll_section(bezier3, 4,
+							x0, y0, x1, y1, x2, y2, x3, y3);
+					end
+				end
+			end
+
+			if n_pts2 < 2 then
+				-- ensure to have at least two points.
+				n_pts2 = n_pts2 + 1;
+				pts2[2 * n_pts2 - 1], pts2[2 * n_pts2] = pts2[1], pts2[2];
+			end
+
+			-- store the result.
+			ret, n_ret, pts2, n_pts2, stack, r2 = pts2, n_pts2, {}, 0, {}, 0;
+		end
+
+		return ret, n_ret;
+	end
 end
 
 ---折れ線の bounding box と長さを計算．
@@ -241,7 +279,7 @@ local function measure(pts, n_pts)
 	return L, R, T, B, length;
 end
 
----折れ線を表す配列で，始点から `pos` だけ離れた位置にある点の前後にある頂点のインデックスを二分法で検索．
+---折れ線を表す配列で，始点から距離 `pos` だけ離れた位置にある点の前後にある頂点のインデックスを二分法で検索．
 ---@param pos number 始点からの距離．0 以上の場合はピクセル数で指定，負の場合は `pos >= -1.0` の必要があり，パスの総長との比を絶対値で指定．
 ---@param tbl { [integer]: number } `n_pts` を指定した場合，点列を `{ x1, y1, x2, y2, ... }` の形式で指定．`n_pts` が `nil` の場合，各頂点の始点からの累計距離の配列を `{ 0, l1, l2, ... }` の形式で指定．
 ---@param n_pts integer? `tbl` に点列を指定した場合， `tbl` に含まれる点の個数． 累計距離の配列の場合は `nil`.
@@ -399,54 +437,57 @@ local function randomize(pts, n_pts, period, rand_range, end_mode, seed)
 	return ret, n_ret;
 end
 
-local function encode_float(x)
-	local d, m, M = 2 ^ 8, -2 ^ 23, 2 ^ 23 - 1;
-	return bit.bor(0xff000000, math.min(math.max(math.floor(x * d + 0.5), m), M));
-end
-local function decode_float(c)
-	local d = 2 ^ 16;
-	return bit.lshift(c, 8) / d;
-end
-local uint32_t_array, uint32_t_ptr, intptr_t = ffi.typeof("uint32_t[?]"), ffi.typeof("uint32_t*"), ffi.typeof("intptr_t");
--- converts a pointer to a light userdata.
-local function to_userdata(ptr)
-	-- 0x05: lightud64. (https://luajit.org/ext_buffer.html)
-	return buffer.decode("\x05"..buffer.encode(ffi.cast(intptr_t, ptr)):sub(2));
-end
----点列 `pts` の情報を `target` で指定したバッファに転送する．転送したデータはシェーダーで点列として読み取れるようになる．
----@param pts { [integer]: number } 折れ線の頂点を表す点列．
----@param n_pts integer `pts` に含まれる点の個数．
----@param dx number? X方向の平行移動量．省略時は 0.
----@param dy number? Y方向の平行移動量．省略時は 0.
----@param target string? `"tempbuffer"` あるいは `"cache:..."` の形式でバッファを指定．省略時は `"tempbuffer"`.
-local function send(pts, n_pts, dx, dy, target)
-	dx, dy = dx or 0, dy or 0;
-	local max_width = 2 ^ 12;
-	local w, h =
-		math.min(2 * n_pts, max_width),
-		math.ceil(2 * n_pts / max_width)
-	local data = uint32_t_array(w * h);
-	for i = 1, 2 * n_pts, 2 do
-		data[i - 1] = encode_float(pts[i] + dx);
-		data[i] = encode_float(pts[i + 1] + dy);
+local send, retrieve do
+	local function encode_float(x)
+		local d, m, M = 2 ^ 8, -2 ^ 23, 2 ^ 23 - 1;
+		return bit.bor(0xff000000, math.min(math.max(math.floor(x * d + 0.5), m), M));
 	end
-	obj.putpixeldata(target or "tempbuffer", to_userdata(data), w, h);
-end
+	local function decode_float(c)
+		local d = 2 ^ 16;
+		return bit.lshift(c, 8) / d;
+	end
+	local uint32_t_array, uint32_t_ptr, intptr_t = ffi.typeof("uint32_t[?]"), ffi.typeof("uint32_t*"), ffi.typeof("intptr_t");
+	-- converts a pointer to a light userdata.
+	local function to_userdata(ptr)
+		-- 0x05: lightud64. (https://luajit.org/ext_buffer.html)
+		return buffer.decode("\x05"..buffer.encode(ffi.cast(intptr_t, ptr)):sub(2));
+	end
 
----`target` で指定したバッファから点列情報を復元する．
----@param n_pts integer バッファに含まれている点の個数．
----@param target string? `"tempbuffer"` あるいは `"cache:..."` の形式でバッファを指定．省略時は `"tempbuffer"`.
----@return { [integer]: number }? pts 求める点列を表す配列．もしバッファのサイズが `n_pts` と想定されない場合は `nil`.
-local function retrieve(n_pts, target)
-	local max_width = 2 ^ 12;
-	local w, h =
-		math.min(2 * n_pts, max_width),
-		math.ceil(2 * n_pts / max_width);
-	local data, W, H = obj.getpixeldata(target or "tempbuffer");
-	if H < h or (h > 1 and W ~= w) or W < w then return nil end
-	local ret, ptr = {}, ffi.cast(uint32_t_ptr, data);
-	for i = 1, 2 * n_pts do ret[i] = decode_float(ptr[i - 1]) end
-	return ret;
+	---点列 `pts` の情報を `target` で指定したバッファに転送する．転送したデータはシェーダーで点列として読み取れるようになる．
+	---@param pts { [integer]: number } 折れ線の頂点を表す点列．
+	---@param n_pts integer `pts` に含まれる点の個数．
+	---@param dx number? X方向の平行移動量．省略時は 0.
+	---@param dy number? Y方向の平行移動量．省略時は 0.
+	---@param target string? `"tempbuffer"` あるいは `"cache:..."` の形式でバッファを指定．省略時は `"tempbuffer"`.
+	function send(pts, n_pts, dx, dy, target)
+		dx, dy = dx or 0, dy or 0;
+		local max_width = 2 ^ 12;
+		local w, h =
+			math.min(2 * n_pts, max_width),
+			math.ceil(2 * n_pts / max_width)
+		local data = uint32_t_array(w * h);
+		for i = 1, 2 * n_pts, 2 do
+			data[i - 1] = encode_float(pts[i] + dx);
+			data[i] = encode_float(pts[i + 1] + dy);
+		end
+		obj.putpixeldata(target or "tempbuffer", to_userdata(data), w, h);
+	end
+
+	---`target` で指定したバッファから点列情報を復元する．
+	---@param n_pts integer バッファに含まれている点の個数．
+	---@param target string? `"tempbuffer"` あるいは `"cache:..."` の形式でバッファを指定．省略時は `"tempbuffer"`.
+	---@return { [integer]: number }? pts 求める点列を表す配列．もしバッファのサイズが `n_pts` と想定されない場合は `nil`.
+	function retrieve(n_pts, target)
+		local max_width = 2 ^ 12;
+		local w, h =
+			math.min(2 * n_pts, max_width),
+			math.ceil(2 * n_pts / max_width);
+		local data, W, H = obj.getpixeldata(target or "tempbuffer");
+		if H < h or (h > 1 and W ~= w) or W < w then return nil end
+		local ret, ptr = {}, ffi.cast(uint32_t_ptr, data);
+		for i = 1, 2 * n_pts do ret[i] = decode_float(ptr[i - 1]) end
+		return ret;
+	end
 end
 
 ---パスマスクσ をバッファに送った点列データを元に適用する．
