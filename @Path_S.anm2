@@ -511,6 +511,9 @@ end
 --track@zoom:拡大率,0,5000,100,0.001
 --track@rotate:回転,-720,720,0,0.01
 --check@toggle_gui:アンカー切り替え,false
+--group:フィルタ設定,false
+--select@extra_filter:追加のフィルタ効果=0,後続フィルタ=0,スクリプト実行=1
+--text@extra_script:追加スクリプト,obj.effect("グラデーション",\n  "形状","凸形",\n  "角度",30,\n  "開始色",0x00ff00) -- グラデーション適用\nobj.cx=obj.cx+100 -- 位置もずらせる\n
 --group:その他,false
 --track@antialias:ぼかし幅,0,1000,1,0.01
 --value@PI:PI,{}
@@ -529,7 +532,7 @@ float4 interpolate(float4 pos : SV_Position) : SV_Target
 		rate.Load(int3(pos.xy, 0)).a);
 }
 ]]
-do local invert,num_points,path_type,points,precision,inflation,mode_fill,X,Y,zoom,rotate,toggle_gui,antialias,PI=invert,num_points,path_type,points,precision,inflation,mode_fill,X,Y,zoom,rotate,toggle_gui,antialias,PI;
+do local invert,num_points,path_type,points,precision,inflation,mode_fill,X,Y,zoom,rotate,toggle_gui,extra_filter,extra_script,antialias,PI=invert,num_points,path_type,points,precision,inflation,mode_fill,X,Y,zoom,rotate,toggle_gui,extra_filter,extra_script,antialias,PI;
 
 local path_s = require "Path_S";
 local obj, math, tonumber, type, tostring = obj, math, tonumber, type, tostring;
@@ -546,18 +549,19 @@ end
 -- take parameters.
 --[==[
 	PI = {
-		num_points:	number?,
-		path_type:	string?,
-		points:		table?,
-		precision:	number?,
-		antialias:	number?,
-		inflation:	number?,
-		mode_fill:	string?,
-		invert:		boolean|number|nil,
-		X:			number?,
-		Y:			number?,
-		zoom:		number?,
-		rotate:		number?,
+		num_points:		number?,
+		path_type:		string?,
+		points:			table?,
+		precision:		number?,
+		antialias:		number?,
+		inflation:		number?,
+		mode_fill:		string?,
+		invert:			boolean|number|nil,
+		X:				number?,
+		Y:				number?,
+		zoom:			number?,
+		rotate:			number?,
+		extra_filter:	string?,
 	}
 ]==]
 local function as_bool(t, v)
@@ -587,6 +591,12 @@ X = tonumber(PI.X) or X;
 Y = tonumber(PI.Y) or Y;
 zoom = tonumber(PI.zoom) or zoom;
 rotate = tonumber(PI.rotate) or rotate;
+if type(PI.extra_filter) == "string" then
+	local name2num = {
+		["後続フィルタ"] = 0, ["スクリプト実行"] = 1,
+	};
+	extra_filter = name2num[PI.extra_filter] or extra_filter;
+end
 
 -- normalize parameters.
 num_points = math.max(math.floor(0.5 + num_points), 3);
@@ -597,14 +607,26 @@ inflation = math.max(inflation, 0);
 mode_fill = math.min(math.max(math.floor(0.5 + mode_fill), 0), 3);
 zoom = math.min(math.max(zoom / 100, 0), 50);
 rotate = math.pi / 180 * (rotate % 360);
+extra_filter = math.min(math.max(math.floor(0.5 + extra_filter), 0), 1);
+if extra_filter == 1 and extra_script:match("^%s*(.-)%s*$") == "" then return end
 
 -- backup the current image.
-local cache_name_ori, cache_name_eff = "cache:path_s/part/ori#"..obj.effect_id, "cache:path_s/part/eff#"..obj.effect_id;
+local cache_name_ori, cache_name_eff = "cache:path_s/part/ori#"..obj.effect_id, "cache:path_s/part/eff";
 obj.copybuffer(cache_name_ori, "object");
 
 -- apply following filters.
 local w0, h0, cx0, cy0 = obj.w, obj.h, obj.cx, obj.cy;
-obj.effect();
+if extra_filter == 0 then obj.effect();
+else
+	local f, c, e;
+	f, e = loadstring(extra_script);
+	if f then c, e = pcall(f) end
+	if not (f and c) then
+		path_s.print_script_error(tostring(e), extra_script);
+		obj.setoption("draw_state", true);
+		return;
+	end
+end
 if obj.w <= 0 or obj.h <= 0 then return end -- subsequent filter already drew.
 obj.copybuffer(cache_name_eff, "object");
 
@@ -622,6 +644,7 @@ end
 
 -- create the shape of the path.
 obj.clearbuffer("object", w, h, 0x000000);
+obj.cx, obj.cy  = cx, cy;
 path_s.path_mask_area(
 	1, invert, mode_fill, inflation, antialias,
 	path_type, points, num_points, precision,
@@ -633,10 +656,11 @@ obj.pixelshader("interpolate", "object", { cache_name_ori, cache_name_eff, "obje
 	-(w - w1) / 2 - (cx - cx1), -(h - h1) / 2 - (cy - cy1);
 });
 
--- then draw to the framebuffer.
-obj.setoption("drawtarget", "framebuffer");
-obj.cx, obj.cy  = cx, cy;
-obj.draw();
+if extra_filter == 0 then
+	-- draw to the framebuffer.
+	obj.setoption("drawtarget", "framebuffer");
+	obj.draw();
+end
 
 end
 

@@ -775,6 +775,28 @@ local function path_mask_line(
 		target_buffer);
 end
 
+---Lua のエラーメッセージを，AviUtl2 が標準で出力する形式を真似て出力する．
+---@param err_mes string Lua からのエラーメッセージ．
+---@param source string エラー元となった Lua スクリプトのソースコード．
+local function print_script_error(err_mes, source)
+	local n, err_desc = err_mes:match("%]:(%d+):%s(.-)$");
+	n = tonumber(n);
+	if n and err_desc then
+		-- collect three lines containing the one that caused the error.
+		n = math.max(n - 1, 1);
+		local k = 0;
+		for l in (source.."\n"):gmatch("(.-)\n") do
+			k = k + 1;
+			if k >= n then
+				err_desc = err_desc.."\n> "..l;
+				if k >= n + 2 then break end
+			end
+		end
+	else err_desc = err_mes end
+	print(err_desc); -- easy-to-read message.
+	print("@warn", err_mes); -- raw message.
+end
+
 -- return the table containing the exported functions.
 return {
 	anchor = anchor,
@@ -791,4 +813,6 @@ return {
 	path_mask_area = path_mask_area,
 	path_mask_line_buffered = path_mask_line_buffered,
 	path_mask_line = path_mask_line,
+
+	print_script_error = print_script_error,
 };
