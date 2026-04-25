@@ -1,4 +1,4 @@
--- under development for v1.20 (for beta42) r3
+-- under development for v1.20 (for beta42) r4
 --[[
 MIT License
 Copyright (c) 2025-2026 sigma-axis
@@ -490,6 +490,13 @@ local send, retrieve do
 	end
 end
 
+local function mask_uniform(alpha, target)
+	if alpha <= 0 then obj.clearbuffer(target);
+	elseif alpha < 1 then
+		obj.pixelshader("const_alpha@パスマスクσ@Path_S", target, nil, { alpha }, "mask");
+	end
+end
+
 ---パスマスクσ をバッファに送った点列データを元に適用する．
 ---@param intensity number 「強さ」を 0.0 から 1.0 で指定．
 ---@param invert boolean 反転するかどうか．
@@ -560,12 +567,7 @@ local function path_mask_area(
 
 	-- check if the path overlaps this object.
 	if L >= tgt_w / 2 or R <= -tgt_w / 2 or T >= tgt_h / 2 or B <= -tgt_h / 2 then
-		-- the path does not overlap this object.
-		local alpha = invert == (mode_fill >= 2) and 1 - intensity or 1;
-		if alpha <= 0 then obj.clearbuffer(tgt_name);
-		elseif alpha < 1 then
-			obj.pixelshader("const_alpha@パスマスクσ@Path_S", tgt_name, nil, { alpha }, "mask");
-		end
+		mask_uniform(invert == (mode_fill >= 2) and 1 - intensity or 1, tgt_name);
 		return;
 	end
 
@@ -792,11 +794,7 @@ local function path_mask_line(
 
 	-- check if the path overlaps this object.
 	if L >= tgt_w / 2 or R <= -tgt_w / 2 or T >= tgt_h / 2 or B <= -tgt_h / 2 then
-		local alpha = invert and 1 or 1 - intensity;
-		if alpha <= 0 then obj.clearbuffer("object");
-		elseif alpha < 1 then
-			obj.pixelshader("const_alpha@パスマスクσ@Path_S", tgt_name, nil, { alpha }, "mask");
-		end
+		mask_uniform(invert and 1 or 1 - intensity, tgt_name);
 		return;
 	end
 
