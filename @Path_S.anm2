@@ -1,4 +1,4 @@
--- under development for v1.20 (for beta42) r5
+-- under development for v1.20 (for beta42) r7
 --[[
 MIT License
 Copyright (c) 2025-2026 sigma-axis
@@ -201,14 +201,16 @@ rotate = math.pi / 180 * (rotate % 360);
 if intensity <= 0 then return end
 
 -- further calculations.
+local alpha_outer, alpha_inner = 1 - intensity, 1;
+if invert then alpha_outer, alpha_inner = alpha_inner, alpha_outer end
 if pt_buff then
 	path_s.path_mask_area_buffered(
-		intensity, invert, mode_fill,
+		alpha_outer, alpha_inner, mode_fill,
 		inflation, antialias,
 		pt_buff, num_points);
 else
 	path_s.path_mask_area(
-		intensity, invert, mode_fill,
+		alpha_outer, alpha_inner, mode_fill,
 		inflation, antialias,
 		path_type, points, num_points, precision,
 		zoom, rotate, X, Y);
@@ -470,15 +472,17 @@ zoom = math.min(math.max(zoom / 100, 0), 50);
 rotate = math.pi / 180 * (rotate % 360);
 if intensity <= 0 then return end
 
+local alpha_outer, alpha_inner = 1 - intensity, 1;
+if invert then alpha_outer, alpha_inner = alpha_inner, alpha_outer end
 if pt_buff then
 	path_s.path_mask_line_buffered(
-		intensity, invert, line, antialias,
+		alpha_outer, alpha_inner, line, antialias,
 		pt_buff, num_points, len_buff, loop,
 		start_pos, end_pos, end_shape, endpt_buff,
 		dash_pat, dash_pos, dash_adj);
 else
 	path_s.path_mask_line(
-		intensity, invert, line, antialias,
+		alpha_outer, alpha_inner, line, antialias,
 		path_type, points, num_points - (loop and 0 or 1), loop, precision,
 		start_pos, end_pos, end_shape,
 		dash_pat, dash_pos, dash_adj,
@@ -639,7 +643,7 @@ end
 obj.clearbuffer("tempbuffer", w, h, 0x000000);
 obj.cx, obj.cy  = cx, cy;
 path_s.path_mask_area(
-	1, invert, mode_fill, inflation, antialias,
+	invert and 1 or 0, invert and 0 or 1, mode_fill, inflation, antialias,
 	path_type, points, num_points, precision,
 	zoom, rotate, X + (cx - cx0), Y + (cy - cy0),
 	{ name = "tempbuffer", w = w, h = h }, "object");
@@ -765,7 +769,7 @@ if toggle_gui then
 
 	-- carve by the path.
 	path_s.path_mask_line(
-		1, false, 2, 1,
+		0, 1, 2, 1,
 		0, points, num_points - (loop and 0 or 1), loop, 1,
 		0, 1, 0, { 6, 10 }, 0, true,
 		1, 0, -(L + R) / 2, -(T + B) / 2);

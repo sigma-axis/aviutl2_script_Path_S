@@ -1,4 +1,4 @@
--- under development for v1.20 (for beta42) r6
+-- under development for v1.20 (for beta42) r7
 --[[
 MIT License
 Copyright (c) 2025-2026 sigma-axis
@@ -500,8 +500,8 @@ local function mask_uniform(alpha, target)
 end
 
 ---パスマスクσ をバッファに送った点列データを元に適用する．
----@param intensity number 「強さ」を 0.0 から 1.0 で指定．
----@param invert boolean 反転するかどうか．
+---@param alpha_outer number パス外側のマスクのアルファ値を 0.0 から 1.0 で指定．
+---@param alpha_inner number パス内側のマスクのアルファ値を 0.0 から 1.0 で指定．
 ---@param mode_fill mode_fill 塗りつぶし範囲の指定．
 ---@param inflation number 「追加幅」をピクセル単位で指定．
 ---@param antialias number 「ぼかし幅」をピクセル単位で指定．
@@ -509,29 +509,28 @@ end
 ---@param num_points integer バッファに含まれる頂点数．
 ---@param target_buffer { name: string, w: integer, h: integer }? マスク適用先のバッファ名 (e.g. "object", "cache:foo") とその幅と高さを指定．省略時は `{ name = "object", w = obj.w, h = obj.h }`.
 local function path_mask_area_buffered(
-	intensity, invert, mode_fill,
+	alpha_outer, alpha_inner, mode_fill,
 	inflation, antialias,
 	buffer_name, num_points,
 	target_buffer)
 	-- unwrap target_buffer.
 	local tgt_name = target_buffer and target_buffer.name or "object";
 
-	local alpha_map0, alpha_map1;
-	if invert then alpha_map0, alpha_map1 = 1, -intensity;
-	else alpha_map0, alpha_map1 = 1 - intensity, intensity end
+	-- handle the trivial case.
+	if alpha_outer == alpha_inner then mask_uniform(alpha_outer, tgt_name); return end
 
 	-- mask with the path.
 	obj.pixelshader("carve@パスマスクσ@Path_S", tgt_name, buffer_name,
 	{
-		alpha_map1, alpha_map0;
+		alpha_inner - alpha_outer, alpha_outer;
 		num_points, mode_fill,
 		inflation, antialias,
 	}, "mask");
 end
 
 ---パスマスクσ を点列を元に適用する．
----@param intensity number 「強さ」を 0.0 から 1.0 で指定．
----@param invert boolean 反転するかどうか．
+---@param alpha_outer number パス外側のマスクのアルファ値を 0.0 から 1.0 で指定．
+---@param alpha_inner number パス内側のマスクのアルファ値を 0.0 から 1.0 で指定．
 ---@param mode_fill mode_fill 塗りつぶし範囲の指定．
 ---@param inflation number 「追加幅」をピクセル単位で指定．
 ---@param antialias number 「ぼかし幅」をピクセル単位で指定．
@@ -546,7 +545,7 @@ end
 ---@param target_buffer { name: string, w: integer, h: integer }? マスク適用先のバッファ名 (e.g. "object", "cache:foo") とその幅と高さを指定．省略時は `{ name = "object", w = obj.w, h = obj.h }`.
 ---@param temp_buffer_name string? 頂点データを転送する先のバッファ名 (e.g. "tempbuffer", "cache:foo"). 省略時は "tempbuffer".
 local function path_mask_area(
-	intensity, invert, mode_fill,
+	alpha_outer, alpha_inner, mode_fill,
 	inflation, antialias,
 	path_type, pts, n_segs, prec,
 	scale, rotate, dx, dy,
@@ -556,6 +555,9 @@ local function path_mask_area(
 	if target_buffer then
 		tgt_name, tgt_w, tgt_h = target_buffer.name, target_buffer.w, target_buffer.h;
 	end
+
+	-- handle the trivial case.
+	if alpha_outer == alpha_inner then mask_uniform(alpha_outer, tgt_name); return end
 
 	-- make the curve into the sequence of secants.
 	local points, num_points = poll(path_type, pts, n_segs, true,
@@ -569,7 +571,7 @@ local function path_mask_area(
 
 	-- check if the path overlaps this object.
 	if L >= tgt_w / 2 or R <= -tgt_w / 2 or T >= tgt_h / 2 or B <= -tgt_h / 2 then
-		mask_uniform(invert == (mode_fill >= 2) and 1 - intensity or 1, tgt_name);
+		mask_uniform(mode_fill >= 2 and alpha_inner or alpha_outer, tgt_name);
 		return;
 	end
 
@@ -578,14 +580,14 @@ local function path_mask_area(
 	send(points, num_points, tgt_w / 2, tgt_h / 2, temp_buffer_name);
 
 	path_mask_area_buffered(
-		intensity, invert, mode_fill,
+		alpha_outer, alpha_inner, mode_fill,
 		inflation, antialias, temp_buffer_name, num_points,
 		target_buffer);
 end
 
 ---パスマスク(ライン)σ をバッファに送った点列データを元に適用する．
----@param intensity number 「強さ」を 0.0 から 1.0 で指定．
----@param invert boolean 反転するかどうか．
+---@param alpha_outer number パス外側のマスクのアルファ値を 0.0 から 1.0 で指定．
+---@param alpha_inner number パス内側のマスクのアルファ値を 0.0 から 1.0 で指定．
 ---@param line_width number 「ライン幅」をピクセル単位で指定．
 ---@param antialias number 「ぼかし幅」をピクセル単位で指定．
 ---@param buffer_name string 折れ線の頂点データのあるバッファ名．
@@ -601,7 +603,7 @@ end
 ---@param dash_adj boolean 「破線周期補正」を指定．
 ---@param target_buffer { name: string, w: integer, h: integer }? マスク適用先のバッファ名 (e.g. "object", "cache:foo") とその幅と高さを指定．省略時は `{ name = "object", w = obj.w, h = obj.h }`.
 local function path_mask_line_buffered(
-	intensity, invert, line_width, antialias,
+	alpha_outer, alpha_inner, line_width, antialias,
 	buffer_name, num_points, len_path, loop,
 	start_pos, end_pos, end_shape, end_points,
 	dash_pat, dash_pos, dash_adj,
@@ -609,12 +611,12 @@ local function path_mask_line_buffered(
 	-- unwrap target_buffer.
 	local tgt_name = target_buffer and target_buffer.name or "object";
 
-	local alpha_map0, alpha_map1;
-	if invert then alpha_map0, alpha_map1 = 1, -intensity;
-	else alpha_map0, alpha_map1 = 1 - intensity, intensity end
+	-- handle the trivial case.
+	if alpha_outer == alpha_inner then mask_uniform(alpha_outer, tgt_name); return end
+
 	if line_width < 1 then
 		-- fade out the line as the width approaches zero.
-		alpha_map0, alpha_map1 = line_width * alpha_map0, line_width * alpha_map1;
+		alpha_inner = line_width * alpha_inner + (1 - line_width) * alpha_outer;
 	end
 
 	local phase_whole0, phase_whole1, phase_whole2;
@@ -728,7 +730,7 @@ local function path_mask_line_buffered(
 	if end_pos - start_pos >= 1 and sum_dash_len <= 0 then
 		obj.pixelshader("carve@パスマスク(ライン)σ@Path_S", tgt_name, buffer_name,
 		{
-			alpha_map1, alpha_map0;
+			alpha_inner - alpha_outer, alpha_outer;
 			num_points, math.max(line_width - 1, 0) / 2, antialias; 0, 0, 0;
 
 			endpt[1], endpt[2], endpt[3], endpt[4];
@@ -737,7 +739,7 @@ local function path_mask_line_buffered(
 	else
 		obj.pixelshader("carve_dash@パスマスク(ライン)σ@Path_S", tgt_name, buffer_name,
 		{
-			alpha_map1, alpha_map0;
+			alpha_inner - alpha_outer, alpha_outer;
 			num_points, math.max(line_width - 1, 0) / 2, antialias;
 			#dash_pat, dash_len0, dash_idx0 - 1;
 
@@ -751,8 +753,8 @@ local function path_mask_line_buffered(
 end
 
 ---パスマスク(ライン)σ を点列を元に適用する．
----@param intensity number 「強さ」を 0.0 から 1.0 で指定．
----@param invert boolean 反転するかどうか．
+---@param alpha_outer number パス外側のマスクのアルファ値を 0.0 から 1.0 で指定．
+---@param alpha_inner number パス内側のマスクのアルファ値を 0.0 から 1.0 で指定．
 ---@param line_width number 「ライン幅」をピクセル単位で指定．
 ---@param antialias number 「ぼかし幅」をピクセル単位で指定．
 ---@param path_type path_type 「線タイプ」(パスの種類) を指定．
@@ -773,7 +775,7 @@ end
 ---@param target_buffer { name: string, w: integer, h: integer }? マスク適用先のバッファ名 (e.g. "object", "cache:foo") とその幅と高さを指定．省略時は `{ name = "object", w = obj.w, h = obj.h }`.
 ---@param temp_buffer_name string? 頂点データを転送する先のバッファ名 (e.g. "tempbuffer", "cache:foo"). 省略時は "tempbuffer".
 local function path_mask_line(
-	intensity, invert, line_width, antialias,
+	alpha_outer, alpha_inner, line_width, antialias,
 	path_type, pts, n_segs, loop, prec,
 	start_pos, end_pos, end_shape, dash_pat, dash_pos, dash_adj,
 	scale, rotate, dx, dy,
@@ -783,6 +785,9 @@ local function path_mask_line(
 	if target_buffer then
 		tgt_name, tgt_w, tgt_h = target_buffer.name, target_buffer.w, target_buffer.h;
 	end
+
+	-- handle the trivial case.
+	if alpha_outer == alpha_inner then mask_uniform(alpha_outer, tgt_name); return end
 
 	-- make the curve into the sequence of secants.
 	local points, num_points = poll(path_type, pts, n_segs, loop,
@@ -796,7 +801,7 @@ local function path_mask_line(
 
 	-- check if the path overlaps this object.
 	if L >= tgt_w / 2 or R <= -tgt_w / 2 or T >= tgt_h / 2 or B <= -tgt_h / 2 then
-		mask_uniform(invert and 1 or 1 - intensity, tgt_name);
+		mask_uniform(alpha_outer, tgt_name);
 		return;
 	end
 
@@ -809,7 +814,7 @@ local function path_mask_line(
 		find_end_points(points, num_points, loop, start_pos, end_pos, tgt_w / 2, tgt_h / 2) or nil;
 
 	path_mask_line_buffered(
-		intensity, invert, line_width, antialias,
+		alpha_outer, alpha_inner, line_width, antialias,
 		temp_buffer_name, num_points, len, loop,
 		start_pos, end_pos, end_shape, end_points,
 		dash_pat, dash_pos, dash_adj,

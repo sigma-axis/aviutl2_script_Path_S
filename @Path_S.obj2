@@ -1,4 +1,4 @@
--- under development for v1.20 (for beta42) r3
+-- under development for v1.20 (for beta42) r7
 --[[
 MIT License
 Copyright (c) 2025-2026 sigma-axis
@@ -158,6 +158,10 @@ rand_period = math.max(rand_period, 4);
 rand_amplify = math.max(rand_amplify, 0);
 rand_seed = math.min(math.max(math.floor(0.5 + rand_seed), -2 ^ 16), 2 ^ 16 - 1);
 
+-- further calculations.
+local has_fill, has_chrome = alpha_fill > 0,
+	line > 0 and alpha_line > 0 and start_pos <= end_pos;
+
 -- parse/measure the path.
 points, num_points = path_s.poll(path_type, points, num_points - (loop and 0 or 1), loop, precision);
 if rand_amplify > 0 then
@@ -172,19 +176,23 @@ R, B = math.max(math.ceil(R + th), L + 1), math.max(math.ceil(B + th), T + 1);
 
 -- calculate the end points from the calculated length.
 local end_points = nil;
-if end_shape == 1 and line > 0 and alpha_line > 0 and start_pos <= end_pos then
+if end_shape == 1 and has_chrome then
 	end_points = path_s.find_end_points(points, num_points, loop, start_pos, end_pos, -L, -T);
 end
 
 -- prepare the canvas.
-obj.setoption("drawtarget", "tempbuffer", R - L, B - T);
-obj.copybuffer("object", "tempbuffer");
+obj.clearbuffer("object", R - L, B - T);
 obj.cx, obj.cy = -(L + R) / 2, -(T + B) / 2;
 
 -- draw the figures.
-if (line > 0 and alpha_line > 0 and start_pos <= end_pos) or alpha_fill > 0 then
-	local cache_name, num_segments = "cache:path_s/coords", num_points;
-	if not loop and alpha_fill > 0 then
+if has_fill or has_chrome then
+	local cache_name, num_segments = "tempbuffer", num_points;
+	if has_fill and has_chrome then
+		cache_name = "cache:path_s/coords";
+		obj.setoption("drawtarget", "tempbuffer", obj.w, obj.h);
+	end
+
+	if not loop and has_fill then
 		-- close the loop for drawing the filling part.
 		num_points = num_points + 1;
 		points[2 * num_points - 1], points[2 * num_points] = points[1], points[2];
@@ -192,25 +200,27 @@ if (line > 0 and alpha_line > 0 and start_pos <= end_pos) or alpha_fill > 0 then
 	path_s.send(points, num_points, -L, -T, cache_name);
 
 	-- draw the shape of the filling part.
-	if alpha_fill > 0 then
-		obj.clearbuffer("object", color_fill);
+	if has_fill then
+		obj.clearbuffer(has_chrome and "tempbuffer" or "object", color_fill);
 		path_s.path_mask_area_buffered(
-			1, false, mode_fill, inflation, antialias,
-			cache_name, num_points);
-		obj.draw(0, 0, 0, 1, alpha_fill);
+			0, alpha_fill, mode_fill, inflation, antialias,
+			cache_name, num_points,
+			has_chrome and { name = "tempbuffer", w = obj.w, h = obj.h } or nil);
 	end
 
 	-- then the outline part.
-	if line > 0 and alpha_line > 0 and start_pos <= end_pos then
+	if has_chrome then
 		obj.clearbuffer("object", color_line);
 		path_s.path_mask_line_buffered(
-			1, false, line, antialias,
+			0, alpha_line, line, antialias,
 			cache_name, num_segments, len, loop,
 			start_pos, end_pos, end_shape, end_points,
 			dash_pat, dash_pos, dash_adj);
-		obj.draw(0, 0, 0, 1, alpha_line);
+		if has_fill then
+			obj.draw();
+			obj.copybuffer("object", "tempbuffer");
+		end
 	end
-	obj.copybuffer("object", "tempbuffer");
 end
 
 @ラインσ
@@ -423,7 +433,7 @@ obj.clearbuffer("object", R - L, B - T, color);
 
 -- draw the line.
 path_s.path_mask_line(
-	1, false, line, antialias,
+	0, 1, line, antialias,
 	0, pts, n_pts - 1, false, 1,
 	0, 1, end_shape, dash_pat, dash_pos, false,
 	1, 0, obj.cx, obj.cy);
@@ -603,7 +613,7 @@ obj.clearbuffer("object", R - L, B - T, color);
 
 -- draw the path.
 path_s.path_mask_line(
-	1, false, line, antialias,
+	0, 1, line, antialias,
 	0, pts, n_pts - 1, false, 1,
 	0, 1, end_shape, dash_pat, dash_pos, false,
 	1, 0, obj.cx, obj.cy);
@@ -785,7 +795,7 @@ R, B = math.max(math.ceil(R + th), L + 1), math.max(math.ceil(B + th), T + 1);
 local cx, cy = -(L + R) / 2, -(T + B) / 2;
 obj.clearbuffer("object", R - L, B - T, color);
 path_s.path_mask_line(
-	1, false, line, antialias,
+	0, 1, line, antialias,
 	0, points, num_points - 1, false, 1,
 	start_pos, end_pos, end_shape, dash_pat, dash_pos, false,
 	1, 0, cx, cy);
@@ -1042,6 +1052,10 @@ do local prev = {
 	end
 end
 
+-- further calculations.
+local has_fill, has_chrome = alpha_fill > 0,
+	line > 0 and alpha_line > 0 and start_pos <= end_pos;
+
 -- generate a path.
 local pts, n_pts = { (radii[1][1] - radii[2][1]) / 2, -height / 2 }, 1;
 for i = 1, 4 do
@@ -1076,37 +1090,43 @@ R, B = math.max(math.ceil(R + th), L + 1), math.max(math.ceil(B + th), T + 1);
 
 -- calculate the end points from the calculated length.
 local end_points = nil;
-if end_shape == 1 and line > 0 and alpha_line > 0 and end_pos >= start_pos then
+if end_shape == 1 and has_chrome then
 	end_points = path_s.find_end_points(pts, n_pts, true, start_pos, end_pos, -L, -T);
 end
 
 -- prepare the canvas.
-obj.setoption("drawtarget", "tempbuffer", R - L, B - T);
-obj.copybuffer("object", "tempbuffer");
+obj.clearbuffer("object", R - L, B - T);
 obj.cx, obj.cy = -(L + R + align_x * width) / 2, -(T + B + align_y * height) / 2;
 
 -- draw the figures.
-if (line > 0 and alpha_line > 0 and start_pos <= end_pos) or alpha_fill > 0 then
-	local cache_name = "cache:path_s/coords";
+if has_fill or has_chrome then
+	local cache_name = "tempbuffer";
+	if has_fill and has_chrome then
+		cache_name = "cache:path_s/coords";
+		obj.setoption("drawtarget", "tempbuffer", obj.w, obj.h);
+	end
 	path_s.send(pts, n_pts, -L, -T, cache_name);
 
 	-- draw the shape of the filling part.
-	if alpha_fill > 0 then
-		obj.clearbuffer("object", color_fill);
+	if has_fill then
+		obj.clearbuffer(has_chrome and "tempbuffer" or "object", color_fill);
 		path_s.path_mask_area_buffered(
-			1, false, 0, inflation, antialias,
-			cache_name, n_pts);
-		obj.draw(0, 0, 0, 1, alpha_fill);
+			0, alpha_fill, 0, inflation, antialias,
+			cache_name, n_pts,
+			has_chrome and { name = "tempbuffer", w = obj.w, h = obj.h } or nil);
 	end
 
 	-- then the outline part.
-	if line > 0 and alpha_line > 0 and start_pos <= end_pos then
+	if has_chrome then
 		obj.clearbuffer("object", color_line);
 		path_s.path_mask_line_buffered(
-			1, false, line, antialias,
+			0, alpha_line, line, antialias,
 			cache_name, n_pts, len, true,
-			start_pos, end_pos, end_shape, end_points, dash_pat, dash_pos, true);
-		obj.draw(0, 0, 0, 1, alpha_line);
+			start_pos, end_pos, end_shape, end_points,
+			dash_pat, dash_pos, true);
+		if has_fill then
+			obj.draw();
+			obj.copybuffer("object", "tempbuffer");
+		end
 	end
-	obj.copybuffer("object", "tempbuffer");
 end
