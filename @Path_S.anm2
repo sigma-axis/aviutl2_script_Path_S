@@ -1,4 +1,4 @@
--- under development for v1.20 (for beta42) r3
+-- under development for v1.20 (for beta42) r5
 --[[
 MIT License
 Copyright (c) 2025-2026 sigma-axis
@@ -123,8 +123,6 @@ float4 carve(float4 pos : SV_Position) : SV_Target
 	return float4(0, 0, 0, dot(alpha_map, float2(a, 1)));
 }
 ]]
-do local intensity,invert,num_points,path_type,points,precision,inflation,mode_fill,X,Y,zoom,rotate,toggle_gui,antialias,PI=intensity,invert,num_points,path_type,points,precision,inflation,mode_fill,X,Y,zoom,rotate,toggle_gui,antialias,PI
-
 local path_s = require "Path_S";
 local obj, math, tonumber, type = obj, math, tonumber, type;
 
@@ -214,8 +212,6 @@ else
 		inflation, antialias,
 		path_type, points, num_points, precision,
 		zoom, rotate, X, Y);
-end
-
 end
 
 @パスマスク(ライン)σ
@@ -378,8 +374,6 @@ float4 carve_dash(float4 pos : SV_Position) : SV_Target
 	return float4(0, 0, 0, dot(alpha_map, float2(a, 1)));
 }
 ]]
-do local intensity,invert,line,num_points,path_type,points,loop,precision,start_pos,end_pos,end_shape,dash_pat,dash_adj,dash_pos,X,Y,zoom,rotate,toggle_gui,antialias,PI=intensity,invert,line,num_points,path_type,points,loop,precision,start_pos,end_pos,end_shape,dash_pat,dash_adj,dash_pos,X,Y,zoom,rotate,toggle_gui,antialias,PI
-
 local path_s = require "Path_S";
 local obj, math, tonumber, type = obj, math, tonumber, type;
 
@@ -491,8 +485,6 @@ else
 		zoom, rotate, X, Y);
 end
 
-end
-
 @パス部分フィルタσ
 --information:パス部分フィルタσ@Path_S v1.12 (for beta25) by σ軸
 --label:Path_S\加工
@@ -534,8 +526,6 @@ float4 interpolate(float4 pos : SV_Position) : SV_Target
 		rate.Load(int3(pos.xy, 0)).a);
 }
 ]]
-do local invert,num_points,path_type,points,precision,inflation,mode_fill,X,Y,zoom,rotate,toggle_gui,extra_filter,extra_script,antialias,PI=invert,num_points,path_type,points,precision,inflation,mode_fill,X,Y,zoom,rotate,toggle_gui,extra_filter,extra_script,antialias,PI;
-
 local path_s = require "Path_S";
 local obj, math, tonumber, type, tostring = obj, math, tonumber, type, tostring;
 
@@ -646,15 +636,17 @@ local w, h, cx, cy do
 end
 
 -- create the shape of the path.
-obj.clearbuffer("object", w, h, 0x000000);
+obj.clearbuffer("tempbuffer", w, h, 0x000000);
 obj.cx, obj.cy  = cx, cy;
 path_s.path_mask_area(
 	1, invert, mode_fill, inflation, antialias,
 	path_type, points, num_points, precision,
-	zoom, rotate, X + (cx - cx0), Y + (cy - cy0));
+	zoom, rotate, X + (cx - cx0), Y + (cy - cy0),
+	{ name = "tempbuffer", w = w, h = h }, "object");
 
 -- interpolate the original and effected buffers by that shape.
-obj.pixelshader("interpolate", "object", { cache_name_ori, cache_name_eff, "object" }, {
+obj.clearbuffer("object", w, h);
+obj.pixelshader("interpolate", "object", { cache_name_ori, cache_name_eff, "tempbuffer" }, {
 	-(w - w0) / 2 - (cx - cx0), -(h - h0) / 2 - (cy - cy0);
 	-(w - w1) / 2 - (cx - cx1), -(h - h1) / 2 - (cy - cy1);
 });
@@ -663,8 +655,6 @@ if extra_filter == 0 then
 	-- draw to the framebuffer.
 	obj.setoption("drawtarget", "framebuffer");
 	obj.draw();
-end
-
 end
 
 @パスに沿って配置σ
@@ -685,8 +675,6 @@ end
 --check@toggle_gui:パスの表示,false
 --group:その他,false
 --value@PI:PI,{}
-do local position,rotate,rot_tangent,ofs_indiv,out_of_range,num_points,path_type,points,loop,precision,toggle_gui,PI=position,rotate,rot_tangent,ofs_indiv,out_of_range,num_points,path_type,points,loop,precision,toggle_gui,PI;
-
 local path_s = require "Path_S";
 local obj, math, tonumber, type = obj, math, tonumber, type;
 
@@ -864,5 +852,3 @@ end
 -- apply the position and the angle.
 obj.ox, obj.oy, obj.oz = obj.ox + X, obj.oy + Y, obj.oz + Z;
 obj.rz = obj.rz + rotate + A;
-
-end
