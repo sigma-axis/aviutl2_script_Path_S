@@ -16,8 +16,8 @@
 1.  [パス部分フィルタσ](#パス部分フィルタσ) (フィルタ効果)
 1.  [パスに沿って配置σ](#パスに沿って配置σ) (フィルタ効果)
 
-<img width="960" height="540" alt="Overview of objects of this script" src="https://github.com/user-attachments/assets/57cc741b-9d50-4f68-a30a-d0608a6ba11c" />
-<img width="960" height="540" alt="Overview of effects of this script" src="https://github.com/user-attachments/assets/1bf5cc4b-013f-4027-a01a-36847e10db24" />
+![Overview of objects of this script](https://github.com/user-attachments/assets/57cc741b-9d50-4f68-a30a-d0608a6ba11c)
+![Overview of effects of this script](https://github.com/user-attachments/assets/1bf5cc4b-013f-4027-a01a-36847e10db24)
 
 - <details>
   <summary>元画像出典 (クリックで表示):</summary>
@@ -67,8 +67,8 @@ Although, usage documentations for this script / plugin in languages other than 
 
 [パラメタの説明 :arrow_down:](#パス図形σのパラメタ) [共通のパラメタの説明 :arrow_down:](#共通の設定項目)
 
-<img width="640" height="480" alt="Image of manipulating figure paths" src="https://github.com/user-attachments/assets/8fd01b02-daed-4ccf-ba51-0a040b4feb73" />
-<img width="960" height="720" alt="Image of path strokes" src="https://github.com/user-attachments/assets/9059a77c-f2af-40d4-bbe2-8a1d61c99a05" />
+![Image of manipulating figure paths](https://github.com/user-attachments/assets/8fd01b02-daed-4ccf-ba51-0a040b4feb73)
+![Image of path strokes](https://github.com/user-attachments/assets/9059a77c-f2af-40d4-bbe2-8a1d61c99a05)
 
 - 初期状態だと「オブジェクトを追加」メニューの「Path_S :arrow_right: 図形」に「パス図形σ@Path_S」が追加されています．
 
@@ -78,7 +78,7 @@ Although, usage documentations for this script / plugin in languages other than 
 
 [パラメタの説明 :arrow_down:](#ラインσのパラメタ) [共通のパラメタの説明 :arrow_down:](#共通の設定項目)
 
-<img width="840" height="360" alt="Image of kinds of curves" src="https://github.com/user-attachments/assets/cf053f16-5abe-421d-8492-7497aef98e8d" />
+![Image of kinds of curves](https://github.com/user-attachments/assets/cf053f16-5abe-421d-8492-7497aef98e8d)
 
 - 初期状態だと「オブジェクトを追加」メニューの「Path_S :arrow_right: 図形」に「ラインσ@Path_S」が追加されています．
 
@@ -88,7 +88,7 @@ Although, usage documentations for this script / plugin in languages other than 
 
 [パラメタの説明 :arrow_down:](#スパイラルσのパラメタ) [共通のパラメタの説明 :arrow_down:](#共通の設定項目)
 
-<img width="480" height="320" alt="Image of two kinds of spirals" src="https://github.com/user-attachments/assets/bfd8010a-8911-4fa6-b59f-1c2222c3da37" />
+![Image of two kinds of spirals](https://github.com/user-attachments/assets/bfd8010a-8911-4fa6-b59f-1c2222c3da37)
 
 - 初期状態だと「オブジェクトを追加」メニューの「Path_S :arrow_right: 図形」に「スパイラルσ@Path_S」が追加されています．
 
@@ -98,7 +98,7 @@ Although, usage documentations for this script / plugin in languages other than 
 
 [パラメタの説明 :arrow_down:](#アローσのパラメタ) [共通のパラメタの説明 :arrow_down:](#共通の設定項目)
 
-<img width="408" height="320" alt="Image of arrows with different placements of heads" src="https://github.com/user-attachments/assets/05c4cf9a-18fc-4535-87b6-aa2792b7f287" />
+![Image of arrows with different placements of heads](https://github.com/user-attachments/assets/05c4cf9a-18fc-4535-87b6-aa2792b7f287)
 
 - 初期状態だと「オブジェクトを追加」メニューの「Path_S :arrow_right: 図形」に「アローσ@Path_S」が追加されています．
 
@@ -110,7 +110,7 @@ Although, usage documentations for this script / plugin in languages other than 
 
 [パラメタの説明 :arrow_down:](#スクウェアσのパラメタ) [共通のパラメタの説明 :arrow_down:](#共通の設定項目)
 
-<img width="480" height="200" alt="Image of two rounded rectangles" src="https://github.com/user-attachments/assets/2e54c079-5344-4884-a09e-cdd78b45db93" />
+![Image of two rounded rectangles](https://github.com/user-attachments/assets/2e54c079-5344-4884-a09e-cdd78b45db93)
 
 - 初期状態だと「オブジェクトを追加」メニューの「Path_S :arrow_right: 図形」に「スクウェアσ@Path_S」が追加されています．
 
@@ -120,7 +120,7 @@ Although, usage documentations for this script / plugin in languages other than 
 
 [パラメタの説明 :arrow_down:](#パスマスクσ--パスマスクラインσ--パス部分フィルタσのパラメタ) [共通のパラメタの説明 :arrow_down:](#共通の設定項目)
 
-<img width="640" height="480" alt="An image clipped by the inner part of a path" src="https://github.com/user-attachments/assets/02d94745-4678-4b7d-8f78-aeefca2edea6" />
+![An image clipped by the inner part of a path](https://github.com/user-attachments/assets/02d94745-4678-4b7d-8f78-aeefca2edea6)
 
 - 初期状態だと「フィルタ効果を追加」メニューの「Path_S :arrow_right: クリッピング」に「パスマスクσ@Path_S」が追加されています．
 
@@ -130,7 +130,7 @@ Although, usage documentations for this script / plugin in languages other than 
 
 [パラメタの説明 :arrow_down:](#パスマスクσ--パスマスクラインσ--パス部分フィルタσのパラメタ) [共通のパラメタの説明 :arrow_down:](#共通の設定項目)
 
-<img width="640" height="480" alt="An image clipped by the stroke of a path" src="https://github.com/user-attachments/assets/21b6fe1e-c4b8-4d25-9ab5-6f0ed1e640ce" />
+![An image clipped by the stroke of a path](https://github.com/user-attachments/assets/21b6fe1e-c4b8-4d25-9ab5-6f0ed1e640ce)
 
 - 初期状態だと「フィルタ効果を追加」メニューの「Path_S :arrow_right: クリッピング」に「パスマスク(ライン)σ@Path_S」が追加されています．
 
@@ -140,7 +140,7 @@ Although, usage documentations for this script / plugin in languages other than 
 
 [パラメタの説明 :arrow_down:](#パスマスクσ--パスマスクラインσ--パス部分フィルタσのパラメタ) [共通のパラメタの説明 :arrow_down:](#共通の設定項目)
 
-<img width="800" height="540" alt="An image that only a specific area is blurred and monochromed" src="https://github.com/user-attachments/assets/c37f44be-5f8b-414e-9a66-0d295fd63d5e" />
+![An image that only a specific area is blurred and monochromed](https://github.com/user-attachments/assets/c37f44be-5f8b-414e-9a66-0d295fd63d5e)
 
 - 初期状態だと「フィルタ効果を追加」メニューの「Path_S :arrow_right: 加工」に「パス部分フィルタσ@Path_S」が追加されています．
 
@@ -150,7 +150,7 @@ Although, usage documentations for this script / plugin in languages other than 
 
 [パラメタの説明 :arrow_down:](#パスに沿って配置σのパラメタ) [共通のパラメタの説明 :arrow_down:](#共通の設定項目)
 
-<img width="880" height="440" alt="Charcters of a text arrayed on a path" src="https://github.com/user-attachments/assets/58acd121-7966-4352-a9b5-960a9b76921d" />
+![Charcters of a text arrayed on a path](https://github.com/user-attachments/assets/58acd121-7966-4352-a9b5-960a9b76921d)
 
 - 初期状態だと「フィルタ効果を追加」メニューの「Path_S :arrow_right: 配置」に「パスに沿って配置σ@Path_S」が追加されています．
 
@@ -177,10 +177,10 @@ Although, usage documentations for this script / plugin in languages other than 
 
 | 線タイプ | 例 | 備考 |
 |:---:|:---:|:---|
-| `折れ線` | <img width="360" height="256" alt="An example of straight paths" src="https://github.com/user-attachments/assets/194f2213-9d25-44e6-a710-fbea72aa4f09" /> |  |
-| `補間移動` | <img width="360" height="256" alt="An example of interpolated path" src="https://github.com/user-attachments/assets/9c5d575d-0211-4d6d-9fa7-0f6bd605c5e9" /> | トラックバー移動方法の「補間移動」と同じ計算式． |
-| `2次ベジェ曲線` | <img width="360" height="256" alt="An example of quadratic Bezier paths" src="https://github.com/user-attachments/assets/96fb023e-2243-4b0e-b3d4-db04d3745da5" /> | |
-| `3次ベジェ曲線` | <img width="360" height="256" alt="An example of cubic Bezier paths" src="https://github.com/user-attachments/assets/a3563699-19e5-4ab8-9267-613989b88fa7" /> |初期値． |
+| `折れ線` | ![An example of straight paths](https://github.com/user-attachments/assets/194f2213-9d25-44e6-a710-fbea72aa4f09) |  |
+| `補間移動` | ![An example of interpolated path](https://github.com/user-attachments/assets/9c5d575d-0211-4d6d-9fa7-0f6bd605c5e9) | トラックバー移動方法の「補間移動」と同じ計算式． |
+| `2次ベジェ曲線` | ![An example of quadratic Bezier paths](https://github.com/user-attachments/assets/96fb023e-2243-4b0e-b3d4-db04d3745da5) | |
+| `3次ベジェ曲線` | ![An example of cubic Bezier paths](https://github.com/user-attachments/assets/a3563699-19e5-4ab8-9267-613989b88fa7) |初期値． |
 
 初期値は `3次ベジェ曲線`.
 
@@ -235,8 +235,8 @@ Although, usage documentations for this script / plugin in languages other than 
 
 | 端の形状 | 例 |
 |:---:|:---:|
-| `円` | <img width="320" height="320" alt="Image of rounded endpoint" src="https://github.com/user-attachments/assets/0100b898-afe5-4b8a-b3eb-8ea5d6e30ce8" /> |
-| `四角` | <img width="320" height="320" alt="Image of square endpoint" src="https://github.com/user-attachments/assets/f20cba23-64bd-472b-89ae-84ce36f0724f" /> |
+| `円` | ![Image of rounded endpoint](https://github.com/user-attachments/assets/0100b898-afe5-4b8a-b3eb-8ea5d6e30ce8) |
+| `四角` | ![Image of square endpoint](https://github.com/user-attachments/assets/f20cba23-64bd-472b-89ae-84ce36f0724f) |
 
 初期値は `円`.
 
@@ -285,10 +285,10 @@ Although, usage documentations for this script / plugin in languages other than 
 
 | 範囲 | 例 |
 |:---:|:---:|
-| `内側` | <img width="240" height="240" alt="Image of inner fill mode" src="https://github.com/user-attachments/assets/01ec1000-7812-4205-be59-ebb7f45623ae" /> |
-| `奇偶` | <img width="240" height="240" alt="Image of parity fill mode" src="https://github.com/user-attachments/assets/e759daeb-ab71-4fc7-901b-e4f932dcfd44" /> |
-| `内側反転` | <img width="240" height="240" alt="Image of inverted inner fill mode" src="https://github.com/user-attachments/assets/9e831812-8204-4455-915e-fc61764b6073" /> |
-| `奇偶反転` | <img width="240" height="240" alt="Image of inverted parity fill mode" src="https://github.com/user-attachments/assets/5c1f8c26-27dc-40a0-a86d-a013f1d1a1e0" /> |
+| `内側` | ![Image of inner fill mode](https://github.com/user-attachments/assets/01ec1000-7812-4205-be59-ebb7f45623ae) |
+| `奇偶` | ![Image of parity fill mode](https://github.com/user-attachments/assets/e759daeb-ab71-4fc7-901b-e4f932dcfd44) |
+| `内側反転` | ![Image of inverted inner fill mode](https://github.com/user-attachments/assets/9e831812-8204-4455-915e-fc61764b6073) |
+| `奇偶反転` | ![Image of inverted parity fill mode](https://github.com/user-attachments/assets/5c1f8c26-27dc-40a0-a86d-a013f1d1a1e0) |
 
 - 「反転」の系統は，[「追加幅」](#追加幅--塗り追加幅)での膨張の方向にも影響します．
 
@@ -322,7 +322,7 @@ Although, usage documentations for this script / plugin in languages other than 
 
 ### パス図形σのパラメタ
 
-<img width="500" height="1052" alt="Image of GUI of Figure" src="https://github.com/user-attachments/assets/db98e5eb-91c7-4956-a62e-d0cef192d3c7" />
+![Image of GUI of Figure](https://github.com/user-attachments/assets/db98e5eb-91c7-4956-a62e-d0cef192d3c7)
 
 ####  ライン色, ライン透明度
 
@@ -341,7 +341,7 @@ Although, usage documentations for this script / plugin in languages other than 
 
 ### ラインσのパラメタ
 
-<img width="500" height="772" alt="Image of GUI of Curve" src="https://github.com/user-attachments/assets/1bbc84af-bd0c-4cbb-9315-f648c3c2ba96" />
+![Image of GUI of Curve](https://github.com/user-attachments/assets/1bbc84af-bd0c-4cbb-9315-f648c3c2ba96)
 
 ####  終点X, 終点Y
 
@@ -386,7 +386,7 @@ Although, usage documentations for this script / plugin in languages other than 
 
 ### スパイラルσのパラメタ
 
-<img width="500" height="842" alt="Image of GUI of Spiral" src="https://github.com/user-attachments/assets/a44b065a-82d1-47da-9de6-10425c82f65a" />
+![Image of GUI of Spiral](https://github.com/user-attachments/assets/a44b065a-82d1-47da-9de6-10425c82f65a)
 
 ####  傾き
 
@@ -411,8 +411,8 @@ Although, usage documentations for this script / plugin in languages other than 
 
 | 形状 | 例 |
 |:---:|:---|
-| `アルキメデス螺旋` | <img width="240" height="240" alt="Archimedean Spiral" src="https://github.com/user-attachments/assets/a9a55709-a623-4bf1-a33f-339fc44de4e3" /> |
-| `対数螺旋` | <img width="240" height="240" alt="Logarithmic Spiral" src="https://github.com/user-attachments/assets/2c3f425a-56b0-40a4-889b-ab64b8452216" /> |
+| `アルキメデス螺旋` | ![Archimedean Spiral](https://github.com/user-attachments/assets/a9a55709-a623-4bf1-a33f-339fc44de4e3) |
+| `対数螺旋` | ![Logarithmic Spiral](https://github.com/user-attachments/assets/2c3f425a-56b0-40a4-889b-ab64b8452216) |
 
 初期値は `対数螺旋`.
 
@@ -441,7 +441,7 @@ Although, usage documentations for this script / plugin in languages other than 
 
 ### アローσのパラメタ
 
-<img width="500" height="1052" alt="Image of GUI of Arrow" src="https://github.com/user-attachments/assets/e878b7c9-801c-4b10-b29a-2b88e091c4db" />
+![Image of GUI of Arrow](https://github.com/user-attachments/assets/e878b7c9-801c-4b10-b29a-2b88e091c4db)
 
 ####  色
 
@@ -455,10 +455,10 @@ Although, usage documentations for this script / plugin in languages other than 
 
 | 矢じり配置 | 例 |
 |:---:|:---:|
-| `なし` | <img width="240" height="160" alt="Example of no arrowheads" src="https://github.com/user-attachments/assets/6daf1471-8611-4638-b423-dc1f8da017d5" /> |
-| `終点` | <img width="240" height="160" alt="Example of arrowhead on the end" src="https://github.com/user-attachments/assets/56c92338-d48b-4a09-abad-14f2b2349a76" /> |
-| `両方` | <img width="240" height="160" alt="Example of two arrowheads with the same directions" src="https://github.com/user-attachments/assets/fd51402e-c87e-4cde-a8ba-aa918691328a" /> |
-| `双方向` | <img width="240" height="160" alt="Example of two arrowheads with the opposite directions" src="https://github.com/user-attachments/assets/aeccddf4-4647-4625-b0d7-061adbfaa72d" /> |
+| `なし` | ![Example of no arrowheads](https://github.com/user-attachments/assets/6daf1471-8611-4638-b423-dc1f8da017d5) |
+| `終点` | ![Example of arrowhead on the end](https://github.com/user-attachments/assets/56c92338-d48b-4a09-abad-14f2b2349a76) |
+| `両方` | ![Example of two arrowheads with the same directions](https://github.com/user-attachments/assets/fd51402e-c87e-4cde-a8ba-aa918691328a) |
+| `双方向` | ![Example of two arrowheads with the opposite directions](https://github.com/user-attachments/assets/aeccddf4-4647-4625-b0d7-061adbfaa72d) |
 
 初期値は `終点`.
 
@@ -496,7 +496,7 @@ Although, usage documentations for this script / plugin in languages other than 
 
 ### スクウェアσのパラメタ
 
-<img width="500" height="1192" alt="Image of GUI of Round Rect" src="https://github.com/user-attachments/assets/2daa8080-8816-4b6f-a0ab-51ae1173fa6c" />
+![Image of GUI of Round Rect](https://github.com/user-attachments/assets/2daa8080-8816-4b6f-a0ab-51ae1173fa6c)
 
 ####  幅, 高さ
 
@@ -564,9 +564,9 @@ Although, usage documentations for this script / plugin in languages other than 
 
 ### パスマスクσ / パスマスク(ライン)σ / パス部分フィルタσのパラメタ
 
-<img width="500" height="702" alt="Image of GUI of Clip by Path (Area)" src="https://github.com/user-attachments/assets/744a1c17-3c34-4b7c-a2b3-c9bbec823827" />
-<img width="500" height="912" alt="Image of GUI of Clip by Path (Line)" src="https://github.com/user-attachments/assets/19a729f3-da7d-4ed7-ba49-4ab53aebc74a" />
-<img width="500" height="668" alt="Image of GUI of Partial Filter by Path" src="https://github.com/user-attachments/assets/0ac4089e-ce38-47ad-84d1-a44e2222d2e8" />
+![Image of GUI of Clip by Path (Area)](https://github.com/user-attachments/assets/744a1c17-3c34-4b7c-a2b3-c9bbec823827)
+![Image of GUI of Clip by Path (Line)](https://github.com/user-attachments/assets/19a729f3-da7d-4ed7-ba49-4ab53aebc74a)
+![Image of GUI of Partial Filter by Path](https://github.com/user-attachments/assets/0ac4089e-ce38-47ad-84d1-a44e2222d2e8)
 
 ####  強さ
 
@@ -632,7 +632,7 @@ obj.cx=obj.cx+100 -- 位置もずらせる
 
 ### パスに沿って配置σのパラメタ
 
-<img width="500" height="528" alt="Image of GUI of Place Along Path" src="https://github.com/user-attachments/assets/5e828666-1ee6-479b-adbf-e292274b6a8d" />
+![Image of GUI of Place Along Path](https://github.com/user-attachments/assets/5e828666-1ee6-479b-adbf-e292274b6a8d)
 
 ####  位置
 
@@ -979,7 +979,7 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
 
 1.  [「パス部分フィルタσ」](#パス部分フィルタσ)では，一部のフィルタ効果は後続に置いたり，スクリプトで呼び出しても「部分的に適用」されるような挙動にはなりません．
 
-    「ランダム移動」や「球体(カメラ制御)」など，フレームバッファに直接描画したり，カメラ制御を前提としたり，配置を変えるフィルタ効果などが当てはまることが多いです．
+    「ランダム配置」や「球体(カメラ制御)」など，フレームバッファに直接描画したり，カメラ制御を前提としたり，配置を変えるフィルタ効果などが当てはまることが多いです．
 
 1.  [「パス部分フィルタσ」](#パス部分フィルタσ)で「後続フィルタ」を指定するものは，1つのオブジェクトに対して複数設定できません (つまり「入れ子」のような構造は指定不可能).
 
