@@ -1,4 +1,4 @@
--- under development for v1.20 (for beta42) r4
+-- under development for v1.20 (for beta42) r6
 --[[
 MIT License
 Copyright (c) 2025-2026 sigma-axis
@@ -446,11 +446,13 @@ local send, retrieve do
 		local d = 2 ^ 16;
 		return bit.lshift(c, 8) / d;
 	end
-	local uint32_t_array, uint32_t_ptr, intptr_t = ffi.typeof("uint32_t[?]"), ffi.typeof("uint32_t*"), ffi.typeof("intptr_t");
+	local buf, intptr_t, uint32_t_array, uint32_t_ptr =
+		buffer.new(9), ffi.typeof("intptr_t"), ffi.typeof("uint32_t[?]"), ffi.typeof("uint32_t*");
 	-- converts a pointer to a light userdata.
 	local function to_userdata(ptr)
 		-- 0x05: lightud64. (https://luajit.org/ext_buffer.html)
-		return buffer.decode("\x05"..buffer.encode(ffi.cast(intptr_t, ptr)):sub(2));
+		buf:reset():encode(ffi.cast(intptr_t, ptr)):ref()[0] = 0x05;
+		return buf:decode();
 	end
 
 	---点列 `pts` の情報を `target` で指定したバッファに転送する．転送したデータはシェーダーで点列として読み取れるようになる．
@@ -484,7 +486,7 @@ local send, retrieve do
 			math.ceil(2 * n_pts / max_width);
 		local data, W, H = obj.getpixeldata(target or "tempbuffer");
 		if H < h or (h > 1 and W ~= w) or W < w then return nil end
-		local ret, ptr = {}, ffi.cast(uint32_t_ptr, data);
+		local ret, ptr = {}, uint32_t_ptr(data);
 		for i = 1, 2 * n_pts do ret[i] = decode_float(ptr[i - 1]) end
 		return ret;
 	end
