@@ -1,4 +1,3 @@
--- under development for v1.20 (for beta42) r7
 --[[
 MIT License
 Copyright (c) 2025-2026 sigma-axis
@@ -24,7 +23,7 @@ SOFTWARE.
 https://mit-license.org/
 ]]
 @パスマスクσ
---information:パスマスクσ@Path_S v1.12 (for beta25) by σ軸
+--information:パスマスクσ@Path_S v1.20 (for beta43) by σ軸
 --label:Path_S\クリッピング
 --filter
 --require:2004001
@@ -217,7 +216,7 @@ else
 end
 
 @パスマスク(ライン)σ
---information:パスマスク(ライン)σ@Path_S v1.12 (for beta25) by σ軸
+--information:パスマスク(ライン)σ@Path_S v1.20 (for beta43) by σ軸
 --label:Path_S\クリッピング
 --filter
 --require:2004001
@@ -490,7 +489,7 @@ else
 end
 
 @パス部分フィルタσ
---information:パス部分フィルタσ@Path_S v1.12 (for beta25) by σ軸
+--information:パス部分フィルタσ@Path_S v1.20 (for beta43) by σ軸
 --label:Path_S\加工
 --require:2004001
 --check@invert:反転,false
@@ -662,7 +661,7 @@ if extra_filter == 0 then
 end
 
 @パスに沿って配置σ
---information:パスに沿って配置σ@Path_S v1.12 (for beta25) by σ軸
+--information:パスに沿って配置σ@Path_S v1.20 (for beta43) by σ軸
 --label:Path_S\配置
 --require:2004001
 --track@position:位置,-400,400,0,0.001,,0.25

@@ -1,4 +1,3 @@
--- under development for v1.20 (for beta42) r8
 --[[
 MIT License
 Copyright (c) 2025-2026 sigma-axis
@@ -25,7 +24,7 @@ https://mit-license.org/
 ]]
 
 --
--- v1.12 (for beta25)
+-- v1.20 (for beta43)
 --
 
 local obj, print, math, tonumber, ipairs, unpack, bit, ffi, buffer = obj, print, math, tonumber, ipairs, unpack, bit, require("ffi"), require("string.buffer");
@@ -66,9 +65,10 @@ local anchor, poll do
 	---@param pts { [integer]: number? } 点列の配列， `{ x1, y1, x2, y2, x3, y3, ... }` の形式．
 	---@param n_segs integer パスの分割区間の個数．
 	---@param loop boolean 閉じたパスかどうか．
+	---@param alt_points function? `alt_pts = alt_points(path_type, pts, n_segs, loop)` 想定されるアンカーの個数が `pts` の点の個数と異なる場合に呼ばれる関数．代替となる点列テーブルを返す．省略時は独自の方法で代替の点列を構築する．
 	---@return integer n_anchors 設定したアンカーの個数．
 	---@return table pts_corrected 足りない点や余剰な点を補正した点列．補正の必要がない場合は `pts` そのもの．
-	function anchor(var_name, path_type, pts, n_segs, loop)
+	function anchor(var_name, path_type, pts, n_segs, loop, alt_points)
 		local pts_per_seg =
 			path_type == 0 and 1 or
 			path_type == 1 and 1 or
@@ -76,31 +76,37 @@ local anchor, poll do
 		local n_anchors = (loop and 0 or 1) + pts_per_seg * n_segs;
 		local alt_pts = nil;
 		if 2 * n_anchors ~= #pts then
-			alt_pts = {};
-			local n = math.min(n_anchors, math.floor(#pts / 2));
-			for i = 1, 2 * n do alt_pts[i] = pt(pts, i) end
+			if alt_points then
+				alt_pts = alt_points(path_type, pts, n_segs, loop);
+				if 2 * n_anchors ~= #alt_pts then alt_pts = nil end
+			end
+			if alt_pts == nil then
+				alt_pts = {};
+				local n = math.min(n_anchors, math.floor(#pts / 2));
+				for i = 1, 2 * n do alt_pts[i] = pt(pts, i) end
 
-			if n < n_anchors then
-				-- find a suitable placeholder point.
-				local k = 1 + math.floor((n - 1) / pts_per_seg) * pts_per_seg;
-				local X, Y = pt(pts, 2 * k - 1), pt(pts, 2 * k); -- last point.
-				local dx, dy;
-				if loop then
-					dx, dy = (pt(pts, 1) - X) / 2, (pt(pts, 2) - Y) / 2;
-				else
-					k = math.max(1, k - pts_per_seg);
-					dx, dy = (X - pt(pts, 2 * k - 1)) / 2, (Y - pt(pts, 2 * k)) / 2;
-				end
-				local l = dx ^ 2 + dy ^ 2;
-				if l > 100 ^ 2 then
-					l = 100 / l ^ 0.5; -- at most 100 pixel far.
-					dx, dy = l * dx, l * dy;
-				end
-				X, Y = X + dx, Y + dy;
+				if n < n_anchors then
+					-- find a suitable placeholder point.
+					local k = 1 + math.floor((n - 1) / pts_per_seg) * pts_per_seg;
+					local X, Y = pt(pts, 2 * k - 1), pt(pts, 2 * k); -- last point.
+					local dx, dy;
+					if loop then
+						dx, dy = (pt(pts, 1) - X) / 2, (pt(pts, 2) - Y) / 2;
+					else
+						k = math.max(1, k - pts_per_seg);
+						dx, dy = (X - pt(pts, 2 * k - 1)) / 2, (Y - pt(pts, 2 * k)) / 2;
+					end
+					local l = dx ^ 2 + dy ^ 2;
+					if l > 100 ^ 2 then
+						l = 100 / l ^ 0.5; -- at most 100 pixel far.
+						dx, dy = l * dx, l * dy;
+					end
+					X, Y = X + dx, Y + dy;
 
-				-- fill the rest with that placeholder.
-				for i = n + 1, n_anchors do
-					alt_pts[2 * i - 1], alt_pts[2 * i] = X, Y;
+					-- fill the rest with that placeholder.
+					for i = n + 1, n_anchors do
+						alt_pts[2 * i - 1], alt_pts[2 * i] = X, Y;
+					end
 				end
 			end
 		end

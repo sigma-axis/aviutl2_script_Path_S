@@ -38,7 +38,7 @@
 
   http://spring-fragrance.mints.ne.jp/aviutl
 
-  - `beta25` で動作確認済み．
+  - `beta43` で動作確認済み．
 
 ## 導入方法
 
@@ -322,8 +322,6 @@ Although, usage documentations for this script / plugin in languages other than 
 
 ### パス図形σのパラメタ
 
-![Image of GUI of Figure](https://github.com/user-attachments/assets/db98e5eb-91c7-4956-a62e-d0cef192d3c7)
-
 ####  ライン色, ライン透明度
 
 図形のライン部分の色と透明度を指定します．
@@ -340,8 +338,6 @@ Although, usage documentations for this script / plugin in languages other than 
 
 
 ### ラインσのパラメタ
-
-![Image of GUI of Curve](https://github.com/user-attachments/assets/1bbc84af-bd0c-4cbb-9315-f648c3c2ba96)
 
 ####  終点X, 終点Y
 
@@ -385,8 +381,6 @@ Although, usage documentations for this script / plugin in languages other than 
 
 
 ### スパイラルσのパラメタ
-
-![Image of GUI of Spiral](https://github.com/user-attachments/assets/a44b065a-82d1-47da-9de6-10425c82f65a)
 
 ####  傾き
 
@@ -441,8 +435,6 @@ Although, usage documentations for this script / plugin in languages other than 
 
 ### アローσのパラメタ
 
-![Image of GUI of Arrow](https://github.com/user-attachments/assets/e878b7c9-801c-4b10-b29a-2b88e091c4db)
-
 ####  色
 
 矢印図形の色を指定します．
@@ -495,8 +487,6 @@ Although, usage documentations for this script / plugin in languages other than 
 
 
 ### スクウェアσのパラメタ
-
-![Image of GUI of Round Rect](https://github.com/user-attachments/assets/2daa8080-8816-4b6f-a0ab-51ae1173fa6c)
 
 ####  幅, 高さ
 
@@ -564,10 +554,6 @@ Although, usage documentations for this script / plugin in languages other than 
 
 ### パスマスクσ / パスマスク(ライン)σ / パス部分フィルタσのパラメタ
 
-![Image of GUI of Clip by Path (Area)](https://github.com/user-attachments/assets/744a1c17-3c34-4b7c-a2b3-c9bbec823827)
-![Image of GUI of Clip by Path (Line)](https://github.com/user-attachments/assets/19a729f3-da7d-4ed7-ba49-4ab53aebc74a)
-![Image of GUI of Partial Filter by Path](https://github.com/user-attachments/assets/0ac4089e-ce38-47ad-84d1-a44e2222d2e8)
-
 ####  強さ
 
 *「パスマスクσ」と「パスマスク(ライン)σ」のみの項目です．*
@@ -631,8 +617,6 @@ obj.cx=obj.cx+100 -- 位置もずらせる
 - 「追加スクリプト」は [`PI`](#pi) による操作ができません．
 
 ### パスに沿って配置σのパラメタ
-
-![Image of GUI of Place Along Path](https://github.com/user-attachments/assets/5e828666-1ee6-479b-adbf-e292274b6a8d)
 
 ####  位置
 
@@ -866,9 +850,14 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
   X = num, Y = num, -- number 型で "移動X", "移動Y" の項目を上書き，または nil.
   zoom = num,       -- number 型で "拡大率" の項目を上書き，または nil.
   rotate = num,     -- number 型で "回転" の項目を上書き，または nil.
+
+-- 以降は require("Path_S") からの API で代替できるようになったため非推奨です．
   pt_buff = str,    -- string 型で, パスの頂点情報を保持している画像バッファ名を指定，または nil. 詳細後述．
 }
 ```
+
+<details>
+<summary>v1.12 以前の「パス図形σ」などで内部的に使われていましたが，現在は非推奨な項目の解説です:</summary>
 
 フィールド `.pt_buff` は `"tempbuffer"` か `"cache:****"` の形式の文字列で，`Path_S.lua` の `.send()` 関数によって頂点情報が保持されている画像バッファ名を指定します．この場合，次に注意してください:
 1.  「頂点数」または `.num_points` にはこのバッファに保持された点の個数を指定すること．
@@ -880,7 +869,7 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
     1.  「拡大率」と `.zoom`.
     1.  「回転」と `.rotate`.
 1.  指定された頂点は折れ線と解釈して描画されます．
-
+</details>
 
 ####  パスマスク(ライン)σの `PI`
 
@@ -904,11 +893,16 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
   X = num, Y = num, -- number 型で "移動X", "移動Y" の項目を上書き，または nil.
   zoom = num,       -- number 型で "拡大率" の項目を上書き，または nil.
   rotate = num,     -- number 型で "回転" の項目を上書き，または nil.
+
+-- 以降は require("Path_S") からの API で代替できるようになったため非推奨です．
   pt_buff = str,    -- string 型で, パスの頂点情報を保持している画像バッファ名を指定，または nil. 詳細後述．
   len_buff = num,   -- number 型で, パス全体のピクセル長を指定，または nil. 詳細後述．
   endpt_buff = tab, -- table 型で, パスの両端の座標と方向を記述，または nil. 詳細後述．
 }
 ```
+
+<details>
+<summary>v1.12 以前の「パス図形σ」などで内部的に使われていましたが，現在は非推奨な項目の解説です:</summary>
 
 フィールド `.pt_buff` は `"tempbuffer"` か `"cache:****"` の形式の文字列で，`Path_S.lua` の `.send()` 関数によって頂点情報が保持されている画像バッファ名を指定します．この場合，次に注意してください:
 1.  「頂点数」または `.num_points` にはこのバッファに保持された点の個数を指定すること．
@@ -936,7 +930,7 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
 1.  指定された頂点は折れ線と解釈して描画されます．
 
 `.pt_buff` が `nil` の場合は，`.len_buff` と `.endpt_buff` は無視されます．
-
+</details>
 
 ####  パス部分フィルタσの `PI`
 
@@ -974,6 +968,13 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
 }
 ```
 
+##  同梱のスクリプトファイル `Path_S.lua` について
+
+他スクリプトからの利用も想定したものになっていて，`local path_s = require("Path_S")` から各種 API を呼び出せます．
+
+「パスマスクσ」「パスマスク(ライン)σ」に関しては `obj.effect(...)` を使わずとも `path_s.path_mask_area(...)` や `path_s.path_mask_line(...)` から適用できます．各種パスの曲線を折れ線に変換するなどといった API も用意しています．
+
+`Path_S.lua` にドキュメントコメントを残しているので，詳しい仕様はそちらを参照してください．
 
 ##  既知の問題
 
@@ -983,9 +984,9 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
 
 1.  [「パス部分フィルタσ」](#パス部分フィルタσ)で「後続フィルタ」を指定するものは，1つのオブジェクトに対して複数設定できません (つまり「入れ子」のような構造は指定不可能).
 
-##  次の改版予定
+##  改版履歴
 
-- **v1.20 (for beta42)** (2026-??-??)
+- **v1.20 (for beta43)** (2026-04-26)
 
   - 「パス部分フィルタσ」で後続フィルタの代わりにスクリプトの直接記入をできるように．
   - 3次ベジェ曲線のアンカーのハンドルを色分けして表示するように．
@@ -1006,8 +1007,6 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
       スクリプトフォルダ，またはその 1 階層下のサブフォルダ内に配置されています．
 
   - `beta42` での動作確認．
-
-##  改版履歴
 
 - **v1.12 (for beta25)** (2025-12-22)
 
