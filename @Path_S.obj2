@@ -1,4 +1,4 @@
--- under development for v1.20 (for beta42) r7
+-- under development for v1.20 (for beta42) r8
 --[[
 MIT License
 Copyright (c) 2025-2026 sigma-axis
@@ -422,7 +422,7 @@ end
 
 -- measure and move the path.
 path_s.transform(pts, n_pts, 1, math.atan2(Y, X));
-local L, R, T, B, len = path_s.measure(pts, n_pts);
+local L, R, T, B = path_s.measure(pts, n_pts);
 local th = math.ceil(line * (end_shape == 1 and 0.5 ^ 0.5 or 0.5) + antialias);
 L, T = math.floor(L - th), math.floor(T - th);
 R, B = math.max(math.ceil(R + th), L + 1), math.max(math.ceil(B + th), T + 1);
@@ -434,7 +434,7 @@ obj.clearbuffer("object", R - L, B - T, color);
 -- draw the line.
 path_s.path_mask_line(
 	0, 1, line, antialias,
-	0, pts, n_pts - 1, false, 1,
+	nil, pts, n_pts - 1, false, 1,
 	0, 1, end_shape, dash_pat, dash_pos, false,
 	1, 0, obj.cx, obj.cy);
 
@@ -614,7 +614,7 @@ obj.clearbuffer("object", R - L, B - T, color);
 -- draw the path.
 path_s.path_mask_line(
 	0, 1, line, antialias,
-	0, pts, n_pts - 1, false, 1,
+	nil, pts, n_pts - 1, false, 1,
 	0, 1, end_shape, dash_pat, dash_pos, false,
 	1, 0, obj.cx, obj.cy);
 
@@ -782,7 +782,7 @@ if rand_amplify > 0 then
 			rand_period, rand_amplify, 0, rand_seed);
 	end
 end
-local L, R, T, B, len = path_s.measure(points, num_points);
+local L, R, T, B = path_s.measure(points, num_points);
 local th = line * (end_shape == 1 and 0.5 ^ 0.5 or 0.5) + antialias;
 if head_type ~= 0 then
 	-- take the arrow heads into account.
@@ -790,78 +790,85 @@ if head_type ~= 0 then
 end
 L, T = math.floor(L - th), math.floor(T - th);
 R, B = math.max(math.ceil(R + th), L + 1), math.max(math.ceil(B + th), T + 1);
+local W, H, cx, cy = R - L, B - T, -(L + R) / 2, -(T + B) / 2;
 
--- draw the path.
-local cx, cy = -(L + R) / 2, -(T + B) / 2;
-obj.clearbuffer("object", R - L, B - T, color);
-path_s.path_mask_line(
-	0, 1, line, antialias,
-	0, points, num_points - 1, false, 1,
-	start_pos, end_pos, end_shape, dash_pat, dash_pos, false,
-	1, 0, cx, cy);
-
--- draw the arrow heads.
+-- calculate the head position.
+local head_vertices = nil;
 if head_type ~= 0 and head_size > 0 and head_width > 0 then
-	obj.setoption("drawtarget", "tempbuffer");
-	obj.copybuffer("tempbuffer", "object");
-	obj.load("figure", head_fig, color, math.ceil(head_size * math.max(head_width, 1)));
-	if obj.w > 0 and obj.h > 0 then
-		local function polygon(i, j, rot)
-			local X, Y =
-				(1 - j) * points[2 * i - 1] + j * points[2 * i + 1],
-				(1 - j) * points[2 * i - 0] + j * points[2 * i + 2];
-			local A = math.atan2(
+	local function polygon(i, j, rot)
+		local X, Y =
+			(1 - j) * points[2 * i - 1] + j * points[2 * i + 1],
+			(1 - j) * points[2 * i - 0] + j * points[2 * i + 2];
+		local A = math.atan2(
+			points[2 * i + 2] - points[2 * i - 0],
+			points[2 * i + 1] - points[2 * i - 1]);
+
+		-- as to the angle, interpolate with the neighbor secant.
+		if j < 0.5 then i = i - 1;
+		else i, j = i + 1, 1 - j end
+		local dA = 0;
+		if 0 < i and i < num_points then
+			dA = math.atan2(
 				points[2 * i + 2] - points[2 * i - 0],
 				points[2 * i + 1] - points[2 * i - 1]);
-
-			-- as to the angle, interpolate with the neighbor secant.
-			if j < 0.5 then i = i - 1;
-			else i, j = i + 1, 1 - j end
-			local dA = 0;
-			if 0 < i and i < num_points then
-				dA = math.atan2(
-					points[2 * i + 2] - points[2 * i - 0],
-					points[2 * i + 1] - points[2 * i - 1]);
-				dA = (dA - A) / (2 * math.pi);
-				dA = ((dA + 0.5) % 1) - 0.5;
-				dA = 2 * math.pi * (0.5 - j) * dA;
-			end
-			A = A + dA + rot;
-
-			local c, s = math.cos(A), math.sin(A);
-			X, Y =
-				X - head_center * head_size / 2 * s + cx,
-				Y + head_center * head_size / 2 * c + cy;
-			local w2x, w2y, h2x, h2y = head_size * head_width / 2, 0, 0, head_size / 2;
-			w2x, w2y = w2x * c, w2x * s;
-			h2x, h2y = h2y *-s, h2y * c;
-			return
-				{ X - w2x - h2x, Y - w2y - h2y, 0; 0, 0 },
-				{ X + w2x - h2x, Y + w2y - h2y, 0; 1, 0 },
-				{ X + w2x + h2x, Y + w2y + h2y, 0; 1, 1 },
-				{ X - w2x + h2x, Y - w2y + h2y, 0; 0, 1 };
+			dA = (dA - A) / (2 * math.pi);
+			dA = ((dA + 0.5) % 1) - 0.5;
+			dA = 2 * math.pi * (0.5 - j) * dA;
 		end
+		A = A + dA + rot;
 
-		-- first tip.
-		local pos = math.min(math.max(1 + head_pos, 0), 1);
-		pos = (1 - pos) * start_pos + pos * end_pos;
-		local i, j, l = path_s.find_index(-pos, points, num_points);
-		local vts = { polygon(i, j, head_rot + math.pi / 2) };
+		local c, s = math.cos(A), math.sin(A);
+		X, Y =
+			X - head_center * head_size / 2 * s + cx,
+			Y + head_center * head_size / 2 * c + cy;
+		local w2x, w2y, h2x, h2y = head_size * head_width / 2, 0, 0, head_size / 2;
+		w2x, w2y = w2x * c, w2x * s;
+		h2x, h2y = h2y *-s, h2y * c;
+		return
+			{ X - w2x - h2x, Y - w2y - h2y, 0; 0, 0 },
+			{ X + w2x - h2x, Y + w2y - h2y, 0; 1, 0 },
+			{ X + w2x + h2x, Y + w2y + h2y, 0; 1, 1 },
+			{ X - w2x + h2x, Y - w2y + h2y, 0; 0, 1 };
+	end
 
-		if head_type > 1 then
-			-- second tip.
-			local pos2 = math.min(math.max(head_pos, 0), 1);
-			pos2 = (1 - pos2) * start_pos + pos2 * end_pos;
-			if pos ~= pos2 then
-				i, j = path_s.find_index(-pos2, l);
-				vts[5], vts[6], vts[7], vts[8] = polygon(i, j, head_rot
-					+ math.pi / 2 * (head_type == 2 and 1 or -1));
-			end
+	-- first tip.
+	local pos = math.min(math.max(1 + head_pos, 0), 1);
+	pos = (1 - pos) * start_pos + pos * end_pos;
+	local i, j, l = path_s.find_index(-pos, points, num_points);
+	local vts = { polygon(i, j, head_rot + math.pi / 2) };
+
+	if head_type > 1 then
+		-- second tip.
+		local pos2 = math.min(math.max(head_pos, 0), 1);
+		pos2 = (1 - pos2) * start_pos + pos2 * end_pos;
+		if pos ~= pos2 then
+			i, j = path_s.find_index(-pos2, l);
+			vts[5], vts[6], vts[7], vts[8] = polygon(i, j, head_rot
+				+ math.pi / 2 * (head_type == 2 and 1 or -1));
 		end
+	end
 
+	head_vertices = vts;
+end
+
+-- draw the path.
+obj.clearbuffer(head_vertices and "tempbuffer" or "object", W, H, color);
+path_s.path_mask_line(
+	0, 1, line, antialias,
+	nil, points, num_points - 1, false, 1,
+	start_pos, end_pos, end_shape, dash_pat, dash_pos, false,
+	1, 0, cx, cy,
+	head_vertices and { name = "tempbuffer", w = W, h = H } or nil,
+	head_vertices and "object" or nil);
+
+-- draw the arrow heads.
+if head_vertices then
+	obj.setoption("drawtarget", "tempbuffer");
+	obj.load("figure", head_fig, color, math.ceil(head_size * math.max(head_width, 1)));
+	if obj.w > 0 and obj.h > 0 then
 		-- "alpha_max" does not seem to work well with obj.drawpoly().
 		-- obj.setoption("blend", "alpha_max");
-		obj.drawpoly(vts);
+		obj.drawpoly(head_vertices);
 		-- obj.setoption("blend");
 	end
 	obj.copybuffer("object", "tempbuffer");

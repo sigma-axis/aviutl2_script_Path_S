@@ -1,4 +1,4 @@
--- under development for v1.20 (for beta42) r7
+-- under development for v1.20 (for beta42) r8
 --[[
 MIT License
 Copyright (c) 2025-2026 sigma-axis
@@ -108,16 +108,22 @@ local anchor, poll do
 			obj.setanchor(var_name, n_anchors, unpack1(alt_pts));
 
 			-- draw handles.
-			local pts2 = alt_pts or pts;
+			local pts2, pts3 = alt_pts or pts, {};
 			for i = 1, n_segs do
 				local I, J = 6 * i, 6 * (loop and (i % n_segs) or i);
 				obj.setanchor({
-					pt(pts2, I - 3), pt(pts2, I - 2),
 					pt(pts2, I - 5), pt(pts2, I - 4),
-					pt(pts2, J + 1), pt(pts2, J + 2),
+					pt(pts2, I - 3), pt(pts2, I - 2),
 					pt(pts2, I - 1), pt(pts2, I - 0),
-				}, 4, "line");
+					pt(pts2, J + 1), pt(pts2, J + 2),
+				}, 4, "line", "inout");
+				pts3[2 * i - 1], pts3[2 * i] = pt(pts2, I - 5), pt(pts2, I - 4);
 			end
+			if not loop then
+				pts3[2 * n_segs + 1], pts3[2 * n_segs + 2] =
+					pt(pts2, 6 * n_segs + 1), pt(pts2, 6 * n_segs + 2);
+			end
+			obj.setanchor(pts3, n_segs + (loop and 0 or 1), loop and "loop" or "line");
 		else obj.setanchor(var_name, n_anchors, loop and "loop" or "line", unpack1(alt_pts)) end
 		return n_anchors, alt_pts or pts;
 	end
@@ -534,7 +540,7 @@ end
 ---@param mode_fill mode_fill 塗りつぶし範囲の指定．
 ---@param inflation number 「追加幅」をピクセル単位で指定．
 ---@param antialias number 「ぼかし幅」をピクセル単位で指定．
----@param path_type path_type 「線タイプ」(パスの種類) を指定．
+---@param path_type path_type|nil 「線タイプ」(パスの種類) を指定．`nil` を指定した場合，折れ線への変換や点列のコピーを省略する．このとき `pts` は既に折れ線の前提で，テーブルの内容も書き換わる．
 ---@param pts { [integer]: number? } 点列の配列， `{ x1, y1, x2, y2, x3, y3, ... }` の形式．
 ---@param n_segs integer パスの分割区間の個数．
 ---@param prec number 「曲線精度」(折れ線の許容最長距離) を指定．
@@ -560,8 +566,11 @@ local function path_mask_area(
 	if alpha_outer == alpha_inner then mask_uniform(alpha_outer, tgt_name); return end
 
 	-- make the curve into the sequence of secants.
-	local points, num_points = poll(path_type, pts, n_segs, true,
-		prec / math.min(math.max(scale, 1 / 64), 1));
+	local points, num_points = pts, n_segs + 1;
+	if path_type then
+		points, num_points = poll(path_type, pts, n_segs, true,
+			prec / math.min(math.max(scale, 1 / 64), 1));
+	end
 
 	-- apply translation / scaling / rotation.
 	transform(points, num_points, scale, rotate, dx, dy);
@@ -757,7 +766,7 @@ end
 ---@param alpha_inner number パス内側のマスクのアルファ値を 0.0 から 1.0 で指定．
 ---@param line_width number 「ライン幅」をピクセル単位で指定．
 ---@param antialias number 「ぼかし幅」をピクセル単位で指定．
----@param path_type path_type 「線タイプ」(パスの種類) を指定．
+---@param path_type path_type|nil 「線タイプ」(パスの種類) を指定．`nil` を指定した場合，折れ線への変換や点列のコピーを省略する．このとき `pts` は既に折れ線の前提で，テーブルの内容も書き換わる．
 ---@param pts { [integer]: number? } 点列の配列， `{ x1, y1, x2, y2, x3, y3, ... }` の形式．
 ---@param n_segs integer パスの分割区間の個数．
 ---@param loop boolean 閉じたパスかどうか．
@@ -790,8 +799,11 @@ local function path_mask_line(
 	if alpha_outer == alpha_inner then mask_uniform(alpha_outer, tgt_name); return end
 
 	-- make the curve into the sequence of secants.
-	local points, num_points = poll(path_type, pts, n_segs, loop,
-		prec / math.min(math.max(scale, 1.0 / 64), 1));
+	local points, num_points = pts, n_segs + 1;
+	if path_type then
+		points, num_points = poll(path_type, pts, n_segs, loop,
+			prec / math.min(math.max(scale, 1.0 / 64), 1));
+	end
 
 	-- apply translation / scaling / rotation.
 	transform(points, num_points, scale, rotate, dx, dy);
