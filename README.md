@@ -1,4 +1,4 @@
-# パス描画 AviUtl ExEdit2 スクリプト
+# パス描画 AviUtl ExEdit2 スクリプト Path_S
 
 折れ線やベジェ曲線で図形を描画したり，その図形を利用したフィルタ効果をかける AivUtl ExEdit 2 のスクリプトです．
 
