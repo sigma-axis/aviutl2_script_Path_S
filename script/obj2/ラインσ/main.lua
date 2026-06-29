@@ -9,10 +9,10 @@ local start_Y = 0
 
 --trackgroup@start_X,start_Y:start_point
 ---$track:終点X, min = -4000, max = 4000, step = 0.01, scale = 0.25
-local X = 256
+local end_X = 256
 
 ---$track:終点Y, min = -4000, max = 4000, step = 0.01, scale = 0.25
-local Y = 0
+local end_Y = 0
 
 --trackgroup@X,Y:end_point
 ---$track:ライン幅, min = 0, max = 1000, step = 0.01, scale = 0.2
@@ -83,14 +83,14 @@ local obj, math, tonumber, type = obj, math, tonumber, type;
 if obj.getoption("gui") then
 	obj.setanchor("start_X,start_Y", 0, "line", "color", 0xa0ffa0);
 	obj.setanchor("X,Y", 0, "line", "color", 0xffa0a0);
-	obj.setanchor({ start_X, start_Y, X, Y }, 2, "line");
+	obj.setanchor({ start_X, start_Y, end_X, end_Y }, 2, "line");
 end
 
 -- take parameters.
 --[==[
 	PI = {
 		start_X, start_Y:	number?,
-		X, Y:			    number?,
+		end_X, end_Y:	    number?,
 		color:			    number?,
 		line:			    number?,
 		end_shape:		    string?,
@@ -116,8 +116,8 @@ local function as_bool(t, v)
 end
 start_X = tonumber(PI.start_X) or start_X;
 start_Y = tonumber(PI.start_Y) or start_Y;
-X = tonumber(PI.X) or X;
-Y = tonumber(PI.Y) or Y;
+end_X = tonumber(PI.end_X) or end_X;
+end_Y = tonumber(PI.end_Y) or end_Y;
 color = tonumber(PI.color) or color;
 line = tonumber(PI.line) or line;
 if type(PI.end_shape) == "string" then
@@ -160,7 +160,7 @@ rand_amplify = math.max(rand_amplify, 0);
 rand_seed = math.min(math.max(math.floor(0.5 + rand_seed), -2 ^ 16), 2 ^ 16 - 1);
 
 -- further calculations.
-local length = ((X - start_X) ^ 2 + (Y - start_Y) ^ 2) ^ 0.5;
+local length = ((end_X - start_X) ^ 2 + (end_Y - start_Y) ^ 2) ^ 0.5;
 if length <= 0 then
 	-- no image.
 	obj.setoption("draw_state", true);
@@ -260,7 +260,7 @@ if rand_amplify > 0 then
 end
 
 -- measure and move the path.
-path_s.transform(pts, n_pts, 1, math.atan2(Y - start_Y, X - start_X), start_X, start_Y);
+path_s.transform(pts, n_pts, 1, math.atan2(end_Y - start_Y, end_X - start_X), start_X, start_Y);
 local L, R, T, B = path_s.measure(pts, n_pts);
 local th = math.ceil(line * (end_shape == 1 and 0.5 ^ 0.5 or 0.5) + antialias);
 L, T = math.floor(L - th), math.floor(T - th);
