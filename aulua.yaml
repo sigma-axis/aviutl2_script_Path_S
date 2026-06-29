@@ -1,0 +1,72 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/karoterra/aviutl2-aulua/refs/heads/main/schema/aulua.schema.json
+project:
+  variables:
+    NAME: Path_S
+    AUTHOR: σ軸
+    LEAST_AVIUTL_VERSION: "2005000"
+    LEAST_AVIUTL_VERSION_STRING: beta50
+
+package:
+  id: Path_S
+  name: パス描画スクリプト Path_S
+  version: v1.21-dev (for beta52)
+  information: "{name} {version} by {AUTHOR}"
+  script_sub_dir: ""
+  uninstall_sub_folder_file: false
+  message:
+    text: |
+      # Path_S AviUtl ExEdit2 パス描画スクリプト
+
+      折れ線やベジェ曲線で図形を描画したり，その図形を利用したフィルタ効果をかける，曲線に沿ってオブジェクトを動かすなど，パスを使った表現ができるようになるスクリプトです．
+
+      公開ページ:
+      https://github.com/sigma-axis/aviutl2_script_Path_S
+
+      紹介動画:
+      https://www.nicovideo.jp/watch/sm45647149
+
+      お願い:
+      ニコニコ動画での親作品登録をしていただけると励みになります．
+      作品 ID: sm45647149
+
+  assets:
+    - src: README.md
+      dest: Script/{id}/README.md
+    - src: LICENSE
+      dest: Script/{id}/LICENSE
+  file_name: package.au2pkg.zip
+
+build:
+  out_dir: build
+
+scripts:
+  - name: "Path_S.lua"
+    sources:
+      - path: script/preamble.lua
+      - path: script/Path_S.lua
+
+  - name: "@Path_S.anm2"
+    sources:
+      - path: script/preamble.lua
+      - label: パスマスクσ
+        path: script/anm2/パスマスクσ/main.lua
+      - label: パスマスク(ライン)σ
+        path: script/anm2/パスマスク(ライン)σ/main.lua
+      - label: パス部分フィルタσ
+        path: script/anm2/パス部分フィルタσ/main.lua
+      - label: パスに沿って配置σ
+        path: script/anm2/パスに沿って配置σ/main.lua
+
+  - name: "@Path_S.obj2"
+    sources:
+      - path: script/preamble.lua
+      - label: パス図形σ
+        path: script/obj2/パス図形σ/main.lua
+      - label: ラインσ
+        path: script/obj2/ラインσ/main.lua
+      - label: スパイラルσ
+        path: script/obj2/スパイラルσ/main.lua
+      - label: アローσ
+        path: script/obj2/アローσ/main.lua
+      - label: スクウェアσ
+        path: script/obj2/スクウェアσ/main.lua

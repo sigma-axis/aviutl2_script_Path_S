@@ -1,36 +1,7 @@
---[[
-MIT License
-Copyright (c) 2025-2026 sigma-axis
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
-https://mit-license.org/
-]]
-
---
--- v1.20 (for beta43)
---
-
 local obj, print, math, tonumber, ipairs, unpack, bit, ffi, buffer = obj, print, math, tonumber, ipairs, unpack, bit, require("ffi"), require("string.buffer");
 
-if obj.getinfo("version") < 2004001 then
-	error([[AviUtl ExEdit beta40a 以降が必要です！]], 2);
+if obj.getinfo("version") < tonumber("${LEAST_AVIUTL_VERSION}") then
+	error([[AviUtl ExEdit ${LEAST_AVIUTL_VERSION_STRING} 以降が必要です！]], 2);
 end
 
 ---@alias path_type # パスの種類．
@@ -62,7 +33,7 @@ local anchor, poll do
 	---places anchors for the path.
 	---@param var_name string 点列を受け取る変数の名前．
 	---@param path_type path_type パスの種類．
-	---@param pts { [integer]: number? } 点列の配列， `{ x1, y1, x2, y2, x3, y3, ... }` の形式．
+	---@param pts any[] 点列の配列， `{ x1, y1, x2, y2, x3, y3, ... }` の形式．
 	---@param n_segs integer パスの分割区間の個数．
 	---@param loop boolean 閉じたパスかどうか．
 	---@param alt_points function? `alt_pts = alt_points(path_type, pts, n_segs, loop)` 想定されるアンカーの個数が `pts` の点の個数と異なる場合に呼ばれる関数．代替となる点列テーブルを返す．省略時は独自の方法で代替の点列を構築する．
@@ -180,11 +151,11 @@ local anchor, poll do
 
 	---曲線を表すパスを折れ線の列に変換する．
 	---@param path_type path_type パスの種類．折れ線の場合は実質 shallow copy が取られる．
-	---@param pts { [integer]: number? } 点列の配列， `{ x1, y1, x2, y2, x3, y3, ... }` の形式．
+	---@param pts any[] 点列の配列， `{ x1, y1, x2, y2, x3, y3, ... }` の形式．
 	---@param n_segs integer パスの分割区間の個数．
 	---@param loop boolean 閉じたパスかどうか．
 	---@param prec number 折れ線の許容最長距離．
-	---@return { [integer]: number } pts2 結果の折れ線の頂点を表す点列．`loop` が true の場合は末尾には最初と同じ点が格納される．
+	---@return number[] pts2 結果の折れ線の頂点を表す点列．`loop` が true の場合は末尾には最初と同じ点が格納される．
 	---@return integer n_pts2 `pts2` に含まれる点の個数．
 	function poll(path_type, pts, n_segs, loop, prec)
 		local ret, n_ret;
@@ -274,7 +245,7 @@ local anchor, poll do
 end
 
 ---折れ線の bounding box と長さを計算．
----@param pts { [integer]: number } 折れ線の頂点を表す点列．
+---@param pts number[] 折れ線の頂点を表す点列．
 ---@param n_pts integer `pts` に含まれる点の個数．
 ---@return number L, number R, number T, number B bounding box の座標．
 ---@return number length 折れ線の長さ．
@@ -293,11 +264,11 @@ end
 
 ---折れ線を表す配列で，始点から距離 `pos` だけ離れた位置にある点の前後にある頂点のインデックスを二分法で検索．
 ---@param pos number 始点からの距離．0 以上の場合はピクセル数で指定，負の場合は `pos >= -1.0` の必要があり，パスの総長との比を絶対値で指定．
----@param tbl { [integer]: number } `n_pts` を指定した場合，点列を `{ x1, y1, x2, y2, ... }` の形式で指定．`n_pts` が `nil` の場合，各頂点の始点からの累計距離の配列を `{ 0, l1, l2, ... }` の形式で指定．
+---@param tbl number[] `n_pts` を指定した場合，点列を `{ x1, y1, x2, y2, ... }` の形式で指定．`n_pts` が `nil` の場合，各頂点の始点からの累計距離の配列を `{ 0, l1, l2, ... }` の形式で指定．
 ---@param n_pts integer? `tbl` に点列を指定した場合， `tbl` に含まれる点の個数． 累計距離の配列の場合は `nil`.
 ---@return integer int_part `pos` の前後位置にある頂点のインデックスのうち小さいほう．
 ---@return number frac_part `int_part` から次の頂点までの相対位置を表す，0.0 から 1.0 までの数値．
----@return { [integer]: number } lengths 各頂点の始点からの累計距離の配列．2回目以降の呼び出しで使うと一部計算を省略できる．
+---@return number[] lengths 各頂点の始点からの累計距離の配列．2回目以降の呼び出しで使うと一部計算を省略できる．
 local function find_index(pos, tbl, n_pts)
 	if n_pts then
 		-- construct an array of accumulated lengths.
@@ -328,7 +299,7 @@ local function find_index(pos, tbl, n_pts)
 end
 
 ---曲線の両端の情報 (2点の座標と正方向への方向ベクトル) を計算・取得する．
----@param pts { [integer]: number } 折れ線の頂点を表す点列．
+---@param pts number[] 折れ線の頂点を表す点列．
 ---@param n_pts integer `pts` に含まれる点の個数．
 ---@param loop boolean 閉じたパスかどうか．
 ---@param start_pos number パスの始点の位置をパス全体の長さからの比で 0.0 から 1.0 に正規化した数値．ただしループの場合はこの範囲を超えることもある．
@@ -360,7 +331,7 @@ local function find_end_points(pts, n_pts, loop, start_pos, end_pos, offset_x, o
 end
 
 ---点列に対して拡縮回転平行移動を適用する．
----@param pts { [integer]: number } 適用先の点列．このテーブルの内容を書き換える．
+---@param pts number[] 適用先の点列．このテーブルの内容を書き換える．
 ---@param n_pts integer `pts` に含まれる点の個数．
 ---@param scale number 拡縮の比率．
 ---@param rotate number ラジアン単位の回転角．
@@ -395,13 +366,13 @@ local disk_rand do
 	end
 end
 ---パスに対してランダム移動を適用する．乱数器は `obj.rand1()`．
----@param pts { [integer]: number } 適用先の点列．このテーブルの内容は書き換わらない．
+---@param pts number[] 適用先の点列．このテーブルの内容は書き換わらない．
 ---@param n_pts integer `pts` に含まれる点の個数．
 ---@param period number ランダムを適用する距離周期，ピクセル単位．
 ---@param rand_range number 各点がランダム移動する最大距離，ピクセル単位．
 ---@param end_mode 0|1|2 両端での特別扱いを指定．0: 特になし, 1: 両端は固定, 2: 両端のランダム移動量を揃える (ループ用).
 ---@param seed number `obj.rand1()` へ渡す乱数シード値．
----@return { [integer]: number } pts2 ランダム移動で得られた新しい点列．
+---@return number[] pts2 ランダム移動で得られた新しい点列．
 ---@return integer n_pts2 `pts2` に含まれる点の個数．
 local function randomize(pts, n_pts, period, rand_range, end_mode, seed)
 	local rng = disk_rand(seed, rand_range);
@@ -468,7 +439,7 @@ local send, retrieve do
 	end
 
 	---点列 `pts` の情報を `target` で指定したバッファに転送する．転送したデータはシェーダーで点列として読み取れるようになる．
-	---@param pts { [integer]: number } 折れ線の頂点を表す点列．
+	---@param pts number[] 折れ線の頂点を表す点列．
 	---@param n_pts integer `pts` に含まれる点の個数．
 	---@param dx number? X方向の平行移動量．省略時は 0.
 	---@param dy number? Y方向の平行移動量．省略時は 0.
@@ -490,7 +461,7 @@ local send, retrieve do
 	---`target` で指定したバッファから点列情報を復元する．
 	---@param n_pts integer バッファに含まれている点の個数．
 	---@param target string? `"tempbuffer"` あるいは `"cache:..."` の形式でバッファを指定．省略時は `"tempbuffer"`.
-	---@return { [integer]: number }? pts 求める点列を表す配列．もしバッファのサイズが `n_pts` と想定されない場合は `nil`.
+	---@return number[]? pts 求める点列を表す配列．もしバッファのサイズが `n_pts` と想定されない場合は `nil`.
 	function retrieve(n_pts, target)
 		local max_width = 2 ^ 12;
 		local w, h =
@@ -547,7 +518,7 @@ end
 ---@param inflation number 「追加幅」をピクセル単位で指定．
 ---@param antialias number 「ぼかし幅」をピクセル単位で指定．
 ---@param path_type path_type|nil 「線タイプ」(パスの種類) を指定．`nil` を指定した場合，折れ線への変換や点列のコピーを省略する．このとき `pts` は既に折れ線の前提で，テーブルの内容も書き換わる．
----@param pts { [integer]: number? } 点列の配列， `{ x1, y1, x2, y2, x3, y3, ... }` の形式．
+---@param pts any[] 点列の配列， `{ x1, y1, x2, y2, x3, y3, ... }` の形式．
 ---@param n_segs integer パスの分割区間の個数．
 ---@param prec number 「曲線精度」(折れ線の許容最長距離) を指定．
 ---@param scale number 「拡大率」を指定．
@@ -613,7 +584,7 @@ end
 ---@param end_pos number 「終了位置」を 0.0 から 1.0 に正規化した数値で指定．ただしループの場合はこの範囲を超えることもある．
 ---@param end_shape 0|1 「端の形状」を指定．`1` (四角) を指定した場合，`end_points` を省略せず指定すること．
 ---@param end_points end_points|nil `end_shape` が `1` のときのみ有効．曲線の両端の情報を記述．2点の座標と正方向への方向ベクトル．
----@param dash_pat { [integer]: number } 「破線パターン」を `{ opaque_len1, blank_len1, opaque_len2, blank_len2, ... }` の形式で指定．
+---@param dash_pat number[] 「破線パターン」を `{ opaque_len1, blank_len1, opaque_len2, blank_len2, ... }` の形式で指定．
 ---@param dash_pos number 「破線位置」をピクセル単位で指定．
 ---@param dash_adj boolean 「破線周期補正」を指定．
 ---@param target_buffer { name: string, w: integer, h: integer }? マスク適用先のバッファ名 (e.g. "object", "cache:foo") とその幅と高さを指定．省略時は `{ name = "object", w = obj.w, h = obj.h }`.
@@ -773,14 +744,14 @@ end
 ---@param line_width number 「ライン幅」をピクセル単位で指定．
 ---@param antialias number 「ぼかし幅」をピクセル単位で指定．
 ---@param path_type path_type|nil 「線タイプ」(パスの種類) を指定．`nil` を指定した場合，折れ線への変換や点列のコピーを省略する．このとき `pts` は既に折れ線の前提で，テーブルの内容も書き換わる．
----@param pts { [integer]: number? } 点列の配列， `{ x1, y1, x2, y2, x3, y3, ... }` の形式．
+---@param pts any[] 点列の配列， `{ x1, y1, x2, y2, x3, y3, ... }` の形式．
 ---@param n_segs integer パスの分割区間の個数．
 ---@param loop boolean 閉じたパスかどうか．
 ---@param prec number 「曲線精度」(折れ線の許容最長距離) を指定．
 ---@param start_pos number 「開始位置」を 0.0 から 1.0 に正規化した数値で指定．ただしループの場合はこの範囲を超えることもある．
 ---@param end_pos number 「終了位置」を 0.0 から 1.0 に正規化した数値で指定．ただしループの場合はこの範囲を超えることもある．
 ---@param end_shape 0|1 「端の形状」を指定．
----@param dash_pat { [integer]: number } 「破線パターン」を `{ opaque_len1, blank_len1, opaque_len2, blank_len2, ... }` の形式で指定．
+---@param dash_pat number[] 「破線パターン」を `{ opaque_len1, blank_len1, opaque_len2, blank_len2, ... }` の形式で指定．
 ---@param dash_pos number 「破線位置」をピクセル単位で指定．
 ---@param dash_adj boolean 「破線周期補正」を指定．
 ---@param scale number 「拡大率」を指定．

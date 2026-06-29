@@ -1,0 +1,253 @@
+--information:ラインσ@Path_S ${PACKAGE_VERSION} by ${AUTHOR}
+--label:Path_S\図形
+--require:${LEAST_AVIUTL_VERSION}
+---$track:終点X, min = -4000, max = 4000, step = 0.01, scale = 0.25
+local X = 256
+
+---$track:終点Y, min = -4000, max = 4000, step = 0.01, scale = 0.25
+local Y = 0
+
+---$track:ライン幅, min = 0, max = 1000, step = 0.01, scale = 0.2
+local line = 5
+
+---$color:色
+local color = 0xffffff
+
+--group:曲線設定,true
+---$select:形状
+---直線 = 0
+---正弦波 = 1
+---三角波 = 2
+---矩形波 = 3
+---のこぎり波 = 4
+local line_shape = 1
+
+---$track:周期, min = 4, max = 1024, step = 0.001, scale = 0.25
+local line_period = 64
+
+---$track:周期位置, min = -4000, max = 4000, step = 0.01, scale = 0.25
+local line_phase = 0
+
+---$track:振幅, min = 0, max = 1024, step = 0.01, scale = 0.125
+local line_amplify = 32
+
+--group:ライン設定,false
+---$select:端の形状
+---円 = 0
+---四角 = 1
+local end_shape = 0
+
+---$value:破線パターン
+local dash_pat = {100,0}
+
+---$track:破線位置, min = -4000, max = 4000, step = 0.01, scale = 0.25
+local dash_pos = 0
+
+--group:ランダム変化,false
+---$track:ランダム周期, min = 4, max = 1024, step = 0.01, scale = 0.25
+local rand_period = 32
+
+---$track:ランダム振幅, min = 0, max = 1024, step = 0.001, scale = 0.125
+local rand_amplify = 0
+
+---$checksection:ランダム固定端
+local rand_fix_end = true
+---$track:ランダムシード, min = -65536, max = 65535, step = 1
+local rand_seed = 10000
+
+--group:その他,false
+---$track:ぼかし幅, min = 0, max = 1000, step = 0.01, scale = 0.2
+local antialias = 1
+
+---$value:PI
+local PI = {}
+
+local path_s = require "Path_S";
+local obj, math, tonumber, type = obj, math, tonumber, type;
+
+-- set anchors.
+if obj.getoption("gui") then
+	obj.setanchor("X,Y", 0, "star", "line");
+end
+
+-- take parameters.
+--[==[
+	PI = {
+		X, Y:			number?,
+		color:			number?,
+		line:			number?,
+		end_shape:		string?,
+		line_shape:		string?,
+		antialias:		number?,
+		line_period:	number?,
+		line_phase:		number?,
+		line_amplify:	number?,
+		dash_pat:		table?,
+		dash_pos:		number?,
+		rand_period:	number?,
+		rand_amplify:	number?,
+		rand_fix_end:	boolean|number|nil,
+		rand_seed:		number?,
+	}
+]==]
+local function as_bool(t, v)
+	if type(t) == "boolean" then return t;
+	elseif type(t) == "number" then return t ~= 0;
+	else return v end
+end
+X = tonumber(PI.X) or X;
+Y = tonumber(PI.Y) or Y;
+color = tonumber(PI.color) or color;
+line = tonumber(PI.line) or line;
+if type(PI.end_shape) == "string" then
+	local name2num = {
+		["円"] = 0, ["四角"] = 1,
+	};
+	end_shape = name2num[PI.end_shape] or end_shape;
+end
+if type(PI.line_shape) == "string" then
+	local name2num = {
+		["直線"] = 0,["正弦波"] = 1,["三角波"] = 2,["矩形波"] = 3, ["のこぎり波"] = 4,
+	};
+	line_shape = name2num[PI.line_shape] or line_shape;
+end
+antialias = tonumber(PI.antialias) or antialias;
+line_period = tonumber(PI.line_period) or line_period;
+line_phase = tonumber(PI.line_phase) or line_phase;
+line_amplify = tonumber(PI.line_amplify) or line_amplify;
+dash_pat = type(PI.dash_pat) == "table" and PI.dash_pat or dash_pat;
+dash_pos = tonumber(PI.dash_pos) or dash_pos;
+rand_period = tonumber(PI.rand_period) or rand_period;
+rand_amplify = tonumber(PI.rand_amplify) or rand_amplify;
+rand_fix_end = as_bool(PI.rand_fix_end, rand_fix_end);
+rand_seed = tonumber(PI.rand_seed) or rand_seed;
+
+-- normalize parameters.
+color = math.floor(0.5 + color) % 2 ^ 24;
+line = math.max(line, 0);
+end_shape = math.min(math.max(math.floor(0.5 + end_shape), 0), 1);
+line_shape = math.min(math.max(math.floor(0.5 + line_shape), 0), 4);
+antialias = math.max(antialias, 0);
+line_period = math.max(line_period, 4);
+line_amplify = math.max(line_amplify, 0);
+rand_period = math.max(rand_period, 4);
+rand_amplify = math.max(rand_amplify, 0);
+rand_seed = math.min(math.max(math.floor(0.5 + rand_seed), -2 ^ 16), 2 ^ 16 - 1);
+
+-- further calculations.
+local length = (X ^ 2 + Y ^ 2) ^ 0.5;
+if length <= 0 then
+	-- no image.
+	obj.setoption("draw_state", true);
+	return;
+end
+
+-- make the table of the points for the curve.
+local n_pts, pts
+if line_shape == 0 then
+	-- straight line.
+	n_pts, pts = 2, { 0, 0, length, 0 };
+elseif line_shape == 1 then
+	-- sine wave.
+	local dp, p = math.min(2 ^ -math.ceil(math.log((line_period + line_amplify) / 8, 2)), 1 / 16),
+		((-line_phase) / line_period) % 1;
+	n_pts, pts = 1, { 0, line_amplify * math.sin(2 * math.pi * p) };
+	local x do
+		local p1 = (math.floor(p / dp) + 1) * dp;
+		x = (p1 - p) * line_period;
+		p = p1 % 1;
+	end
+	while x < length do
+		n_pts = n_pts + 1;
+		pts[2 * n_pts - 1], pts[2 * n_pts] =
+			x, line_amplify * math.sin(2 * math.pi * p);
+		x, p = x + dp * line_period, (p + dp) % 1;
+	end
+	p = (p - (x - length) / line_period) % 1;
+	n_pts = n_pts + 1;
+	pts[2 * n_pts - 1], pts[2 * n_pts] =
+		length, line_amplify * math.sin(2 * math.pi * p);
+elseif line_shape == 2 then
+	-- triangular wave.
+	local p = (((-line_phase) / line_period) - 0.25) % 1;
+	n_pts, pts = 1, { 0, line_amplify * (4 * math.abs(p - 0.5) - 1) };
+	local x do
+		local p1 = (math.floor(2 * p) + 1) / 2;
+		x = (p1 - p) * line_period;
+		p = p1 % 1;
+	end
+	while x < length do
+		n_pts = n_pts + 1;
+		pts[2 * n_pts - 1], pts[2 * n_pts] =
+			x, line_amplify * (p > 0 and -1 or 1);
+		x, p = x + 0.5 * line_period, (p + 0.5) % 1;
+	end
+	p = (p - (x - length) / line_period) % 1;
+	n_pts = n_pts + 1;
+	pts[2 * n_pts - 1], pts[2 * n_pts] =
+		length, line_amplify * (4 * math.abs(p - 0.5) - 1);
+elseif line_shape == 3 then
+	-- square wave.
+	local p = ((-line_phase) / line_period) % 1;
+	n_pts, pts = 1, { 0, line_amplify * (p < 0.5 and -1 or 1) };
+	local x do
+		local p1 = (math.floor(2 * p) + 1) / 2;
+		x = (p1 - p) * line_period;
+		p = p1 % 1;
+	end
+	while x < length do
+		n_pts = n_pts + 2;
+		pts[2 * n_pts - 3], pts[2 * n_pts - 2] =
+			x, line_amplify * (p > 0 and -1 or 1);
+		pts[2 * n_pts - 1], pts[2 * n_pts] = pts[2 * n_pts - 3], -pts[2 * n_pts - 2];
+		x, p = x + 0.5 * line_period, (p + 0.5) % 1;
+	end
+	p = ((x - length) / line_period - p) % 1;
+	n_pts = n_pts + 1;
+	pts[2 * n_pts - 1], pts[2 * n_pts] =
+		length, line_amplify * (p < 0.5 and 1 or -1);
+else -- line_shape == 4
+	-- saw wave.
+	local p = ((-line_phase) / line_period) % 1;
+	n_pts, pts = 1, { 0, line_amplify * (2 * p - 1) };
+	local x do
+		local p1 = (math.floor(p) + 1);
+		x = (p1 - p) * line_period;
+		p = 0;
+	end
+	while x < length do
+		n_pts = n_pts + 2;
+		pts[2 * n_pts - 3], pts[2 * n_pts - 2] =
+			x, line_amplify;
+		pts[2 * n_pts - 1], pts[2 * n_pts] = pts[2 * n_pts - 3], -pts[2 * n_pts - 2];
+		x = x + line_period;
+	end
+	p = 1 - (((x - length) / line_period) % 1);
+	n_pts = n_pts + 1;
+	pts[2 * n_pts - 1], pts[2 * n_pts] =
+		length, line_amplify * (2 * p - 1);
+end
+
+-- randomize the line.
+if rand_amplify > 0 then
+	pts, n_pts = path_s.randomize(pts, n_pts, rand_period, rand_amplify,
+		rand_fix_end and 1 or 0, rand_seed);
+end
+
+-- measure and move the path.
+path_s.transform(pts, n_pts, 1, math.atan2(Y, X));
+local L, R, T, B = path_s.measure(pts, n_pts);
+local th = math.ceil(line * (end_shape == 1 and 0.5 ^ 0.5 or 0.5) + antialias);
+L, T = math.floor(L - th), math.floor(T - th);
+R, B = math.max(math.ceil(R + th), L + 1), math.max(math.ceil(B + th), T + 1);
+
+-- prepare the canvas.
+obj.cx, obj.cy = -(L + R) / 2, -(T + B) / 2;
+obj.clearbuffer("object", R - L, B - T, color);
+
+-- draw the line.
+path_s.path_mask_line(
+	0, 1, line, antialias,
+	nil, pts, n_pts - 1, false, 1,
+	0, 1, end_shape, dash_pat, dash_pos, false,
+	1, 0, obj.cx, obj.cy);
