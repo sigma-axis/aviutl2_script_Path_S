@@ -32,6 +32,12 @@ local line_phase = 0
 local line_amplify = 32
 
 --group:ライン設定,false
+---$track:開始位置, min = 0, max = 100, step = 0.001
+local start_pos = 0
+
+---$track:終了位置, min = 0, max = 100, step = 0.001
+local end_pos = 100
+
 ---$select:端の形状
 ---円 = 0
 ---四角 = 1
@@ -82,6 +88,8 @@ end
 		line_period:	number?,
 		line_phase:		number?,
 		line_amplify:	number?,
+        start_pos:      number?,
+        end_pos:        number?,
 		dash_pat:		table?,
 		dash_pos:		number?,
 		rand_period:	number?,
@@ -115,6 +123,8 @@ antialias = tonumber(PI.antialias) or antialias;
 line_period = tonumber(PI.line_period) or line_period;
 line_phase = tonumber(PI.line_phase) or line_phase;
 line_amplify = tonumber(PI.line_amplify) or line_amplify;
+start_pos = tonumber(PI.start_pos) or start_pos;
+end_pos = tonumber(PI.end_pos) or end_pos;
 dash_pat = type(PI.dash_pat) == "table" and PI.dash_pat or dash_pat;
 dash_pos = tonumber(PI.dash_pos) or dash_pos;
 rand_period = tonumber(PI.rand_period) or rand_period;
@@ -130,6 +140,8 @@ line_shape = math.min(math.max(math.floor(0.5 + line_shape), 0), 4);
 antialias = math.max(antialias, 0);
 line_period = math.max(line_period, 4);
 line_amplify = math.max(line_amplify, 0);
+start_pos = math.min(math.max(start_pos / 100, 0), 1);
+end_pos = math.min(math.max(end_pos / 100, 0), 1);
 rand_period = math.max(rand_period, 4);
 rand_amplify = math.max(rand_amplify, 0);
 rand_seed = math.min(math.max(math.floor(0.5 + rand_seed), -2 ^ 16), 2 ^ 16 - 1);
@@ -249,5 +261,5 @@ obj.clearbuffer("object", R - L, B - T, color);
 path_s.path_mask_line(
 	0, 1, line, antialias,
 	nil, pts, n_pts - 1, false, 1,
-	0, 1, end_shape, dash_pat, dash_pos, false,
+	start_pos, end_pos, end_shape, dash_pat, dash_pos, false,
 	1, 0, obj.cx, obj.cy);
