@@ -709,22 +709,22 @@ obj.cx=obj.cx+100 -- 位置もずらせる
   start_Y = num,       -- number 型で "始点Y" の項目を上書き，または nil.
   end_X = num,         -- number 型で "終点X" の項目を上書き，または nil.
   end_Y = num,         -- number 型で "終点Y" の項目を上書き，または nil.
-  color = num,         -- number 型で "色" の項目を上書き，または nil.
   line = num,          -- number 型で "ライン幅" の項目を上書き，または nil.
-  end_shape = str,     -- string 型で "端の形状" の項目を上書き，または nil.
+  color = num,         -- number 型で "色" の項目を上書き，または nil.
   line_shape = str,    -- string 型で "形状" の項目を上書き，または nil.
-  antialias = num,     -- number 型で "ぼかし幅" の項目を上書き，または nil.
   line_period = num,   -- number 型で "周期" の項目を上書き，または nil.
   line_phase = num,    -- number 型で "周期位置" の項目を上書き，または nil.
   line_amplify = num,  -- number 型で "振幅" の項目を上書き，または nil.
   start_pos = num,     -- number 型で "開始位置" の項目を上書き，または nil.
   end_pos = num,       -- number 型で "終了位置" の項目を上書き，または nil.
+  end_shape = str,     -- string 型で "端の形状" の項目を上書き，または nil.
   dash_pat = tab,      -- table 型で "破線パターン" の項目を上書き，または nil.
   dash_pos = num,      -- number 型で "破線位置" の項目を上書き，または nil.
   rand_period = num,   -- number 型で "ランダム周期" の項目を上書き，または nil.
   rand_amplify = num,  -- number 型で "ランダム振幅" の項目を上書き，または nil.
   rand_fix_end = bool, -- boolean 型で "ランダム固定端" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
   rand_seed = num,     -- number 型で "ランダムシード" の項目を上書き，または nil.
+  antialias = num,     -- number 型で "ぼかし幅" の項目を上書き，または nil.
 }
 ```
 

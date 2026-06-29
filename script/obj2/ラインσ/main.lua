@@ -90,23 +90,23 @@ end
 --[==[
 	PI = {
 		start_X, start_Y:	number?,
-		end_X, end_Y:	    number?,
-		color:			    number?,
-		line:			    number?,
-		end_shape:		    string?,
-		line_shape:		    string?,
-		antialias:		    number?,
-		line_period:	    number?,
-		line_phase:		    number?,
-		line_amplify:	    number?,
-        start_pos:          number?,
-        end_pos:            number?,
-		dash_pat:		    table?,
-		dash_pos:		    number?,
-		rand_period:	    number?,
-		rand_amplify:	    number?,
-		rand_fix_end:	    boolean|number|nil,
-		rand_seed:		    number?,
+		end_X, end_Y:		number?,
+		line:				number?,
+		color:				number?,
+		line_shape:			string?,
+		line_period:		number?,
+		line_phase:			number?,
+		line_amplify:		number?,
+		start_pos:			number?,
+		end_pos:			number?,
+		end_shape:			string?,
+		dash_pat:			table?,
+		dash_pos:			number?,
+		rand_period:		number?,
+		rand_amplify:		number?,
+		rand_fix_end:		boolean|number|nil,
+		rand_seed:			number?,
+		antialias:			number?,
 	}
 ]==]
 local function as_bool(t, v)
@@ -118,46 +118,46 @@ start_X = tonumber(PI.start_X) or start_X;
 start_Y = tonumber(PI.start_Y) or start_Y;
 end_X = tonumber(PI.end_X) or end_X;
 end_Y = tonumber(PI.end_Y) or end_Y;
-color = tonumber(PI.color) or color;
 line = tonumber(PI.line) or line;
-if type(PI.end_shape) == "string" then
-	local name2num = {
-		["円"] = 0, ["四角"] = 1,
-	};
-	end_shape = name2num[PI.end_shape] or end_shape;
-end
+color = tonumber(PI.color) or color;
 if type(PI.line_shape) == "string" then
 	local name2num = {
 		["直線"] = 0,["正弦波"] = 1,["三角波"] = 2,["矩形波"] = 3, ["のこぎり波"] = 4,
 	};
 	line_shape = name2num[PI.line_shape] or line_shape;
 end
-antialias = tonumber(PI.antialias) or antialias;
 line_period = tonumber(PI.line_period) or line_period;
 line_phase = tonumber(PI.line_phase) or line_phase;
 line_amplify = tonumber(PI.line_amplify) or line_amplify;
 start_pos = tonumber(PI.start_pos) or start_pos;
 end_pos = tonumber(PI.end_pos) or end_pos;
+if type(PI.end_shape) == "string" then
+	local name2num = {
+		["円"] = 0, ["四角"] = 1,
+	};
+	end_shape = name2num[PI.end_shape] or end_shape;
+end
 dash_pat = type(PI.dash_pat) == "table" and PI.dash_pat or dash_pat;
 dash_pos = tonumber(PI.dash_pos) or dash_pos;
 rand_period = tonumber(PI.rand_period) or rand_period;
 rand_amplify = tonumber(PI.rand_amplify) or rand_amplify;
 rand_fix_end = as_bool(PI.rand_fix_end, rand_fix_end);
 rand_seed = tonumber(PI.rand_seed) or rand_seed;
+antialias = tonumber(PI.antialias) or antialias;
 
 -- normalize parameters.
-color = math.floor(0.5 + color) % 2 ^ 24;
 line = math.max(line, 0);
-end_shape = math.min(math.max(math.floor(0.5 + end_shape), 0), 1);
+color = math.floor(0.5 + color) % 2 ^ 24;
 line_shape = math.min(math.max(math.floor(0.5 + line_shape), 0), 4);
-antialias = math.max(antialias, 0);
 line_period = math.max(line_period, 4);
 line_amplify = math.max(line_amplify, 0);
 start_pos = math.min(math.max(start_pos / 100, 0), 1);
 end_pos = math.min(math.max(end_pos / 100, 0), 1);
+end_shape = math.min(math.max(math.floor(0.5 + end_shape), 0), 1);
 rand_period = math.max(rand_period, 4);
 rand_amplify = math.max(rand_amplify, 0);
 rand_seed = math.min(math.max(math.floor(0.5 + rand_seed), -2 ^ 16), 2 ^ 16 - 1);
+antialias = math.max(antialias, 0);
 
 -- further calculations.
 local length = ((end_X - start_X) ^ 2 + (end_Y - start_Y) ^ 2) ^ 0.5;
