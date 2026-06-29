@@ -1,12 +1,20 @@
 --information:ラインσ@Path_S ${PACKAGE_VERSION} by ${AUTHOR}
 --label:Path_S\図形
 --require:${LEAST_AVIUTL_VERSION}
+---$track:始点X, min = -4000, max = 4000, step = 0.01, scale = 0.25
+local start_X = 0
+
+---$track:始点Y, min = -4000, max = 4000, step = 0.01, scale = 0.25
+local start_Y = 0
+
+--trackgroup@start_X,start_Y:start_point
 ---$track:終点X, min = -4000, max = 4000, step = 0.01, scale = 0.25
 local X = 256
 
 ---$track:終点Y, min = -4000, max = 4000, step = 0.01, scale = 0.25
 local Y = 0
 
+--trackgroup@X,Y:end_point
 ---$track:ライン幅, min = 0, max = 1000, step = 0.01, scale = 0.2
 local line = 5
 
@@ -73,29 +81,32 @@ local obj, math, tonumber, type = obj, math, tonumber, type;
 
 -- set anchors.
 if obj.getoption("gui") then
-	obj.setanchor("X,Y", 0, "star", "line");
+	obj.setanchor("start_X,start_Y", 0, "line", "color", 0xa0ffa0);
+	obj.setanchor("X,Y", 0, "line", "color", 0xffa0a0);
+	obj.setanchor({ start_X, start_Y, X, Y }, 2, "line");
 end
 
 -- take parameters.
 --[==[
 	PI = {
-		X, Y:			number?,
-		color:			number?,
-		line:			number?,
-		end_shape:		string?,
-		line_shape:		string?,
-		antialias:		number?,
-		line_period:	number?,
-		line_phase:		number?,
-		line_amplify:	number?,
-        start_pos:      number?,
-        end_pos:        number?,
-		dash_pat:		table?,
-		dash_pos:		number?,
-		rand_period:	number?,
-		rand_amplify:	number?,
-		rand_fix_end:	boolean|number|nil,
-		rand_seed:		number?,
+		start_X, start_Y:	number?,
+		X, Y:			    number?,
+		color:			    number?,
+		line:			    number?,
+		end_shape:		    string?,
+		line_shape:		    string?,
+		antialias:		    number?,
+		line_period:	    number?,
+		line_phase:		    number?,
+		line_amplify:	    number?,
+        start_pos:          number?,
+        end_pos:            number?,
+		dash_pat:		    table?,
+		dash_pos:		    number?,
+		rand_period:	    number?,
+		rand_amplify:	    number?,
+		rand_fix_end:	    boolean|number|nil,
+		rand_seed:		    number?,
 	}
 ]==]
 local function as_bool(t, v)
@@ -103,6 +114,8 @@ local function as_bool(t, v)
 	elseif type(t) == "number" then return t ~= 0;
 	else return v end
 end
+start_X = tonumber(PI.start_X) or start_X;
+start_Y = tonumber(PI.start_Y) or start_Y;
 X = tonumber(PI.X) or X;
 Y = tonumber(PI.Y) or Y;
 color = tonumber(PI.color) or color;
@@ -147,7 +160,7 @@ rand_amplify = math.max(rand_amplify, 0);
 rand_seed = math.min(math.max(math.floor(0.5 + rand_seed), -2 ^ 16), 2 ^ 16 - 1);
 
 -- further calculations.
-local length = (X ^ 2 + Y ^ 2) ^ 0.5;
+local length = ((X - start_X) ^ 2 + (Y - start_Y) ^ 2) ^ 0.5;
 if length <= 0 then
 	-- no image.
 	obj.setoption("draw_state", true);
@@ -156,7 +169,7 @@ end
 
 -- make the table of the points for the curve.
 local n_pts, pts
-if line_shape == 0 then
+if line_shape == 0 or line_amplify <= 0 then
 	-- straight line.
 	n_pts, pts = 2, { 0, 0, length, 0 };
 elseif line_shape == 1 then
@@ -247,7 +260,7 @@ if rand_amplify > 0 then
 end
 
 -- measure and move the path.
-path_s.transform(pts, n_pts, 1, math.atan2(Y, X));
+path_s.transform(pts, n_pts, 1, math.atan2(Y - start_Y, X - start_X), start_X, start_Y);
 local L, R, T, B = path_s.measure(pts, n_pts);
 local th = math.ceil(line * (end_shape == 1 and 0.5 ^ 0.5 or 0.5) + antialias);
 L, T = math.floor(L - th), math.floor(T - th);
