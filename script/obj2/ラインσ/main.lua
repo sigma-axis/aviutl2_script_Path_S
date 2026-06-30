@@ -82,7 +82,7 @@ local obj, math, tonumber, type = obj, math, tonumber, type;
 -- set anchors.
 if obj.getoption("gui") then
 	obj.setanchor("start_X,start_Y", 0, "line", "color", 0xa0ffa0);
-	obj.setanchor("X,Y", 0, "line", "color", 0xffa0a0);
+	obj.setanchor("end_X,end_Y", 0, "line", "color", 0xffa0a0);
 	obj.setanchor({ start_X, start_Y, end_X, end_Y }, 2, "line");
 end
 
