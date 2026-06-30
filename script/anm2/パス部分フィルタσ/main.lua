@@ -68,7 +68,7 @@ local PI = {}
 --[[pixelshader@interpolate:
 ---$include "interpolate.hlsl"
 ]]
-local path_s = require "Path_S";
+local path_s = require("Path_S");
 local obj, math, tonumber, type, tostring = obj, math, tonumber, type, tostring;
 
 -- set anchors.

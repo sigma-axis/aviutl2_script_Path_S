@@ -90,7 +90,7 @@ local antialias = 1
 ---$value:PI
 local PI = {}
 
-local path_s = require "Path_S";
+local path_s = require("Path_S");
 local obj, math, tonumber, type = obj, math, tonumber, type;
 
 -- take parameters.

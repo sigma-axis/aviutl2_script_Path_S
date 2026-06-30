@@ -82,7 +82,7 @@ local PI = {}
 --[[pixelshader@carve_dash:
 ---$include "carve_dash.hlsl"
 ]]
-local path_s = require "Path_S";
+local path_s = require("Path_S");
 local obj, math, tonumber, type = obj, math, tonumber, type;
 
 -- see if the points are already buffered.
