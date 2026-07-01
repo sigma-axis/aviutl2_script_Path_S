@@ -7,7 +7,7 @@ cbuffer constant0 : register(b0) {
 float4 interpolate(float4 pos : SV_Position) : SV_Target
 {
 	return lerp(
-		ori.Load(int3(pos.xy + ofs_ori, 0)),
-		eff.Load(int3(pos.xy + ofs_eff, 0)),
-		rate.Load(int3(pos.xy, 0)).a);
+		ori.Load(int3(floor(pos.xy + ofs_ori), 0)),
+		eff.Load(int3(floor(pos.xy + ofs_eff), 0)),
+		rate[pos.xy].a);
 }

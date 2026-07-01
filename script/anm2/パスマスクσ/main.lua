@@ -64,6 +64,7 @@ local PI = {}
 ---$include "const_alpha.hlsl"
 ]]
 --[[pixelshader@carve:
+---$include "../../path_coord_header.hlsl"
 ---$include "carve.hlsl"
 ]]
 local path_s = require("Path_S");

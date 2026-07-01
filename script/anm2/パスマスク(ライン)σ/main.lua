@@ -77,9 +77,11 @@ local antialias = 1
 local PI = {}
 
 --[[pixelshader@carve:
+---$include "../../path_coord_header.hlsl"
 ---$include "carve.hlsl"
 ]]
 --[[pixelshader@carve_dash:
+---$include "../../path_coord_header.hlsl"
 ---$include "carve_dash.hlsl"
 ]]
 local path_s = require("Path_S");

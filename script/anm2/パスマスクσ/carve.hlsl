@@ -1,25 +1,8 @@
-Texture2D<half4> coords : register(t0);
 cbuffer constant0 : register(b0) {
 	float2 alpha_map;
 	float N_f, mode_fill_f,
 		padding, aa_thick;
 };
-
-float decode_float(half3 c)
-{
-	const uint3 c_i = floor(255 * c + 0.5);
-	const int i = (c_i.r << 8) | (c_i.g << 16) | (c_i.b << 24);
-	return i / float(1 << 16);
-}
-
-float2 get_point(uint i)
-{
-	static const uint log2_span_x = 12, span_x = 1 << log2_span_x;
-	const uint x = (i << 1) & (span_x - 1), y = i >> (log2_span_x - 1);
-	return float2(
-		decode_float(coords.Load(int3(x | 0, y, 0)).rgb),
-		decode_float(coords.Load(int3(x | 1, y, 0)).rgb));
-}
 
 uint quadrant(float2 v)
 {
@@ -59,6 +42,6 @@ float4 carve(float4 pos : SV_Position) : SV_Target
 		pt0 = pt1; q0 = q1;
 	}
 
-	const float a = 1 - smoothstep(0, aa_thick, is_inner(cycles) ? 0 : sqrt(sq_dist) - padding);
+	const float a = 1 - saturate((is_inner(cycles) ? 0 : sqrt(sq_dist) - padding) / aa_thick);
 	return float4(0, 0, 0, dot(alpha_map, float2(a, 1)));
 }
