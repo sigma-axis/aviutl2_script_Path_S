@@ -1,7 +1,17 @@
-local obj, print, math, tonumber, ipairs, unpack, bit, ffi, buffer = obj, print, math, tonumber, ipairs, unpack, bit, require("ffi"), require("string.buffer");
+local obj, print, math, tonumber, type, ipairs, unpack, bit, ffi, buffer = obj, print, math, tonumber, type, ipairs, unpack, bit, require("ffi"), require("string.buffer");
 
 if obj.getinfo("version") < tonumber("${LEAST_AVIUTL_VERSION}") then
 	error([[AviUtl ExEdit ${LEAST_AVIUTL_VERSION_STRING} 以降が必要です！]], 2);
+end
+
+---PI で `boolean|number|nil` での指定を適用する．number の場合，0 を false 扱い，0 以外を true 扱いとする．
+---@param pi_value any PI に渡ってきた値．
+---@param gui_value boolean 実際にスクリプトのパラメタとして渡ってきた値．
+---@return boolean
+local function PI_as_bool(pi_value, gui_value)
+	if type(pi_value) == "boolean" then return pi_value;
+	elseif type(pi_value) == "number" then return pi_value ~= 0;
+	else return gui_value end
 end
 
 ---@alias path_type # パスの種類．
@@ -9,21 +19,93 @@ end
 ---| 1 # 補間移動
 ---| 2 # 2次 Bezier
 ---| 3 # 3次 Bezier
+local PI_choose_path_type do
+	local name2num = {
+		["折れ線"] = 0, ["補間移動"] = 1, ["2次ベジェ曲線"] = 2, ["3次ベジェ曲線"] = 3,
+	};
+	---PI で「パスの種類」指定を適用する．
+	---このパラメタは次の形式で指定されているものとする:
+	---
+	---`--select@path_type:線タイプ=3,折れ線=0,補間移動=1,2次ベジェ曲線=2,3次ベジェ曲線=3`
+	---@param pi_value any
+	---@param gui_value path_type
+	---@return path_type
+	function PI_choose_path_type(pi_value, gui_value)
+		if type(gui_value) == "string" then
+			gui_value = name2num[pi_value] or gui_value;
+		end
+		return math.min(math.max(math.floor(0.5 + gui_value), 0), 3);
+	end
+end
 
 ---@alias mode_fill # 塗りつぶし範囲の指定．
 ---| 0 # 通常
 ---| 1 # 奇偶
 ---| 2 # 反転
 ---| 3 # 奇偶反転
+local PI_choose_mode_fill do
+	local name2num = {
+		["内側"] = 0, ["奇偶"] = 1, ["内側反転"] = 2, ["奇偶反転"] = 3,
+	};
+	---PI で塗りつぶしの「範囲」指定を適用する．
+	---このパラメタは次の形式で指定されているものとする:
+	---
+	---`--select@mode_fill:範囲=0,内側=0,奇偶=1,内側反転=2,奇偶反転=3`
+	---@param pi_value any
+	---@param gui_value mode_fill
+	---@return mode_fill
+	function PI_choose_mode_fill(pi_value, gui_value)
+		if type(gui_value) == "string" then
+			gui_value = name2num[pi_value] or gui_value;
+		end
+		return math.min(math.max(math.floor(0.5 + gui_value), 0), 3);
+	end
+end
 
 ---@alias end_shape # 端の形状．
 ---| 0 # 円
 ---| 1 # 四角
 ---| 2 # 平坦
+local PI_choose_end_shape do
+	local name2num = {
+		["円"] = 0, ["四角"] = 1, ["平坦"] = 2,
+	};
+	---PI で塗りつぶしの「範囲」指定を適用する．
+	---このパラメタは次の形式で指定されているものとする:
+	---
+	---`--select@end_shape:端の形状=0,円=0,四角=1,平坦=2`
+	---@param pi_value any
+	---@param gui_value end_shape
+	---@return end_shape
+	function PI_choose_end_shape(pi_value, gui_value)
+		if type(gui_value) == "string" then
+			gui_value = name2num[pi_value] or gui_value;
+		end
+		return math.min(math.max(math.floor(0.5 + gui_value), 0), 2);
+	end
+end
 
 ---@alias elbow_shape # 接合点の形状．
 ---| 0 # ラウンド
 ---| 1 # ベベル
+local PI_choose_elbow_shape do
+	local name2num = {
+		["ラウンド"] = 0, ["ベベル"] = 1
+	};
+	---PI で塗りつぶしの「範囲」指定を適用する．
+	---このパラメタは次の形式で指定されているものとする:
+	---
+	---`--select@elbow_shape:接合点の形状=0,ラウンド=0,ベベル=1`
+	---@param pi_value any
+	---@param gui_value elbow_shape
+	---@return elbow_shape
+	function PI_choose_elbow_shape(pi_value, gui_value)
+		if type(gui_value) == "string" then
+			gui_value = name2num[pi_value] or gui_value;
+		end
+		return math.min(math.max(math.floor(0.5 + gui_value), 0), 1);
+	end
+end
 
 local anchor, poll do
 	local function pt(pts, i) return tonumber(pts[i]) or 0 end
@@ -766,6 +848,14 @@ end
 
 -- return the table containing the exported functions.
 return {
+	PI = {
+		as_bool = PI_as_bool,
+		path_type = PI_choose_path_type,
+		mode_fill = PI_choose_mode_fill,
+		end_shape = PI_choose_end_shape,
+		elbow_shape = PI_choose_elbow_shape,
+	},
+
 	anchor = anchor,
 	poll = poll,
 	measure = measure,

@@ -117,6 +117,8 @@ if obj.getoption("gui") and not pt_buff then
 	end
 end
 
+--#region PI / normalize parameters.
+
 -- take parameters.
 --[==[
 	PI = {
@@ -145,47 +147,22 @@ end
 		len_buff:		number?,
 	}
 ]==]
-local function as_bool(t, v)
-	if type(t) == "boolean" then return t;
-	elseif type(t) == "number" then return t ~= 0;
-	else return v end
-end
 intensity = tonumber(PI.intensity) or intensity;
-invert = as_bool(PI.invert, invert);
+invert = path_s.PI.as_bool(PI.invert, invert);
 line = tonumber(PI.line) or line;
 num_points = tonumber(PI.num_points) or num_points;
-if type(PI.path_type) == "string" then
-	local name2num = {
-		["折れ線"] = 0, ["補間移動"] = 1, ["2次ベジェ曲線"] = 2, ["3次ベジェ曲線"] = 3,
-	};
-	path_type = name2num[PI.path_type] or path_type;
-end
+path_type = path_s.PI.path_type(PI.path_type, path_type);
 if type(PI.points) == "table" then points = PI.points end
-loop = as_bool(PI.loop, loop);
+loop = path_s.PI.as_bool(PI.loop, loop);
 precision = tonumber(PI.precision) or precision;
 start_pos = tonumber(PI.start_pos) or start_pos;
 end_pos = tonumber(PI.end_pos) or end_pos;
-if type(PI.end_shape) == "string" then
-	local name2num = {
-		["円"] = 0, ["四角"] = 1,
-	};
-	end_shape = name2num[PI.end_shape] or end_shape;
-end
-if type(PI.elbow_shape) == "string" then
-	local name2num = {
-		["ラウンド"] = 0, ["ベベル"] = 1
-	};
-	elbow_shape = name2num[PI.elbow_shape] or elbow_shape;
-end
+end_shape = path_s.PI.end_shape(PI.end_shape, end_shape);
+elbow_shape = path_s.PI.elbow_shape(PI.elbow_shape, elbow_shape);
 if type(PI.dash_pat) == "table" then dash_pat = PI.dash_pat end
-dash_adj = as_bool(PI.dash_adj, dash_adj);
+dash_adj = path_s.PI.as_bool(PI.dash_adj, dash_adj);
 dash_pos = tonumber(PI.dash_pos) or dash_pos;
-if type(PI.dash_end_shape) == "string" then
-	local name2num = {
-		["円"] = 0, ["四角"] = 1,
-	};
-	dash_end_shape = name2num[PI.dash_end_shape] or dash_end_shape;
-end
+dash_end_shape = path_s.PI.end_shape(PI.dash_end_shape, dash_end_shape);
 X = tonumber(PI.X) or X;
 Y = tonumber(PI.Y) or Y;
 zoom = tonumber(PI.zoom) or zoom;
@@ -196,17 +173,15 @@ antialias = tonumber(PI.antialias) or antialias;
 intensity = math.min(math.max(intensity / 100, 0), 1);
 line = math.max(line, 0);
 num_points = math.max(math.floor(0.5 + num_points), 2);
-path_type = math.min(math.max(math.floor(0.5 + path_type), 0), 3);
 precision = math.max(precision, 1);
 start_pos = start_pos / 100;
 end_pos = end_pos / 100;
-end_shape = math.min(math.max(math.floor(0.5 + end_shape), 0), 2);
-elbow_shape = math.min(math.max(math.floor(0.5 + elbow_shape), 0), 1);
-dash_end_shape = math.min(math.max(math.floor(0.5 + dash_end_shape), 0), 2);
 zoom = math.min(math.max(zoom / 100, 0), 50);
 rotate = math.pi / 180 * (rotate % 360);
 antialias = math.max(antialias, 1 / 1024);
 if intensity <= 0 then return end
+
+--#endregion PI / normalize parameters.
 
 local alpha_outer, alpha_inner = 1 - intensity, 1;
 if invert then alpha_outer, alpha_inner = alpha_inner, alpha_outer end
