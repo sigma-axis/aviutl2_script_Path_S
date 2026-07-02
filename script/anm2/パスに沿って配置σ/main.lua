@@ -58,6 +58,8 @@ if obj.getoption("gui") then
 	points = pts;
 end
 
+--#region PI / normalize parameters.
+
 -- take parameters.
 --[==[
 	PI = {
@@ -73,14 +75,9 @@ end
 		loop:			boolean|number|nil,
 	}
 ]==]
-local function as_bool(t, v)
-	if type(t) == "boolean" then return t;
-	elseif type(t) == "number" then return t ~= 0;
-	else return v end
-end
 position = tonumber(PI.position) or position;
 rotate = tonumber(PI.rotate) or rotate;
-rot_tangent = as_bool(PI.rot_tangent, rot_tangent);
+rot_tangent = path_s.PI.as_bool(PI.rot_tangent, rot_tangent);
 ofs_indiv = tonumber(PI.ofs_indiv) or ofs_indiv;
 if type(PI.out_of_range) == "string" then
 	local name2num = {
@@ -89,15 +86,10 @@ if type(PI.out_of_range) == "string" then
 	out_of_range = name2num[PI.out_of_range] or out_of_range;
 end
 num_points = tonumber(PI.num_points) or num_points;
-if type(PI.path_type) == "string" then
-	local name2num = {
-		["折れ線"] = 0, ["補間移動"] = 1, ["2次ベジェ曲線"] = 2, ["3次ベジェ曲線"] = 3,
-	};
-	path_type = name2num[PI.path_type] or path_type;
-end
+path_type = path_s.PI.path_type(PI.path_type, path_type);
 if type(PI.points) == "table" then points = PI.points end
 precision = tonumber(PI.precision) or precision;
-loop = as_bool(PI.loop, loop);
+loop = path_s.PI.as_bool(PI.loop, loop);
 
 -- normalize parameters.
 position = position / 100;
@@ -106,10 +98,11 @@ ofs_indiv = ofs_indiv / 100;
 out_of_range = math.min(math.max(math.floor(0.5 + out_of_range), 0), 3);
 local is_mult_obj = obj.getoption("multi_object");
 num_points = math.max(math.floor(0.5 + num_points), 2);
-path_type = math.min(math.max(math.floor(0.5 + path_type), 0), 3);
 precision = math.max(precision, 1);
 toggle_gui = toggle_gui and
 	obj.getoption("gui") and (not is_mult_obj or obj.index == 0);
+
+--#endregion PI / normalize parameters.
 
 -- further calculations.
 points, num_points = path_s.poll(path_type, points, num_points - (loop and 0 or 1), loop, precision);

@@ -37,13 +37,25 @@ local end_pos = 100
 ---$select:端の形状
 ---円 = 0
 ---四角 = 1
+---平坦 = 2
 local end_shape = 0
+
+---$select:接合点の形状
+---ラウンド = 0
+---ベベル = 1
+local elbow_shape = 0
 
 ---$value:破線パターン
 local dash_pat = {100,0}
 
 ---$track:破線位置, min = -4000, max = 4000, step = 0.01, scale = 0.25
 local dash_pos = 0
+
+---$select:dash::端の形状
+---円 = 0
+---四角 = 1
+---平坦 = 2
+local dash_end_shape = 0
 
 --group:矢じり設定,false
 ---$select:矢じり配置
@@ -99,6 +111,8 @@ if obj.getoption("gui") then
 	points = pts;
 end
 
+--#region PI / normalize parameters.
+
 -- take parameters. (they don't affect to anchors.)
 --[==[
 	PI = {
@@ -119,19 +133,16 @@ end
 		start_pos:		number?,
 		end_pos:		number?,
 		end_shape:		string?,
+		elbow_shape:	string?,
 		dash_pat:		table?,
 		dash_pos:		number?,
+		dash_end_shape:	string?,
 		rand_period:	number?,
 		rand_amplify:	number?,
 		rand_fix_end:	boolean|number|nil,
 		rand_seed:		number?,
 	}
 ]==]
-local function as_bool(t, v)
-	if type(t) == "boolean" then return t;
-	elseif type(t) == "number" then return t ~= 0;
-	else return v end
-end
 color = tonumber(PI.color) or color;
 line = tonumber(PI.line) or line;
 if type(PI.head_type) == "string" then
@@ -147,28 +158,20 @@ head_center = tonumber(PI.head_center) or head_center;
 head_rot = tonumber(PI.head_rot) or head_rot;
 head_pos = tonumber(PI.head_pos) or head_pos;
 num_points = tonumber(PI.num_points) or num_points;
-if type(PI.path_type) == "string" then
-	local name2num = {
-		["折れ線"] = 0, ["補間移動"] = 1, ["2次ベジェ曲線"] = 2, ["3次ベジェ曲線"] = 3,
-	};
-	path_type = name2num[PI.path_type] or path_type;
-end
+path_type = path_s.PI.path_type(PI.path_type, path_type);
 points = type(PI.points) == "table" and PI.points or points;
 precision = tonumber(PI.precision) or precision;
 antialias = tonumber(PI.antialias) or antialias;
 start_pos = tonumber(PI.start_pos) or start_pos;
 end_pos = tonumber(PI.end_pos) or end_pos;
-if type(PI.end_shape) == "string" then
-	local name2num = {
-		["円"] = 0, ["四角"] = 1,
-	};
-	end_shape = name2num[PI.end_shape] or end_shape;
-end
+end_shape = path_s.PI.end_shape(PI.end_shape, end_shape);
+elbow_shape = path_s.PI.elbow_shape(PI.elbow_shape, elbow_shape);
 dash_pat = type(PI.dash_pat) == "table" and PI.dash_pat or dash_pat;
 dash_pos = tonumber(PI.dash_pos) or dash_pos;
+dash_end_shape = path_s.PI.end_shape(PI.dash_end_shape, dash_end_shape);
 rand_period = tonumber(PI.rand_period) or rand_period;
 rand_amplify = tonumber(PI.rand_amplify) or rand_amplify;
-rand_fix_end = as_bool(PI.rand_fix_end, rand_fix_end);
+rand_fix_end = path_s.PI.as_bool(PI.rand_fix_end, rand_fix_end);
 rand_seed = tonumber(PI.rand_seed) or rand_seed;
 
 -- normalize parameters.
@@ -181,16 +184,16 @@ head_center = head_center / 100;
 head_rot = math.pi / 180 * (head_rot % 360);
 head_pos = math.min(math.max(head_pos / 100, -1), 1);
 num_points = math.max(math.floor(0.5 + num_points), 2);
-path_type = math.min(math.max(math.floor(0.5 + path_type), 0), 3);
 precision = math.max(precision, 1);
 antialias = math.max(antialias, 0);
 start_pos = math.min(math.max(start_pos / 100, 0), 1);
 end_pos = math.min(math.max(end_pos / 100, 0), 1);
-end_shape = math.min(math.max(math.floor(0.5 + end_shape), 0), 1);
 rand_period = math.max(rand_period, 4);
 rand_amplify = math.max(rand_amplify, 0);
 rand_seed = math.min(math.max(math.floor(0.5 + rand_seed), -2 ^ 16), 2 ^ 16 - 1);
 if start_pos > end_pos then return end
+
+--#endregion PI / normalize parameters.
 
 -- parse/measure the path.
 points, num_points = path_s.poll(path_type, points, num_points - 1, false, precision);
@@ -293,11 +296,11 @@ obj.clearbuffer(head_vertices and "tempbuffer" or "object", W, H, color);
 path_s.path_mask_line(
 	0, 1, line, antialias,
 	nil, points, num_points - 1, false, 1,
-	start_pos, end_pos, end_shape, 0,
-	dash_pat, dash_pos, false, 0,
+	start_pos, end_pos, end_shape, elbow_shape,
+	dash_pat, dash_pos, false, dash_end_shape,
 	1, 0, cx, cy,
 	head_vertices and { name = "tempbuffer", w = W, h = H } or nil,
-	head_vertices and "object" or nil); -- TODO: new parameters.
+	head_vertices and "object" or nil);
 
 -- draw the arrow heads.
 if head_vertices then

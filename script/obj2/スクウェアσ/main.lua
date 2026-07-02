@@ -58,13 +58,25 @@ local end_pos = 100
 ---$select:端の形状
 ---円 = 0
 ---四角 = 1
+---平坦 = 2
 local end_shape = 0
+
+---$select:接合点の形状
+---ラウンド = 0
+---ベベル = 1
+local elbow_shape = 0
 
 ---$value:破線パターン
 local dash_pat = {100,0}
 
 ---$track:破線位置, min = -4000, max = 4000, step = 0.01, scale = 0.25
 local dash_pos = 0
+
+---$select:dash::端の形状
+---円 = 0
+---四角 = 1
+---平坦 = 2
+local dash_end_shape = 0
 
 --group:塗り設定,false
 ---$track:塗り追加幅, min = 0, max = 1000, step = 0.01, scale = 0.2
@@ -92,6 +104,8 @@ local PI = {}
 
 local path_s = require("Path_S");
 local obj, math, tonumber, type = obj, math, tonumber, type;
+
+--#region PI / normalize parameters.
 
 -- take parameters.
 local function apply_aspect(r, a)
@@ -121,8 +135,10 @@ local radii = {
 		start_pos:		number?,
 		end_pos:		number?,
 		end_shape:		string?,
+		elbow_shape:	string?,
 		dash_pat:		table?,
 		dash_pos:		number?,
+		dash_end_shape:	string?,
 		color_fill:		number?,
 		alpha_fill:		number?,
 		inflation:		number?,
@@ -131,11 +147,6 @@ local radii = {
 		rand_seed:		number?,
 	}
 ]==]
-local function as_bool(t, v)
-	if type(t) == "boolean" then return t;
-	elseif type(t) == "number" then return t ~= 0;
-	else return v end
-end
 local function as_pair(c)
 	if type(c) == "number" then return c, c;
 	elseif type(c) == "table" then
@@ -161,22 +172,18 @@ elseif type(PI.radii) == "table" then
 		if x then radii[i] = { x, y } end
 	end
 end
-fixed_aspect = as_bool(PI.fixed_aspect, fixed_aspect);
+fixed_aspect = path_s.PI.as_bool(PI.fixed_aspect, fixed_aspect);
 antialias = tonumber(PI.antialias) or antialias;
 color_line = tonumber(PI.color_line) or color_line;
 alpha_line = tonumber(PI.alpha_line) or alpha_line;
 line = tonumber(PI.line) or line;
 start_pos = tonumber(PI.start_pos) or start_pos;
 end_pos = tonumber(PI.end_pos) or end_pos;
-
-if type(PI.end_shape) == "string" then
-	local name2num = {
-		["円"] = 0, ["四角"] = 1,
-	};
-	end_shape = name2num[PI.end_shape] or end_shape;
-end
+end_shape = path_s.PI.end_shape(PI.end_shape, end_shape);
+elbow_shape = path_s.PI.elbow_shape(PI.elbow_shape, elbow_shape);
 if type(PI.dash_pat) == "table" then dash_pat = PI.dash_pat end
 dash_pos = tonumber(PI.dash_pos) or dash_pos;
+dash_end_shape = path_s.PI.end_shape(PI.dash_end_shape, dash_end_shape);
 color_fill = tonumber(PI.color_fill) or color_fill;
 alpha_fill = tonumber(PI.alpha_fill) or alpha_fill;
 inflation = tonumber(PI.inflation) or inflation;
@@ -197,13 +204,14 @@ alpha_line = math.min(math.max(1 - alpha_line / 100, 0), 1);
 line = math.max(line, 0);
 start_pos = start_pos / 100;
 end_pos = end_pos / 100;
-end_shape = math.min(math.max(math.floor(0.5 + end_shape), 0), 1);
 color_fill = color_fill % 2 ^ 24;
 alpha_fill = math.min(math.max(1 - alpha_fill / 100, 0), 1);
 inflation = math.max(inflation, 0);
 rand_period = math.max(rand_period, 4);
 rand_amplify = math.max(rand_amplify, 0);
 rand_seed = math.min(math.max(math.floor(0.5 + rand_seed), -2 ^ 16), 2 ^ 16 - 1);
+
+--#endregion PI / normalize parameters.
 
 -- avoid corner sizes from being too large.
 do local prev = {
@@ -299,8 +307,8 @@ if has_fill or has_chrome then
 		path_s.path_mask_line_buffered(
 			0, alpha_line, line, antialias,
 			cache_name, n_pts, len, true,
-			start_pos, end_pos, end_shape, 0,
-			dash_pat, dash_pos, true, 0); -- TODO: new parameters.
+			start_pos, end_pos, end_shape, elbow_shape,
+			dash_pat, dash_pos, true, dash_end_shape);
 		if has_fill then
 			obj.draw();
 			obj.copybuffer("object", "tempbuffer");

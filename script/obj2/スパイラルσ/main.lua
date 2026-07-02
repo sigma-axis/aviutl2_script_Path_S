@@ -49,6 +49,7 @@ local end_pos = 100
 ---$select:端の形状
 ---円 = 0
 ---四角 = 1
+---平坦 = 2
 local end_shape = 0
 
 ---$track:曲線精度, min = 1, max = 128, step = 1, scale = 0.25
@@ -59,6 +60,12 @@ local dash_pat = {100,0}
 
 ---$track:破線位置, min = -4000, max = 4000, step = 0.01, scale = 0.25
 local dash_pos = 0
+
+---$select:dash::端の形状
+---円 = 0
+---四角 = 1
+---平坦 = 2
+local dash_end_shape = 0
 
 --group:ランダム変化,false
 ---$track:ランダム周期, min = 4, max = 1024, step = 0.01, scale = 0.25
@@ -90,6 +97,8 @@ if obj.getoption("gui") then
 	obj.setanchor({ start_X, start_Y, end_X, end_Y }, 2, "line");
 end
 
+--#region PI / normalize parameters.
+
 -- take parameters.
 --[==[
 	PI = {
@@ -108,6 +117,7 @@ end
 		precision:			number?,
 		dash_pat:			table?,
 		dash_pos:			number?,
+		dash_end_shape:		string?,
 		rand_period:		number?,
 		rand_amplify:		number?,
 		rand_fix_end:		boolean|number|nil,
@@ -115,11 +125,6 @@ end
 		antialias:			number?,
 	}
 ]==]
-local function as_bool(t, v)
-	if type(t) == "boolean" then return t;
-	elseif type(t) == "number" then return t ~= 0;
-	else return v end
-end
 start_X = tonumber(PI.start_X) or start_X;
 start_Y = tonumber(PI.start_Y) or start_Y;
 end_X = tonumber(PI.end_X) or end_X;
@@ -138,18 +143,14 @@ slope = tonumber(PI.slope) or slope;
 rotate = tonumber(PI.rotate) or rotate;
 start_pos = tonumber(PI.start_pos) or start_pos;
 end_pos = tonumber(PI.end_pos) or end_pos;
-if type(PI.end_shape) == "string" then
-	local name2num = {
-		["円"] = 0, ["四角"] = 1,
-	};
-	end_shape = name2num[PI.end_shape] or end_shape;
-end
+end_shape = path_s.PI.end_shape(PI.end_shape, end_shape);
 precision = tonumber(PI.precision) or precision;
 dash_pat = type(PI.dash_pat) == "table" and PI.dash_pat or dash_pat;
 dash_pos = tonumber(PI.dash_pos) or dash_pos;
+dash_end_shape = path_s.PI.end_shape(PI.dash_end_shape, dash_end_shape);
 rand_period = tonumber(PI.rand_period) or rand_period;
 rand_amplify = tonumber(PI.rand_amplify) or rand_amplify;
-rand_fix_end = as_bool(PI.rand_fix_end, rand_fix_end);
+rand_fix_end = path_s.PI.as_bool(PI.rand_fix_end, rand_fix_end);
 rand_seed = tonumber(PI.rand_seed) or rand_seed;
 antialias = tonumber(PI.antialias) or antialias;
 
@@ -162,12 +163,13 @@ line_shape = math.min(math.max(math.floor(0.5 + line_shape), 0), 1);
 rotate = math.pi / 180 * (rotate % 360);
 start_pos = math.min(math.max(start_pos / 100, 0), 1);
 end_pos = math.min(math.max(end_pos / 100, 0), 1);
-end_shape = math.min(math.max(math.floor(0.5 + end_shape), 0), 1);
 precision = math.max(precision, 1);
 rand_period = math.max(rand_period, 4);
 rand_amplify = math.max(rand_amplify, 0);
 rand_seed = math.min(math.max(math.floor(0.5 + rand_seed), -2 ^ 16), 2 ^ 16 - 1);
 antialias = math.max(antialias, 0);
+
+--#endregion PI / normalize parameters.
 
 -- prepare the function for the curve, which maps from a radius to a pair (angle, diff_radius).
 local curve_func if line_shape == 0 then
@@ -236,5 +238,5 @@ path_s.path_mask_line(
 	0, 1, line, antialias,
 	nil, pts, n_pts - 1, false, 1,
 	start_pos, end_pos, end_shape, 0,
-	dash_pat, dash_pos, false, 0,
-	1, 0, obj.cx, obj.cy); -- TODO: new parameters.
+	dash_pat, dash_pos, false, dash_end_shape,
+	1, 0, obj.cx, obj.cy);

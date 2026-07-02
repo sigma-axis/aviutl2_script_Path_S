@@ -49,13 +49,25 @@ local end_pos = 100
 ---$select:端の形状
 ---円 = 0
 ---四角 = 1
+---平坦 = 2
 local end_shape = 0
+
+---$select:接合点の形状
+---ラウンド = 0
+---ベベル = 1
+local elbow_shape = 0
 
 ---$value:破線パターン
 local dash_pat = {100,0}
 
 ---$track:破線位置, min = -4000, max = 4000, step = 0.01, scale = 0.25
 local dash_pos = 0
+
+---$select:dash::端の形状
+---円 = 0
+---四角 = 1
+---平坦 = 2
+local dash_end_shape = 0
 
 --group:ランダム変化,false
 ---$track:ランダム周期, min = 4, max = 1024, step = 0.01, scale = 0.25
@@ -86,6 +98,8 @@ if obj.getoption("gui") then
 	obj.setanchor({ start_X, start_Y, end_X, end_Y }, 2, "line");
 end
 
+--#region PI / normalize parameters.
+
 -- take parameters.
 --[==[
 	PI = {
@@ -109,11 +123,6 @@ end
 		antialias:			number?,
 	}
 ]==]
-local function as_bool(t, v)
-	if type(t) == "boolean" then return t;
-	elseif type(t) == "number" then return t ~= 0;
-	else return v end
-end
 start_X = tonumber(PI.start_X) or start_X;
 start_Y = tonumber(PI.start_Y) or start_Y;
 end_X = tonumber(PI.end_X) or end_X;
@@ -131,17 +140,14 @@ line_phase = tonumber(PI.line_phase) or line_phase;
 line_amplify = tonumber(PI.line_amplify) or line_amplify;
 start_pos = tonumber(PI.start_pos) or start_pos;
 end_pos = tonumber(PI.end_pos) or end_pos;
-if type(PI.end_shape) == "string" then
-	local name2num = {
-		["円"] = 0, ["四角"] = 1,
-	};
-	end_shape = name2num[PI.end_shape] or end_shape;
-end
+end_shape = path_s.PI.end_shape(PI.end_shape, end_shape);
+elbow_shape = path_s.PI.elbow_shape(PI.elbow_shape, elbow_shape);
 dash_pat = type(PI.dash_pat) == "table" and PI.dash_pat or dash_pat;
 dash_pos = tonumber(PI.dash_pos) or dash_pos;
+dash_end_shape = path_s.PI.end_shape(PI.dash_end_shape, dash_end_shape);
 rand_period = tonumber(PI.rand_period) or rand_period;
 rand_amplify = tonumber(PI.rand_amplify) or rand_amplify;
-rand_fix_end = as_bool(PI.rand_fix_end, rand_fix_end);
+rand_fix_end = path_s.PI.as_bool(PI.rand_fix_end, rand_fix_end);
 rand_seed = tonumber(PI.rand_seed) or rand_seed;
 antialias = tonumber(PI.antialias) or antialias;
 
@@ -153,11 +159,12 @@ line_period = math.max(line_period, 4);
 line_amplify = math.max(line_amplify, 0);
 start_pos = math.min(math.max(start_pos / 100, 0), 1);
 end_pos = math.min(math.max(end_pos / 100, 0), 1);
-end_shape = math.min(math.max(math.floor(0.5 + end_shape), 0), 1);
 rand_period = math.max(rand_period, 4);
 rand_amplify = math.max(rand_amplify, 0);
 rand_seed = math.min(math.max(math.floor(0.5 + rand_seed), -2 ^ 16), 2 ^ 16 - 1);
 antialias = math.max(antialias, 0);
+
+--#endregion PI / normalize parameters.
 
 -- further calculations.
 local length = ((end_X - start_X) ^ 2 + (end_Y - start_Y) ^ 2) ^ 0.5;
@@ -274,6 +281,6 @@ obj.clearbuffer("object", R - L, B - T, color);
 path_s.path_mask_line(
 	0, 1, line, antialias,
 	nil, pts, n_pts - 1, false, 1,
-	start_pos, end_pos, end_shape, 0,
-	dash_pat, dash_pos, false, 0,
-	1, 0, obj.cx, obj.cy); -- TODO: new parameters.
+	start_pos, end_pos, end_shape, elbow_shape,
+	dash_pat, dash_pos, false, dash_end_shape,
+	1, 0, obj.cx, obj.cy);

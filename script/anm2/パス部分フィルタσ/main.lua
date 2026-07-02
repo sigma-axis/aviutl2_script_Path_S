@@ -81,6 +81,8 @@ if obj.getoption("gui") then
 	end
 end
 
+--#region PI / normalize parameters.
+
 -- take parameters.
 --[==[
 	PI = {
@@ -99,29 +101,14 @@ end
 		extra_filter:	string?,
 	}
 ]==]
-local function as_bool(t, v)
-	if type(t) == "boolean" then return t;
-	elseif type(t) == "number" then return t ~= 0;
-	else return v end
-end
 num_points = tonumber(PI.num_points) or num_points;
-if type(PI.path_type) == "string" then
-	local name2num = {
-		["折れ線"] = 0, ["補間移動"] = 1, ["2次ベジェ曲線"] = 2, ["3次ベジェ曲線"] = 3,
-	};
-	path_type = name2num[PI.path_type] or path_type;
-end
+path_type = path_s.PI.path_type(PI.path_type, path_type);
 if type(PI.points) == "table" then points = PI.points end
 precision = tonumber(PI.precision) or precision;
 antialias = tonumber(PI.antialias) or antialias;
 inflation = tonumber(PI.inflation) or inflation;
-if type(PI.mode_fill) == "string" then
-	local name2num = {
-		["内側"] = 0, ["奇偶"] = 1, ["内側反転"] = 2, ["奇偶反転"] = 3,
-	};
-	mode_fill = name2num[PI.mode_fill] or mode_fill;
-end
-invert = as_bool(PI.invert, invert);
+mode_fill = path_s.PI.mode_fill(PI.mode_fill, mode_fill);
+invert = path_s.PI.as_bool(PI.invert, invert);
 X = tonumber(PI.X) or X;
 Y = tonumber(PI.Y) or Y;
 zoom = tonumber(PI.zoom) or zoom;
@@ -135,15 +122,15 @@ end
 
 -- normalize parameters.
 num_points = math.max(math.floor(0.5 + num_points), 3);
-path_type = math.min(math.max(math.floor(0.5 + path_type), 0), 3);
 precision = math.max(precision, 1);
 antialias = math.max(antialias, 1 / 1024);
 inflation = math.max(inflation, 0);
-mode_fill = math.min(math.max(math.floor(0.5 + mode_fill), 0), 3);
 zoom = math.min(math.max(zoom / 100, 0), 50);
 rotate = math.pi / 180 * (rotate % 360);
 extra_filter = math.min(math.max(math.floor(0.5 + extra_filter), 0), 1);
 if extra_filter == 1 and extra_script:match("^%s*(.-)%s*$") == "" then return end
+
+--#endregion PI / normalize parameters.
 
 -- backup the current image.
 local cache_name_ori, cache_name_eff = "cache:path_s/part/ori#"..obj.effect_id, "cache:path_s/part/eff";
