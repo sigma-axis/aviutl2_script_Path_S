@@ -231,17 +231,32 @@ Although, usage documentations for this script / plugin in languages other than 
 
 *ラインを描画するタイプのスクリプトでの設定です．*
 
-ラインの端点の形状を指定します．[「ループ」](#ループ)が OFF の場合のみ有効です．
+ラインの端点の形状を指定します．[「破線パターン」](#破線パターン--破線周期補正--破線位置)の途切れ目と，ラインの両端 (ある場合) で独立に指定します．
 
 | 端の形状 | 例 |
 |:---:|:---:|
 | `円` | ![Image of rounded endpoint](https://github.com/user-attachments/assets/0100b898-afe5-4b8a-b3eb-8ea5d6e30ce8) |
 | `四角` | ![Image of square endpoint](https://github.com/user-attachments/assets/f20cba23-64bd-472b-89ae-84ce36f0724f) |
 
+<!-- TODO: image of new shape "平坦" -->
+
 初期値は `円`.
 
-> [!NOTE]
-> [「破線パターン」](#破線パターン--破線周期補正--破線位置)の途切れ目では，この設定によらず `円` に相当する形状になります．
+> [!INFO]
+> スクリプトの `obj.effect()` で指定する場合，ライン両端は `"端の形状"`, 破線の途切れ目は `"dash::端の形状"` でそれぞれ指定します．
+
+####  接合点の形状
+
+*ラインを描画するタイプのスクリプトでの設定です．*
+
+ラインの曲がり角での形状を指定します．
+
+| 接合点の形状 | 例 |
+|:---:|:---:|
+| `ラウンド` | TODO: Image of rounded joint |
+| `ベベル` | TODO: Image of bevel joint |
+
+初期値は `ラウンド`.
 
 ####  破線パターン / 破線周期補正 / 破線位置
 
@@ -1026,6 +1041,8 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
 
     - `find_end_points()` 関数の削除．
       - `path_mask_line_buffered()` 関数の引数 `end_points` に利用していたが不必要に．
+
+  - `beta52` での動作確認．
 
 ##  改版履歴
 
