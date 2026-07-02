@@ -204,12 +204,6 @@ local th = math.max(line * (end_shape == 1 and 0.5 ^ 0.5 or 0.5), inflation) + a
 L, T = math.floor(L - th), math.floor(T - th);
 R, B = math.max(math.ceil(R + th), L + 1), math.max(math.ceil(B + th), T + 1);
 
--- calculate the end points from the calculated length.
-local end_points = nil;
-if end_shape == 1 and has_chrome then
-	end_points = path_s.find_end_points(points, num_points, loop, start_pos, end_pos, -L, -T);
-end
-
 -- prepare the canvas.
 obj.clearbuffer("object", R - L, B - T);
 obj.cx, obj.cy = -(L + R) / 2, -(T + B) / 2;
@@ -244,8 +238,8 @@ if has_fill or has_chrome then
 		path_s.path_mask_line_buffered(
 			0, alpha_line, line, antialias,
 			cache_name, num_segments, len, loop,
-			start_pos, end_pos, end_shape, end_points,
-			dash_pat, dash_pos, dash_adj);
+			start_pos, end_pos, end_shape, 0,
+			dash_pat, dash_pos, dash_adj, 0);
 		if has_fill then
 			obj.draw();
 			obj.copybuffer("object", "tempbuffer");

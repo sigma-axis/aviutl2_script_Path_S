@@ -293,10 +293,11 @@ obj.clearbuffer(head_vertices and "tempbuffer" or "object", W, H, color);
 path_s.path_mask_line(
 	0, 1, line, antialias,
 	nil, points, num_points - 1, false, 1,
-	start_pos, end_pos, end_shape, dash_pat, dash_pos, false,
+	start_pos, end_pos, end_shape, 0,
+	dash_pat, dash_pos, false, 0,
 	1, 0, cx, cy,
 	head_vertices and { name = "tempbuffer", w = W, h = H } or nil,
-	head_vertices and "object" or nil);
+	head_vertices and "object" or nil); -- TODO: new parameters.
 
 -- draw the arrow heads.
 if head_vertices then

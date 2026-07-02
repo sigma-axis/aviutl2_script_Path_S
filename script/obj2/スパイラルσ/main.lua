@@ -235,5 +235,6 @@ obj.clearbuffer("object", R - L, B - T, color);
 path_s.path_mask_line(
 	0, 1, line, antialias,
 	nil, pts, n_pts - 1, false, 1,
-	start_pos, end_pos, end_shape, dash_pat, dash_pos, false,
-	1, 0, obj.cx, obj.cy);
+	start_pos, end_pos, end_shape, 0,
+	dash_pat, dash_pos, false, 0,
+	1, 0, obj.cx, obj.cy); -- TODO: new parameters.

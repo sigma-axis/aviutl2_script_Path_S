@@ -16,15 +16,14 @@ end
 ---| 2 # 反転
 ---| 3 # 奇偶反転
 
----@class end_points 曲線の両端の情報を記述．2点の座標と正方向への方向ベクトル．
----@field [1] number? X1
----@field [2] number? Y1
----@field [3] number? dx1
----@field [4] number? dy1
----@field [5] number? X2
----@field [6] number? Y2
----@field [7] number? dx2
----@field [8] number? dy2
+---@alias end_shape # 端の形状．
+---| 0 # 円
+---| 1 # 四角
+---| 2 # 平坦
+
+---@alias elbow_shape # 接合点の形状．
+---| 0 # ラウンド
+---| 1 # ベベル
 
 local anchor, poll do
 	local function pt(pts, i) return tonumber(pts[i]) or 0 end
@@ -152,7 +151,7 @@ local anchor, poll do
 	---曲線を表すパスを折れ線の列に変換する．
 	---@param path_type path_type パスの種類．折れ線の場合は実質 shallow copy が取られる．
 	---@param pts any[] 点列の配列， `{ x1, y1, x2, y2, x3, y3, ... }` の形式．
-	---@param n_segs integer パスの分割区間の個数．
+	---@param n_segs integer パスの分割区間の個数．1 以上．
 	---@param loop boolean 閉じたパスかどうか．
 	---@param prec number 折れ線の許容最長距離．
 	---@return number[] pts2 結果の折れ線の頂点を表す点列．`loop` が true の場合は末尾には最初と同じ点が格納される．
@@ -246,7 +245,7 @@ end
 
 ---折れ線の bounding box と長さを計算．
 ---@param pts number[] 折れ線の頂点を表す点列．
----@param n_pts integer `pts` に含まれる点の個数．
+---@param n_pts integer `pts` に含まれる点の個数．1 以上．
 ---@return number L, number R, number T, number B bounding box の座標．
 ---@return number length 折れ線の長さ．
 local function measure(pts, n_pts)
@@ -298,42 +297,10 @@ local function find_index(pos, tbl, n_pts)
 	return i, j, tbl;
 end
 
----曲線の両端の情報 (2点の座標と正方向への方向ベクトル) を計算・取得する．
----@param pts number[] 折れ線の頂点を表す点列．
----@param n_pts integer `pts` に含まれる点の個数．
----@param loop boolean 閉じたパスかどうか．
----@param start_pos number パスの始点の位置をパス全体の長さからの比で 0.0 から 1.0 に正規化した数値．ただしループの場合はこの範囲を超えることもある．
----@param end_pos number パスの終点の位置をパス全体の長さからの比で 0.0 から 1.0 に正規化した数値．ただしループの場合はこの範囲を超えることもある．
----@param offset_x number 両端位置の X 方向の移動量．
----@param offset_y number 両端位置の Y 方向の移動量．
----@return end_points # 曲線の両端の情報を記述．2点の座標と正方向への方向ベクトル．
-local function find_end_points(pts, n_pts, loop, start_pos, end_pos, offset_x, offset_y)
-	-- calculate the end points from the calculated length.
-	if loop then start_pos, end_pos = start_pos % 1, end_pos % 1
-	else start_pos, end_pos = math.min(math.max(start_pos, 0), 1), math.min(math.max(end_pos, 0), 1) end
-
-	local ret = { 0.0, 0.0, 0.0, 0.0; 0.0, 0.0, 0.0, 0.0 };
-	local i, j, l = find_index(-start_pos, pts, n_pts);
-	ret[1], ret[2], ret[3], ret[4] =
-		(1 - j) * pts[2 * i - 1] + j * pts[2 * i + 1] + offset_x,
-		(1 - j) * pts[2 * i - 0] + j * pts[2 * i + 2] + offset_y,
-		pts[2 * i + 1] - pts[2 * i - 1],
-		pts[2 * i + 2] - pts[2 * i - 0];
-
-	i, j = find_index(-end_pos, l);
-	ret[5], ret[6], ret[7], ret[8] =
-		(1 - j) * pts[2 * i - 1] + j * pts[2 * i + 1] + offset_x,
-		(1 - j) * pts[2 * i - 0] + j * pts[2 * i + 2] + offset_y,
-		pts[2 * i + 1] - pts[2 * i - 1],
-		pts[2 * i + 2] - pts[2 * i - 0];
-
-	return ret;
-end
-
 ---点列に対して拡縮回転平行移動を適用する．
 ---@param pts number[] 適用先の点列．このテーブルの内容を書き換える．
----@param n_pts integer `pts` に含まれる点の個数．
----@param scale number 拡縮の比率．
+---@param n_pts integer `pts` に含まれる点の個数．0 以上．
+---@param scale number 拡縮の比率．0 以上の実数．
 ---@param rotate number ラジアン単位の回転角．
 ---@param dx number? X方向の平行移動量．省略時は 0. 拡縮回転の後に適用される．
 ---@param dy number? Y方向の平行移動量．省略時は 0. 拡縮回転の後に適用される．
@@ -367,7 +334,7 @@ local disk_rand do
 end
 ---パスに対してランダム移動を適用する．乱数器は `obj.rand1()`．
 ---@param pts number[] 適用先の点列．このテーブルの内容は書き換わらない．
----@param n_pts integer `pts` に含まれる点の個数．
+---@param n_pts integer `pts` に含まれる点の個数．2 以上．
 ---@param period number ランダムを適用する距離周期，ピクセル単位．
 ---@param rand_range number 各点がランダム移動する最大距離，ピクセル単位．
 ---@param end_mode 0|1|2 両端での特別扱いを指定．0: 特になし, 1: 両端は固定, 2: 両端のランダム移動量を揃える (ループ用).
@@ -486,10 +453,10 @@ end
 ---@param alpha_outer number パス外側のマスクのアルファ値を 0.0 から 1.0 で指定．
 ---@param alpha_inner number パス内側のマスクのアルファ値を 0.0 から 1.0 で指定．
 ---@param mode_fill mode_fill 塗りつぶし範囲の指定．
----@param inflation number 「追加幅」をピクセル単位で指定．
----@param antialias number 「ぼかし幅」をピクセル単位で指定．
+---@param inflation number 「追加幅」をピクセル単位で指定．0 以上の実数．
+---@param antialias number 「ぼかし幅」をピクセル単位で指定．正の実数 (0 は不可).
 ---@param buffer_name string 折れ線の頂点データのあるバッファ名．
----@param num_points integer バッファに含まれる頂点数．
+---@param num_points integer バッファに含まれる頂点数．3 以上．
 ---@param target_buffer { name: string, w: integer, h: integer }? マスク適用先のバッファ名 (e.g. "object", "cache:foo") とその幅と高さを指定．省略時は `{ name = "object", w = obj.w, h = obj.h }`.
 local function path_mask_area_buffered(
 	alpha_outer, alpha_inner, mode_fill,
@@ -515,13 +482,13 @@ end
 ---@param alpha_outer number パス外側のマスクのアルファ値を 0.0 から 1.0 で指定．
 ---@param alpha_inner number パス内側のマスクのアルファ値を 0.0 から 1.0 で指定．
 ---@param mode_fill mode_fill 塗りつぶし範囲の指定．
----@param inflation number 「追加幅」をピクセル単位で指定．
----@param antialias number 「ぼかし幅」をピクセル単位で指定．
+---@param inflation number 「追加幅」をピクセル単位で指定．0 以上の実数．
+---@param antialias number 「ぼかし幅」をピクセル単位で指定．正の実数 (0 は不可).
 ---@param path_type path_type|nil 「線タイプ」(パスの種類) を指定．`nil` を指定した場合，折れ線への変換や点列のコピーを省略する．このとき `pts` は既に折れ線の前提で，テーブルの内容も書き換わる．
 ---@param pts any[] 点列の配列， `{ x1, y1, x2, y2, x3, y3, ... }` の形式．
----@param n_segs integer パスの分割区間の個数．
+---@param n_segs integer パスの分割区間の個数．1 以上．
 ---@param prec number 「曲線精度」(折れ線の許容最長距離) を指定．
----@param scale number 「拡大率」を指定．
+---@param scale number 「拡大率」を指定．0 以上の実数．
 ---@param rotate number 「回転」を指定．
 ---@param dx number 「移動X」を指定．拡縮回転の後に適用．省略時は 0.
 ---@param dy number 「移動Y」を指定．拡縮回転の後に適用．省略時は 0.
@@ -574,25 +541,26 @@ end
 ---パスマスク(ライン)σ をバッファに送った点列データを元に適用する．
 ---@param alpha_outer number パス外側のマスクのアルファ値を 0.0 から 1.0 で指定．
 ---@param alpha_inner number パス内側のマスクのアルファ値を 0.0 から 1.0 で指定．
----@param line_width number 「ライン幅」をピクセル単位で指定．
----@param antialias number 「ぼかし幅」をピクセル単位で指定．
+---@param line_width number 「ライン幅」をピクセル単位で指定．0 以上の実数．
+---@param antialias number 「ぼかし幅」をピクセル単位で指定．正の実数 (0 は不可).
 ---@param buffer_name string 折れ線の頂点データのあるバッファ名．
----@param num_points integer バッファに含まれる頂点数．
+---@param num_points integer バッファに含まれる頂点数．2 以上．
 ---@param len_path number バッファに含まれる折れ線の累計長さ．
 ---@param loop boolean 閉じたパスかどうか．
 ---@param start_pos number 「開始位置」を 0.0 から 1.0 に正規化した数値で指定．ただしループの場合はこの範囲を超えることもある．
 ---@param end_pos number 「終了位置」を 0.0 から 1.0 に正規化した数値で指定．ただしループの場合はこの範囲を超えることもある．
----@param end_shape 0|1 「端の形状」を指定．`1` (四角) を指定した場合，`end_points` を省略せず指定すること．
----@param end_points end_points|nil `end_shape` が `1` のときのみ有効．曲線の両端の情報を記述．2点の座標と正方向への方向ベクトル．
+---@param end_shape end_shape 「端の形状」を指定．
+---@param elbow_shape elbow_shape 「接合点の形状」を指定．
 ---@param dash_pat number[] 「破線パターン」を `{ opaque_len1, blank_len1, opaque_len2, blank_len2, ... }` の形式で指定．
 ---@param dash_pos number 「破線位置」をピクセル単位で指定．
 ---@param dash_adj boolean 「破線周期補正」を指定．
+---@param dash_end_shape end_shape 破線の「端の形状」を指定．
 ---@param target_buffer { name: string, w: integer, h: integer }? マスク適用先のバッファ名 (e.g. "object", "cache:foo") とその幅と高さを指定．省略時は `{ name = "object", w = obj.w, h = obj.h }`.
 local function path_mask_line_buffered(
 	alpha_outer, alpha_inner, line_width, antialias,
 	buffer_name, num_points, len_path, loop,
-	start_pos, end_pos, end_shape, end_points,
-	dash_pat, dash_pos, dash_adj,
+	start_pos, end_pos, end_shape, elbow_shape,
+	dash_pat, dash_pos, dash_adj, dash_end_shape,
 	target_buffer)
 	-- unwrap target_buffer.
 	local tgt_name = target_buffer and target_buffer.name or "object";
@@ -679,48 +647,14 @@ local function path_mask_line_buffered(
 		for i, v in ipairs(dash_pat) do dash_pat[i] = adj * v end
 	end
 
-	-- handle the shape of the end points.
-	local endpt = {
-		-- dummy, out-of-bound data.
-		-2, -2, 4 * math.max(line_width + antialias, 4), 0,
-		-2, -2, 4 * math.max(line_width + antialias, 4), 0,
-	};
-	if end_shape == 1 and end_points and start_pos <= end_pos and (not loop or start_pos + 1 > end_pos) then
-		for i = 1, 5, 4 do
-			if sum_dash_len > 0 then
-				-- identify the position in the dash pattern.
-				local pos = i > 1 and end_pos or start_pos;
-				if loop then pos = pos % 1 end
-				pos = (-dash_pos + dash_pat[1] + len_path * pos) % sum_dash_len;
-				for k, v in ipairs(dash_pat) do
-					pos = pos - v;
-					if pos < 0 then
-						-- invalidate when on a non-stroke part.
-						if k % 2 == 1 then end_points[i] = nil end
-						break;
-					end
-				end
-			end
-
-			local x, y, z, w = end_points[i], end_points[i + 1], end_points[i + 2], end_points[i + 3];
-			if x and y and z and w then
-				local l = (z ^ 2 + w ^ 2) ^ 0.5;
-				if l > 0 then z, w = z / l, w / l else z, w = 1, 0 end
-				if i > 1 then z, w = -z, -w end
-				endpt[i], endpt[i + 1], endpt[i + 2], endpt[i + 3] = x, y, z, w;
-			end
-		end
-	end
-
 	-- mask with the path.
 	if end_pos - start_pos >= 1 and sum_dash_len <= 0 then
 		obj.pixelshader("carve@パスマスク(ライン)σ@Path_S", tgt_name, buffer_name,
 		{
 			alpha_inner - alpha_outer, alpha_outer;
-			num_points, math.max(line_width - 1, 0) / 2, antialias; 0, 0, 0;
+			num_points, math.max(line_width - 1, 0) / 2, antialias;
 
-			endpt[1], endpt[2], endpt[3], endpt[4];
-			endpt[5], endpt[6], endpt[7], endpt[8];
+			end_shape; elbow_shape;
 		}, "mask");
 	else
 		obj.pixelshader("carve_dash@パスマスク(ライン)σ@Path_S", tgt_name, buffer_name,
@@ -729,8 +663,7 @@ local function path_mask_line_buffered(
 			num_points, math.max(line_width - 1, 0) / 2, antialias;
 			#dash_pat, dash_len0, dash_idx0 - 1;
 
-			endpt[1], endpt[2], endpt[3], endpt[4];
-			endpt[5], endpt[6], endpt[7], endpt[8];
+			end_shape; elbow_shape; dash_end_shape; loop and 1 or 0;
 
 			len_path * phase_whole0, len_path * phase_whole1, len_path * phase_whole2, len_path * 2;
 			unpack(dash_pat)
@@ -741,20 +674,22 @@ end
 ---パスマスク(ライン)σ を点列を元に適用する．
 ---@param alpha_outer number パス外側のマスクのアルファ値を 0.0 から 1.0 で指定．
 ---@param alpha_inner number パス内側のマスクのアルファ値を 0.0 から 1.0 で指定．
----@param line_width number 「ライン幅」をピクセル単位で指定．
----@param antialias number 「ぼかし幅」をピクセル単位で指定．
+---@param line_width number 「ライン幅」をピクセル単位で指定．0 以上の実数．
+---@param antialias number 「ぼかし幅」をピクセル単位で指定．正の実数 (0 は不可).
 ---@param path_type path_type|nil 「線タイプ」(パスの種類) を指定．`nil` を指定した場合，折れ線への変換や点列のコピーを省略する．このとき `pts` は既に折れ線の前提で，テーブルの内容も書き換わる．
 ---@param pts any[] 点列の配列， `{ x1, y1, x2, y2, x3, y3, ... }` の形式．
----@param n_segs integer パスの分割区間の個数．
+---@param n_segs integer パスの分割区間の個数．1 以上．
 ---@param loop boolean 閉じたパスかどうか．
 ---@param prec number 「曲線精度」(折れ線の許容最長距離) を指定．
 ---@param start_pos number 「開始位置」を 0.0 から 1.0 に正規化した数値で指定．ただしループの場合はこの範囲を超えることもある．
 ---@param end_pos number 「終了位置」を 0.0 から 1.0 に正規化した数値で指定．ただしループの場合はこの範囲を超えることもある．
----@param end_shape 0|1 「端の形状」を指定．
+---@param end_shape end_shape 「端の形状」を指定．
+---@param elbow_shape elbow_shape 「接合点の形状」を指定．
 ---@param dash_pat number[] 「破線パターン」を `{ opaque_len1, blank_len1, opaque_len2, blank_len2, ... }` の形式で指定．
 ---@param dash_pos number 「破線位置」をピクセル単位で指定．
 ---@param dash_adj boolean 「破線周期補正」を指定．
----@param scale number 「拡大率」を指定．
+---@param dash_end_shape end_shape 破線の「端の形状」を指定．
+---@param scale number 「拡大率」を指定．0 以上の実数．
 ---@param rotate number 「回転」を指定．
 ---@param dx number? 「移動X」を指定．拡縮回転の後に適用．省略時は 0.
 ---@param dy number? 「移動Y」を指定．拡縮回転の後に適用．省略時は 0.
@@ -763,7 +698,8 @@ end
 local function path_mask_line(
 	alpha_outer, alpha_inner, line_width, antialias,
 	path_type, pts, n_segs, loop, prec,
-	start_pos, end_pos, end_shape, dash_pat, dash_pos, dash_adj,
+	start_pos, end_pos, end_shape, elbow_shape,
+	dash_pat, dash_pos, dash_adj, dash_end_shape,
 	scale, rotate, dx, dy,
 	target_buffer, temp_buffer_name)
 	-- unwrap target_buffer.
@@ -798,15 +734,11 @@ local function path_mask_line(
 	temp_buffer_name = temp_buffer_name or "tempbuffer";
 	send(points, num_points, tgt_w / 2, tgt_h / 2, temp_buffer_name);
 
-	-- calculate the end points from the calculated length.
-	local end_points = end_shape == 1 and
-		find_end_points(points, num_points, loop, start_pos, end_pos, tgt_w / 2, tgt_h / 2) or nil;
-
 	path_mask_line_buffered(
 		alpha_outer, alpha_inner, line_width, antialias,
 		temp_buffer_name, num_points, len, loop,
-		start_pos, end_pos, end_shape, end_points,
-		dash_pat, dash_pos, dash_adj,
+		start_pos, end_pos, end_shape, elbow_shape,
+		dash_pat, dash_pos, dash_adj, dash_end_shape,
 		target_buffer);
 end
 
@@ -838,7 +770,6 @@ return {
 	poll = poll,
 	measure = measure,
 	find_index = find_index,
-	find_end_points = find_end_points,
 	transform = transform,
 	randomize = randomize,
 	send = send,

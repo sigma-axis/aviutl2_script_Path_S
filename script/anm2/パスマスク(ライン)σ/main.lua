@@ -41,7 +41,13 @@ local end_pos = 100
 ---$select:端の形状
 ---円 = 0
 ---四角 = 1
+---平坦 = 2
 local end_shape = 0
+
+---$select:接合点の形状
+---ラウンド = 0
+---ベベル = 1
+local elbow_shape = 0
 
 ---$value:破線パターン
 local dash_pat = {100,0}
@@ -51,6 +57,12 @@ local dash_adj = true
 
 ---$track:破線位置, min = -4000, max = 4000, step = 0.01, scale = 0.25
 local dash_pos = 0
+
+---$select:dash::端の形状
+---円 = 0
+---四角 = 1
+---平坦 = 2
+local dash_end_shape = 0
 
 --group:配置,false
 ---$track:移動X, min = -4000, max = 4000, step = 0.01, scale = 0.25
@@ -78,20 +90,21 @@ local PI = {}
 
 --[[pixelshader@carve:
 ---$include "../../path_coord_header.hlsl"
+---$include "line_dist_header.hlsl"
 ---$include "carve.hlsl"
 ]]
 --[[pixelshader@carve_dash:
 ---$include "../../path_coord_header.hlsl"
+---$include "line_dist_header.hlsl"
 ---$include "carve_dash.hlsl"
 ]]
 local path_s = require("Path_S");
 local obj, math, tonumber, type = obj, math, tonumber, type;
 
 -- see if the points are already buffered.
-local pt_buff, len_buff, endpt_buff =
+local pt_buff, len_buff =
 	type(PI.pt_buff) == "string" and PI.pt_buff or nil,
-	tonumber(PI.len_buff),
-	type(PI.endpt_buff) == "table" and PI.endpt_buff or nil;
+	tonumber(PI.len_buff);
 if (pt_buff and pt_buff ~= "tempbuffer" and not pt_buff:match("^cache:.+$")) or not (len_buff and len_buff > 0) then pt_buff, len_buff = nil, -1 end
 
 -- set anchors.
@@ -107,28 +120,29 @@ end
 -- take parameters.
 --[==[
 	PI = {
-		line:		number?,
-		intensity:	number?,
-		num_points:	number?,
-		path_type:	string?,
-		points:		table?,
-		precision:	number?,
-		antialias:	number?,
-		loop:		boolean|number|nil,
-		start_pos:	number?,
-		end_pos:	number?,
-		end_shape:	string?,
-		dash_pat:	table?,
-		dash_adj:	boolean|number|nil,
-		dash_pos:	number?,
-		invert:		boolean|number|nil,
-		X:			number?,
-		Y:			number?,
-		zoom:		number?,
-		rotate:		number?,
-		pt_buff:	string?,
-		len_buff:	number?,
-		endpt_buff:	table?,
+		intensity:		number?,
+		invert:			boolean|number|nil,
+		line:			number?,
+		num_points:		number?,
+		path_type:		string?,
+		points:			table?,
+		loop:			boolean|number|nil,
+		precision:		number?,
+		start_pos:		number?,
+		end_pos:		number?,
+		end_shape:		string?,
+		elbow_shape:	string?,
+		dash_pat:		table?,
+		dash_adj:		boolean|number|nil,
+		dash_pos:		number?,
+		dash_end_shape:	string?,
+		X:				number?,
+		Y:				number?,
+		zoom:			number?,
+		rotate:			number?,
+		antialias:		number?,
+		pt_buff:		string?,
+		len_buff:		number?,
 	}
 ]==]
 local function as_bool(t, v)
@@ -136,8 +150,9 @@ local function as_bool(t, v)
 	elseif type(t) == "number" then return t ~= 0;
 	else return v end
 end
-line = tonumber(PI.line) or line;
 intensity = tonumber(PI.intensity) or intensity;
+invert = as_bool(PI.invert, invert);
+line = tonumber(PI.line) or line;
 num_points = tonumber(PI.num_points) or num_points;
 if type(PI.path_type) == "string" then
 	local name2num = {
@@ -146,9 +161,8 @@ if type(PI.path_type) == "string" then
 	path_type = name2num[PI.path_type] or path_type;
 end
 if type(PI.points) == "table" then points = PI.points end
-precision = tonumber(PI.precision) or precision;
-antialias = tonumber(PI.antialias) or antialias;
 loop = as_bool(PI.loop, loop);
+precision = tonumber(PI.precision) or precision;
 start_pos = tonumber(PI.start_pos) or start_pos;
 end_pos = tonumber(PI.end_pos) or end_pos;
 if type(PI.end_shape) == "string" then
@@ -157,27 +171,41 @@ if type(PI.end_shape) == "string" then
 	};
 	end_shape = name2num[PI.end_shape] or end_shape;
 end
+if type(PI.elbow_shape) == "string" then
+	local name2num = {
+		["ラウンド"] = 0, ["ベベル"] = 1
+	};
+	elbow_shape = name2num[PI.elbow_shape] or elbow_shape;
+end
 if type(PI.dash_pat) == "table" then dash_pat = PI.dash_pat end
 dash_adj = as_bool(PI.dash_adj, dash_adj);
 dash_pos = tonumber(PI.dash_pos) or dash_pos;
-invert = as_bool(PI.invert, invert);
+if type(PI.dash_end_shape) == "string" then
+	local name2num = {
+		["円"] = 0, ["四角"] = 1,
+	};
+	dash_end_shape = name2num[PI.dash_end_shape] or dash_end_shape;
+end
 X = tonumber(PI.X) or X;
 Y = tonumber(PI.Y) or Y;
 zoom = tonumber(PI.zoom) or zoom;
 rotate = tonumber(PI.rotate) or rotate;
+antialias = tonumber(PI.antialias) or antialias;
 
 -- normalize parameters.
-line = math.max(line, 0);
 intensity = math.min(math.max(intensity / 100, 0), 1);
+line = math.max(line, 0);
 num_points = math.max(math.floor(0.5 + num_points), 2);
 path_type = math.min(math.max(math.floor(0.5 + path_type), 0), 3);
 precision = math.max(precision, 1);
-antialias = math.max(antialias, 1 / 1024);
 start_pos = start_pos / 100;
 end_pos = end_pos / 100;
-end_shape = math.min(math.max(math.floor(0.5 + end_shape), 0), 1);
+end_shape = math.min(math.max(math.floor(0.5 + end_shape), 0), 2);
+elbow_shape = math.min(math.max(math.floor(0.5 + elbow_shape), 0), 1);
+dash_end_shape = math.min(math.max(math.floor(0.5 + dash_end_shape), 0), 2);
 zoom = math.min(math.max(zoom / 100, 0), 50);
 rotate = math.pi / 180 * (rotate % 360);
+antialias = math.max(antialias, 1 / 1024);
 if intensity <= 0 then return end
 
 local alpha_outer, alpha_inner = 1 - intensity, 1;
@@ -186,13 +214,13 @@ if pt_buff then
 	path_s.path_mask_line_buffered(
 		alpha_outer, alpha_inner, line, antialias,
 		pt_buff, num_points, len_buff, loop,
-		start_pos, end_pos, end_shape, endpt_buff,
-		dash_pat, dash_pos, dash_adj);
+		start_pos, end_pos, end_shape, elbow_shape,
+		dash_pat, dash_pos, dash_adj, dash_end_shape);
 else
 	path_s.path_mask_line(
 		alpha_outer, alpha_inner, line, antialias,
 		path_type, points, num_points - (loop and 0 or 1), loop, precision,
-		start_pos, end_pos, end_shape,
-		dash_pat, dash_pos, dash_adj,
+		start_pos, end_pos, end_shape, elbow_shape,
+		dash_pat, dash_pos, dash_adj, dash_end_shape,
 		zoom, rotate, X, Y);
 end

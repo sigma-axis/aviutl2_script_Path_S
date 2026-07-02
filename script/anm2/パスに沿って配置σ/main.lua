@@ -139,7 +139,7 @@ if toggle_gui then
 	path_s.path_mask_line(
 		0, 1, 2, 1,
 		0, points, num_points - (loop and 0 or 1), loop, 1,
-		0, 1, 0, { 6, 10 }, 0, true,
+		0, 1, 0, 0, { 6, 10 }, 0, true, 0,
 		1, 0, -(L + R) / 2, -(T + B) / 2);
 
 	-- adjust the position.
