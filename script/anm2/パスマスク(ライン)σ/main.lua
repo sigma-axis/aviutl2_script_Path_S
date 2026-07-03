@@ -45,12 +45,12 @@ local end_pos = 100
 ---三角 = 3
 local end_shape = 0
 
----$select:接合点の形状
+---$select:線結合の形状
 ---ラウンド = 0
 ---ベベル = 1
 ---マイター = 2
 ---ブランク = 3
-local elbow_shape = 0
+local join_shape = 0
 
 ---$track:マイター限界, min = 100, max = 3200, step = 0.01, scale = 0.25
 local miter_limit = 400
@@ -140,7 +140,7 @@ end
 		start_pos:		number?,
 		end_pos:		number?,
 		end_shape:		string?,
-		elbow_shape:	string?,
+		join_shape:		string?,
 		miter_limit:	number?,
 		dash_pat:		table?,
 		dash_adj:		boolean|number|nil,
@@ -166,7 +166,7 @@ precision = tonumber(PI.precision) or precision;
 start_pos = tonumber(PI.start_pos) or start_pos;
 end_pos = tonumber(PI.end_pos) or end_pos;
 end_shape = path_s.PI.end_shape(PI.end_shape, end_shape);
-elbow_shape = path_s.PI.elbow_shape(PI.elbow_shape, elbow_shape);
+join_shape = path_s.PI.join_shape(PI.join_shape, join_shape);
 miter_limit = tonumber(PI.miter_limit) or miter_limit;
 if type(PI.dash_pat) == "table" then dash_pat = PI.dash_pat end
 dash_adj = path_s.PI.as_bool(PI.dash_adj, dash_adj);
@@ -199,13 +199,13 @@ if pt_buff then
 	path_s.path_mask_line_buffered(
 		alpha_outer, alpha_inner, line, antialias,
 		pt_buff, num_points, len_buff, loop,
-		start_pos, end_pos, end_shape, elbow_shape, miter_limit,
+		start_pos, end_pos, end_shape, join_shape, miter_limit,
 		dash_pat, dash_pos, dash_adj, dash_end_shape);
 else
 	path_s.path_mask_line(
 		alpha_outer, alpha_inner, line, antialias,
 		path_type, points, num_points - (loop and 0 or 1), loop, precision,
-		start_pos, end_pos, end_shape, elbow_shape, miter_limit,
+		start_pos, end_pos, end_shape, join_shape, miter_limit,
 		dash_pat, dash_pos, dash_adj, dash_end_shape,
 		zoom, rotate, X, Y);
 end

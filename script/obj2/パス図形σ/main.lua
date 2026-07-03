@@ -47,12 +47,12 @@ local end_pos = 100
 ---三角 = 3
 local end_shape = 0
 
----$select:接合点の形状
+---$select:線結合の形状
 ---ラウンド = 0
 ---ベベル = 1
 ---マイター = 2
 ---ブランク = 3
-local elbow_shape = 0
+local join_shape = 0
 
 ---$track:マイター限界, min = 100, max = 3200, step = 0.01, scale = 0.25
 local miter_limit = 400
@@ -133,7 +133,7 @@ end
 		start_pos:		number?,
 		end_pos:		number?,
 		end_shape:		string?,
-		elbow_shape:	string?,
+		join_shape:		string?,
 		miter_limit:	number?,
 		dash_pat:		table?,
 		dash_adj:		boolean|number|nil,
@@ -166,7 +166,7 @@ alpha_line = tonumber(PI.alpha_line) or alpha_line;
 start_pos = tonumber(PI.start_pos) or start_pos;
 end_pos = tonumber(PI.end_pos) or end_pos;
 end_shape = path_s.PI.end_shape(PI.end_shape, end_shape);
-elbow_shape = path_s.PI.elbow_shape(PI.elbow_shape, elbow_shape);
+join_shape = path_s.PI.join_shape(PI.join_shape, join_shape);
 miter_limit = tonumber(PI.miter_limit) or miter_limit;
 if type(PI.dash_pat) == "table" then dash_pat = PI.dash_pat end
 dash_adj = path_s.PI.as_bool(PI.dash_adj, dash_adj);
@@ -221,7 +221,7 @@ end
 local L, R, T, B, len = path_s.measure(points, num_points);
 local th = math.max(line * math.max(
 	end_shape == 1 and 2 ^ 0.5 or 1,
-	elbow_shape == 2 and miter_limit or 1) / 2,
+	join_shape == 2 and miter_limit or 1) / 2,
 	inflation) + antialias;
 L, T = math.floor(L - th), math.floor(T - th);
 R, B = math.max(math.ceil(R + th), L + 1), math.max(math.ceil(B + th), T + 1);
@@ -260,7 +260,7 @@ if has_fill or has_chrome then
 		path_s.path_mask_line_buffered(
 			0, alpha_line, line, antialias,
 			cache_name, num_segments, len, loop,
-			start_pos, end_pos, end_shape, elbow_shape, miter_limit,
+			start_pos, end_pos, end_shape, join_shape, miter_limit,
 			dash_pat, dash_pos, dash_adj, dash_end_shape);
 		if has_fill then
 			obj.draw();

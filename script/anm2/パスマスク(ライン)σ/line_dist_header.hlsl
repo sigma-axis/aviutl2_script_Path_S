@@ -18,7 +18,7 @@ float sq_dist_func_end(float2 pt, float2 d, uint shape, float padding)
 		return D * D;
 	}
 }
-float sq_dist_func_elbow(float2 pt, float2 d0, float2 d1, uint shape, float padding, float dot_lim)
+float sq_dist_func_join(float2 pt, float2 d0, float2 d1, uint shape, float padding, float dot_lim)
 {
 	static const float2 flip = { 1, -1 };
 	const float l0 = -dot(d0, pt), l1 = dot(d1, pt),

@@ -62,12 +62,12 @@ local end_pos = 100
 ---三角 = 3
 local end_shape = 0
 
----$select:接合点の形状
+---$select:線結合の形状
 ---ラウンド = 0
 ---ベベル = 1
 ---マイター = 2
 ---ブランク = 3
-local elbow_shape = 0
+local join_shape = 0
 
 ---$value:破線パターン
 local dash_pat = {100,0}
@@ -139,7 +139,7 @@ local radii = {
 		start_pos:		number?,
 		end_pos:		number?,
 		end_shape:		string?,
-		elbow_shape:	string?,
+		join_shape:		string?,
 		dash_pat:		table?,
 		dash_pos:		number?,
 		dash_end_shape:	string?,
@@ -184,7 +184,7 @@ alpha_line = tonumber(PI.alpha_line) or alpha_line;
 start_pos = tonumber(PI.start_pos) or start_pos;
 end_pos = tonumber(PI.end_pos) or end_pos;
 end_shape = path_s.PI.end_shape(PI.end_shape, end_shape);
-elbow_shape = path_s.PI.elbow_shape(PI.elbow_shape, elbow_shape);
+join_shape = path_s.PI.join_shape(PI.join_shape, join_shape);
 if type(PI.dash_pat) == "table" then dash_pat = PI.dash_pat end
 dash_pos = tonumber(PI.dash_pos) or dash_pos;
 dash_end_shape = path_s.PI.end_shape(PI.dash_end_shape, dash_end_shape);
@@ -313,7 +313,7 @@ if has_fill or has_chrome then
 		path_s.path_mask_line_buffered(
 			0, alpha_line, line, antialias,
 			cache_name, n_pts, len, true,
-			start_pos, end_pos, end_shape, elbow_shape, elbow_shape == 2 and 2 or 1.4,
+			start_pos, end_pos, end_shape, join_shape, join_shape == 2 and 2 or 1.4,
 			dash_pat, dash_pos, true, dash_end_shape);
 		if has_fill then
 			obj.draw();

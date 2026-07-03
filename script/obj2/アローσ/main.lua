@@ -41,12 +41,12 @@ local end_pos = 100
 ---三角 = 3
 local end_shape = 0
 
----$select:接合点の形状
+---$select:線結合の形状
 ---ラウンド = 0
 ---ベベル = 1
 ---マイター = 2
 ---ブランク = 3
-local elbow_shape = 0
+local join_shape = 0
 
 ---$track:マイター限界, min = 100, max = 3200, step = 0.01, scale = 0.25
 local miter_limit = 400
@@ -133,7 +133,7 @@ end
 		start_pos:		number?,
 		end_pos:		number?,
 		end_shape:		string?,
-		elbow_shape:	string?,
+		join_shape:		string?,
 		miter_limit:	number?,
 		dash_pat:		table?,
 		dash_pos:		number?,
@@ -161,7 +161,7 @@ precision = tonumber(PI.precision) or precision;
 start_pos = tonumber(PI.start_pos) or start_pos;
 end_pos = tonumber(PI.end_pos) or end_pos;
 end_shape = path_s.PI.end_shape(PI.end_shape, end_shape);
-elbow_shape = path_s.PI.elbow_shape(PI.elbow_shape, elbow_shape);
+join_shape = path_s.PI.join_shape(PI.join_shape, join_shape);
 miter_limit = tonumber(PI.miter_limit) or miter_limit;
 dash_pat = type(PI.dash_pat) == "table" and PI.dash_pat or dash_pat;
 dash_pos = tonumber(PI.dash_pos) or dash_pos;
@@ -235,7 +235,7 @@ end
 local L, R, T, B = path_s.measure(points, num_points);
 local th = line * math.max(
 	end_shape == 1 and 2 ^ 0.5 or 1,
-	elbow_shape == 2 and miter_limit or 1) / 2
+	join_shape == 2 and miter_limit or 1) / 2
 	+ antialias;
 if head_type ~= 0 then
 	-- take the arrow heads into account.
@@ -309,7 +309,7 @@ obj.clearbuffer(head_vertices and "tempbuffer" or "object", W, H, color);
 path_s.path_mask_line(
 	0, 1, line, antialias,
 	nil, points, num_points - 1, false, 1,
-	start_pos, end_pos, end_shape, elbow_shape, miter_limit,
+	start_pos, end_pos, end_shape, join_shape, miter_limit,
 	dash_pat, dash_pos, false, dash_end_shape,
 	1, 0, cx, cy,
 	head_vertices and { name = "tempbuffer", w = W, h = H } or nil,
