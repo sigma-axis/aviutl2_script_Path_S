@@ -114,15 +114,15 @@ end
 -- take parameters. (they don't affect to anchors.)
 --[[
 	PI = {
+		line:			number?,
+		color_line:		number?,
+		color_fill:		number?,
 		num_points:		number?,
 		path_type:		string?,
 		points:			table?,
-		precision:		number?,
-		antialias:		number?,
-		color_line:		number?,
-		alpha_line:		number?,
-		line:			number?,
 		loop:			boolean|number|nil,
+		precision:		number?,
+		alpha_line:		number?,
 		start_pos:		number?,
 		end_pos:		number?,
 		end_shape:		string?,
@@ -131,16 +131,19 @@ end
 		dash_adj:		boolean|number|nil,
 		dash_pos:		number?,
 		dash_end_shape:	string?,
-		color_fill:		number?,
-		alpha_fill:		number?,
 		inflation:		number?,
+		alpha_fill:		number?,
 		mode_fill:		string?,
 		rand_period:	number?,
 		rand_amplify:	number?,
 		rand_fix_end:	boolean|number|nil,
 		rand_seed:		number?,
+		antialias:		number?,
 	}
 ]]
+line = tonumber(PI.line) or line;
+color_line = tonumber(PI.color_line) or color_line;
+color_fill = tonumber(PI.color_fill) or color_fill;
 num_points = tonumber(PI.num_points) or num_points;
 if type(PI.path_type) == "string" then
 	local name2num = {
@@ -149,12 +152,9 @@ if type(PI.path_type) == "string" then
 	path_type = name2num[PI.path_type] or path_type;
 end
 if type(PI.points) == "table" then points = PI.points end
-precision = tonumber(PI.precision) or precision;
-antialias = tonumber(PI.antialias) or antialias;
-color_line = tonumber(PI.color_line) or color_line;
-alpha_line = tonumber(PI.alpha_line) or alpha_line;
-line = tonumber(PI.line) or line;
 loop = path_s.PI.as_bool(PI.loop, loop);
+precision = tonumber(PI.precision) or precision;
+alpha_line = tonumber(PI.alpha_line) or alpha_line;
 start_pos = tonumber(PI.start_pos) or start_pos;
 end_pos = tonumber(PI.end_pos) or end_pos;
 end_shape = path_s.PI.end_shape(PI.end_shape, end_shape);
@@ -163,9 +163,8 @@ if type(PI.dash_pat) == "table" then dash_pat = PI.dash_pat end
 dash_adj = path_s.PI.as_bool(PI.dash_adj, dash_adj);
 dash_pos = tonumber(PI.dash_pos) or dash_pos;
 dash_end_shape = path_s.PI.end_shape(PI.dash_end_shape, dash_end_shape);
-color_fill = tonumber(PI.color_fill) or color_fill;
-alpha_fill = tonumber(PI.alpha_fill) or alpha_fill;
 inflation = tonumber(PI.inflation) or inflation;
+alpha_fill = tonumber(PI.alpha_fill) or alpha_fill;
 if type(PI.mode_fill) == "string" then
 	local name2num = {
 		["内側"] = 0, ["奇偶"] = 1,
@@ -176,24 +175,25 @@ rand_period = tonumber(PI.rand_period) or rand_period;
 rand_amplify = tonumber(PI.rand_amplify) or rand_amplify;
 rand_fix_end = path_s.PI.as_bool(PI.rand_fix_end, rand_fix_end);
 rand_seed = tonumber(PI.rand_seed) or rand_seed;
+antialias = tonumber(PI.antialias) or antialias;
 
 -- normalize parameters.
+line = math.max(line, 0);
+color_line = color_line % 2 ^ 24;
+color_fill = color_fill % 2 ^ 24;
 num_points = math.max(math.floor(0.5 + num_points), 2);
 path_type = math.min(math.max(math.floor(0.5 + path_type), 0), 3);
 precision = math.max(precision, 1);
-antialias = math.max(antialias, 0);
-color_line = color_line % 2 ^ 24;
 alpha_line = math.min(math.max(1 - alpha_line / 100, 0), 1);
-line = math.max(line, 0);
 start_pos = start_pos / 100;
 end_pos = end_pos / 100;
-color_fill = color_fill % 2 ^ 24;
-alpha_fill = math.min(math.max(1 - alpha_fill / 100, 0), 1);
 inflation = math.max(inflation, 0);
+alpha_fill = math.min(math.max(1 - alpha_fill / 100, 0), 1);
 mode_fill = math.min(math.max(math.floor(0.5 + mode_fill), 0), 1);
 rand_period = math.max(rand_period, 4);
 rand_amplify = math.max(rand_amplify, 0);
 rand_seed = math.min(math.max(math.floor(0.5 + rand_seed), -2 ^ 16), 2 ^ 16 - 1);
+antialias = math.max(antialias, 0);
 
 --#endregion PI / normalize parameters.
 

@@ -124,14 +124,14 @@ local radii = {
 	PI = {
 		width:			number?,
 		height:			number?,
-		align_x:		number?,
-		align_y:		number?,
+		line:			number?,
+		color_line:		number?,
+		color_fill:		number?,
 		radii:			table|number|nil,
 		fixed_aspect:	boolean|number|nil,
-		antialias:		number?,
-		color_line:		number?,
+		align_x:		number?,
+		align_y:		number?,
 		alpha_line:		number?,
-		line:			number?,
 		start_pos:		number?,
 		end_pos:		number?,
 		end_shape:		string?,
@@ -139,12 +139,12 @@ local radii = {
 		dash_pat:		table?,
 		dash_pos:		number?,
 		dash_end_shape:	string?,
-		color_fill:		number?,
-		alpha_fill:		number?,
 		inflation:		number?,
+		alpha_fill:		number?,
 		rand_period:	number?,
 		rand_amplify:	number?,
 		rand_seed:		number?,
+		antialias:		number?,
 	}
 ]==]
 local function as_pair(c)
@@ -157,8 +157,9 @@ local function as_pair(c)
 end
 width = tonumber(PI.width) or width;
 height = tonumber(PI.height) or height;
-align_x = tonumber(PI.align_x) or align_x;
-align_y = tonumber(PI.align_y) or align_y;
+line = tonumber(PI.line) or line;
+color_line = tonumber(PI.color_line) or color_line;
+color_fill = tonumber(PI.color_fill) or color_fill;
 if type(PI.radii) == "number" then
 	local r = PI.radii;
 	radii = { { r, r }, { r, r }, { r, r }, { r, r } };
@@ -173,10 +174,9 @@ elseif type(PI.radii) == "table" then
 	end
 end
 fixed_aspect = path_s.PI.as_bool(PI.fixed_aspect, fixed_aspect);
-antialias = tonumber(PI.antialias) or antialias;
-color_line = tonumber(PI.color_line) or color_line;
+align_x = tonumber(PI.align_x) or align_x;
+align_y = tonumber(PI.align_y) or align_y;
 alpha_line = tonumber(PI.alpha_line) or alpha_line;
-line = tonumber(PI.line) or line;
 start_pos = tonumber(PI.start_pos) or start_pos;
 end_pos = tonumber(PI.end_pos) or end_pos;
 end_shape = path_s.PI.end_shape(PI.end_shape, end_shape);
@@ -184,32 +184,32 @@ elbow_shape = path_s.PI.elbow_shape(PI.elbow_shape, elbow_shape);
 if type(PI.dash_pat) == "table" then dash_pat = PI.dash_pat end
 dash_pos = tonumber(PI.dash_pos) or dash_pos;
 dash_end_shape = path_s.PI.end_shape(PI.dash_end_shape, dash_end_shape);
-color_fill = tonumber(PI.color_fill) or color_fill;
-alpha_fill = tonumber(PI.alpha_fill) or alpha_fill;
 inflation = tonumber(PI.inflation) or inflation;
+alpha_fill = tonumber(PI.alpha_fill) or alpha_fill;
 rand_period = tonumber(PI.rand_period) or rand_period;
 rand_amplify = tonumber(PI.rand_amplify) or rand_amplify;
 rand_seed = tonumber(PI.rand_seed) or rand_seed;
+antialias = tonumber(PI.antialias) or antialias;
 
 -- normalize parameters.
 if width <= 0 or height <= 0 then return end -- early return if empty.
-align_x = math.min(math.max(align_x / 100, -1), 1);
-align_y = math.min(math.max(align_y / 100, -1), 1);
+line = math.max(line, 0);
+color_line = color_line % 2 ^ 24;
+color_fill = color_fill % 2 ^ 24;
 for i = 1, 4 do
 	radii[i][1], radii[i][2] = math.max(radii[i][1], 0), math.max(radii[i][2], 0);
 end
-antialias = math.max(antialias, 0);
-color_line = color_line % 2 ^ 24;
+align_x = math.min(math.max(align_x / 100, -1), 1);
+align_y = math.min(math.max(align_y / 100, -1), 1);
 alpha_line = math.min(math.max(1 - alpha_line / 100, 0), 1);
-line = math.max(line, 0);
 start_pos = start_pos / 100;
 end_pos = end_pos / 100;
-color_fill = color_fill % 2 ^ 24;
-alpha_fill = math.min(math.max(1 - alpha_fill / 100, 0), 1);
 inflation = math.max(inflation, 0);
+alpha_fill = math.min(math.max(1 - alpha_fill / 100, 0), 1);
 rand_period = math.max(rand_period, 4);
 rand_amplify = math.max(rand_amplify, 0);
 rand_seed = math.min(math.max(math.floor(0.5 + rand_seed), -2 ^ 16), 2 ^ 16 - 1);
+antialias = math.max(antialias, 0);
 
 --#endregion PI / normalize parameters.
 

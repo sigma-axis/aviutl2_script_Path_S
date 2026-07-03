@@ -116,20 +116,13 @@ end
 -- take parameters. (they don't affect to anchors.)
 --[==[
 	PI = {
-		color:			number?,
 		line:			number?,
-		head_type:		string?,
-		head_fig:		string?,
 		head_size:		number?,
-		head_width:		number?,
-		head_center:	number?,
-		head_rot:		number?,
-		head_pos:		number?,
+		color:			number?,
 		num_points:		number?,
 		path_type:		string?,
 		points:			table?,
 		precision:		number?,
-		antialias:		number?,
 		start_pos:		number?,
 		end_pos:		number?,
 		end_shape:		string?,
@@ -137,31 +130,26 @@ end
 		dash_pat:		table?,
 		dash_pos:		number?,
 		dash_end_shape:	string?,
+		head_type:		string?,
+		head_fig:		string?,
+		head_width:		number?,
+		head_center:	number?,
+		head_rot:		number?,
+		head_pos:		number?,
 		rand_period:	number?,
 		rand_amplify:	number?,
 		rand_fix_end:	boolean|number|nil,
 		rand_seed:		number?,
+		antialias:		number?,
 	}
 ]==]
-color = tonumber(PI.color) or color;
 line = tonumber(PI.line) or line;
-if type(PI.head_type) == "string" then
-	local name2num = {
-		["なし"] = 0, ["終点"] = 1, ["両方"] = 2, ["双方向"] = 3,
-	};
-	head_type = name2num[PI.head_type] or head_type;
-end
-head_fig = type(PI.head_fig) == "string" and PI.head_fig or head_fig;
 head_size = tonumber(PI.head_size) or head_size;
-head_width = tonumber(PI.head_width) or head_width;
-head_center = tonumber(PI.head_center) or head_center;
-head_rot = tonumber(PI.head_rot) or head_rot;
-head_pos = tonumber(PI.head_pos) or head_pos;
+color = tonumber(PI.color) or color;
 num_points = tonumber(PI.num_points) or num_points;
 path_type = path_s.PI.path_type(PI.path_type, path_type);
 points = type(PI.points) == "table" and PI.points or points;
 precision = tonumber(PI.precision) or precision;
-antialias = tonumber(PI.antialias) or antialias;
 start_pos = tonumber(PI.start_pos) or start_pos;
 end_pos = tonumber(PI.end_pos) or end_pos;
 end_shape = path_s.PI.end_shape(PI.end_shape, end_shape);
@@ -169,28 +157,40 @@ elbow_shape = path_s.PI.elbow_shape(PI.elbow_shape, elbow_shape);
 dash_pat = type(PI.dash_pat) == "table" and PI.dash_pat or dash_pat;
 dash_pos = tonumber(PI.dash_pos) or dash_pos;
 dash_end_shape = path_s.PI.end_shape(PI.dash_end_shape, dash_end_shape);
+if type(PI.head_type) == "string" then
+	local name2num = {
+		["なし"] = 0, ["終点"] = 1, ["両方"] = 2, ["双方向"] = 3,
+	};
+	head_type = name2num[PI.head_type] or head_type;
+end
+head_fig = type(PI.head_fig) == "string" and PI.head_fig or head_fig;
+head_width = tonumber(PI.head_width) or head_width;
+head_center = tonumber(PI.head_center) or head_center;
+head_rot = tonumber(PI.head_rot) or head_rot;
+head_pos = tonumber(PI.head_pos) or head_pos;
 rand_period = tonumber(PI.rand_period) or rand_period;
 rand_amplify = tonumber(PI.rand_amplify) or rand_amplify;
 rand_fix_end = path_s.PI.as_bool(PI.rand_fix_end, rand_fix_end);
 rand_seed = tonumber(PI.rand_seed) or rand_seed;
+antialias = tonumber(PI.antialias) or antialias;
 
 -- normalize parameters.
-color = math.floor(0.5 + color) % 2 ^ 24;
 line = math.max(line, 0);
-head_type = math.min(math.max(math.floor(0.5 + head_type), 0), 3);
 head_size = math.max(math.floor(0.5 + head_size), 0);
+color = math.floor(0.5 + color) % 2 ^ 24;
+num_points = math.max(math.floor(0.5 + num_points), 2);
+precision = math.max(precision, 1);
+start_pos = math.min(math.max(start_pos / 100, 0), 1);
+end_pos = math.min(math.max(end_pos / 100, 0), 1);
+head_type = math.min(math.max(math.floor(0.5 + head_type), 0), 3);
 head_width = math.max(head_width / 100, 0);
 head_center = head_center / 100;
 head_rot = math.pi / 180 * (head_rot % 360);
 head_pos = math.min(math.max(head_pos / 100, -1), 1);
-num_points = math.max(math.floor(0.5 + num_points), 2);
-precision = math.max(precision, 1);
-antialias = math.max(antialias, 0);
-start_pos = math.min(math.max(start_pos / 100, 0), 1);
-end_pos = math.min(math.max(end_pos / 100, 0), 1);
 rand_period = math.max(rand_period, 4);
 rand_amplify = math.max(rand_amplify, 0);
 rand_seed = math.min(math.max(math.floor(0.5 + rand_seed), -2 ^ 16), 2 ^ 16 - 1);
+antialias = math.max(antialias, 0);
 if start_pos > end_pos then return end
 
 --#endregion PI / normalize parameters.

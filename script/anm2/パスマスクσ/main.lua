@@ -90,43 +90,43 @@ end
 --[==[
 	PI = {
 		intensity:	number?,
+		invert:		boolean|number|nil,
 		num_points:	number?,
 		path_type:	string?,
 		points:		table?,
 		precision:	number?,
-		antialias:	number?,
 		inflation:	number?,
 		mode_fill:	string?,
-		invert:		boolean|number|nil,
 		X:			number?,
 		Y:			number?,
 		zoom:		number?,
 		rotate:		number?,
+		antialias:	number?,
 		pt_buff:	string?,
 	}
 ]==]
 intensity = tonumber(PI.intensity) or intensity;
+invert = path_s.PI.as_bool(PI.invert, invert);
 num_points = tonumber(PI.num_points) or num_points;
 path_type = path_s.PI.path_type(PI.path_type, path_type);
 if type(PI.points) == "table" then points = PI.points end
 precision = tonumber(PI.precision) or precision;
-antialias = tonumber(PI.antialias) or antialias;
 inflation = tonumber(PI.inflation) or inflation;
 mode_fill = path_s.PI.mode_fill(PI.mode_fill, mode_fill);
-invert = path_s.PI.as_bool(PI.invert, invert);
 X = tonumber(PI.X) or X;
 Y = tonumber(PI.Y) or Y;
 zoom = tonumber(PI.zoom) or zoom;
 rotate = tonumber(PI.rotate) or rotate;
+antialias = tonumber(PI.antialias) or antialias;
 
 -- normalize parameters.
 intensity = math.min(math.max(intensity / 100, 0), 1);
 num_points = math.max(math.floor(0.5 + num_points), 3);
 precision = math.max(precision, 1);
-antialias = math.max(antialias, 1 / 1024);
 inflation = math.max(inflation, 0);
 zoom = math.min(math.max(zoom / 100, 0), 50);
 rotate = math.pi / 180 * (rotate % 360);
+antialias = math.max(antialias, 1 / 1024);
 if intensity <= 0 then return end
 
 --#endregion PI / normalize parameters.

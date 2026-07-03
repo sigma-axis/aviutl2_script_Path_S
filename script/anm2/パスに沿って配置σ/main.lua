@@ -71,8 +71,8 @@ end
 		num_points:		number?,
 		path_type:		string?,
 		points:			table?,
-		precision:		number?,
 		loop:			boolean|number|nil,
+		precision:		number?,
 	}
 ]==]
 position = tonumber(PI.position) or position;
@@ -88,17 +88,17 @@ end
 num_points = tonumber(PI.num_points) or num_points;
 path_type = path_s.PI.path_type(PI.path_type, path_type);
 if type(PI.points) == "table" then points = PI.points end
-precision = tonumber(PI.precision) or precision;
 loop = path_s.PI.as_bool(PI.loop, loop);
+precision = tonumber(PI.precision) or precision;
 
 -- normalize parameters.
 position = position / 100;
 rotate = rotate % 360;
 ofs_indiv = ofs_indiv / 100;
 out_of_range = math.min(math.max(math.floor(0.5 + out_of_range), 0), 3);
-local is_mult_obj = obj.getoption("multi_object");
 num_points = math.max(math.floor(0.5 + num_points), 2);
 precision = math.max(precision, 1);
+local is_mult_obj = obj.getoption("multi_object");
 toggle_gui = toggle_gui and
 	obj.getoption("gui") and (not is_mult_obj or obj.index == 0);
 
