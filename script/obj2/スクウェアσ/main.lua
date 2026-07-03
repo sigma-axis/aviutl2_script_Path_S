@@ -313,7 +313,7 @@ if has_fill or has_chrome then
 		path_s.path_mask_line_buffered(
 			0, alpha_line, line, antialias,
 			cache_name, n_pts, len, true,
-			start_pos, end_pos, end_shape, elbow_shape, 2,
+			start_pos, end_pos, end_shape, elbow_shape, elbow_shape == 2 and 2 or 1.4,
 			dash_pat, dash_pos, true, dash_end_shape);
 		if has_fill then
 			obj.draw();

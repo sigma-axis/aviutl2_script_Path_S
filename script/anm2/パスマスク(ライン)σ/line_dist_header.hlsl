@@ -26,11 +26,14 @@ float sq_dist_func_elbow(float2 pt, float2 d0, float2 d1, uint shape, float padd
 		L = max(L0, L1);
 	float D = max(min(abs(l0), abs(l1)) + padding, L);
 	if (l0 < 0 || l1 < 0) return D * D;
-	if (shape == 2 && dot_lim >= -dot(d0, d1)) return L * L;
+	if (dot_lim >= -dot(d0, d1)) {
+		if (shape == 2) return L * L;
+	}
+	else if (shape == 3) return D * D;
 
 	switch (shape) {
-	case 0: default: return min(D * D, dot(pt, pt));
-	case 1: case 2: {
+	case 0: return min(D * D, dot(pt, pt));
+	default: {
 		float2 dd = d0 - d1, nd = flip * (d0 + d1).yx;
 		if (dot(dd, nd) < 0) nd = -nd;
 		dd += nd; dd = normalize(dd);
@@ -39,6 +42,5 @@ float sq_dist_func_elbow(float2 pt, float2 d0, float2 d1, uint shape, float padd
 		D = min(D, abs(dot(dd, pt)) + (1 - abs(dot(nd, d0))) * padding);
 		return D * D;
 	}
-	case 3: return D * D;
 	}
 }
