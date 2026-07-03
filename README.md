@@ -257,7 +257,7 @@ Although, usage documentations for this script / plugin in languages other than 
   |:---:|:---:|
   | `ラウンド` | TODO: Image of rounded join |
   | `ベベル` | TODO: Image of bevel join |
-  | `マイター` | TODO: Image of rounded join |
+  | `マイター` | TODO: Image of miter join |
   | `ブランク`<br>`ブランク+ラウンド`<br>`ブランク+ベベル` | TODO: Image of bevel join |
 
   初期値は `ラウンド`.
@@ -705,29 +705,32 @@ obj.cx=obj.cx+100 -- 位置もずらせる
 
 ```lua
 {
-  num_points = num,    -- number 型で "頂点数" の項目を上書き，または nil.
-  path_type = str,     -- string 型で "線タイプ" の項目を上書き，または nil.
-  points = tab,        -- table 型で "点リスト" の項目を上書き，または nil.
-  precision = num,     -- number 型で "曲線精度" の項目を上書き，または nil.
-  antialias = num,     -- number 型で "ぼかし幅" の項目を上書き，または nil.
-  color_line = num,    -- number 型で "ライン色" の項目を上書き，または nil.
-  alpha_line = num,    -- number 型で "ライン透明度" の項目を上書き，または nil.
-  line = num,          -- number 型で "ライン幅" の項目を上書き，または nil.
-  loop = bool,         -- boolean 型で "ループ" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
-  start_pos = num,     -- number 型で "開始位置" の項目を上書き，または nil.
-  end_pos = num,       -- number 型で "終了位置" の項目を上書き，または nil.
-  end_shape = str,     -- string 型で "端の形状" の項目を上書き，または nil.
-  dash_pat = tbl,      -- table 型で "破線パターン" の項目を上書き，または nil.
-  dash_adj = bool,     -- boolean 型で "破線周期補正" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
-  dash_pos = num,      -- number 型で "破線位置" の項目を上書き，または nil.
-  color_fill = num,    -- number 型で "塗り色" の項目を上書き，または nil.
-  alpha_fill = num,    -- number 型で "塗り透明度" の項目を上書き，または nil.
-  inflation = num,     -- number 型で "塗り追加幅" の項目を上書き，または nil.
-  mode_fill = str,     -- string 型で "塗り範囲" の項目を上書き，または nil.
-  rand_period = num,   -- number 型で "ランダム周期" の項目を上書き，または nil.
-  rand_amplify = num,  -- number 型で "ランダム振幅" の項目を上書き，または nil.
-  rand_fix_end = bool, -- boolean 型で "ランダム固定端" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
-  rand_seed = num,     -- number 型で "ランダムシード" の項目を上書き，または nil.
+  line = num,           -- number 型で "ライン幅" の項目を上書き，または nil.
+  color_line = num,     -- number 型で "ライン色" の項目を上書き，または nil.
+  color_fill = num,     -- number 型で "塗り色" の項目を上書き，または nil.
+  num_points = num,     -- number 型で "頂点数" の項目を上書き，または nil.
+  path_type = str,      -- string 型で "線タイプ" の項目を上書き，または nil.
+  points = tab,         -- table 型で "点リスト" の項目を上書き，または nil.
+  loop = bool,          -- boolean 型で "ループ" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
+  precision = num,      -- number 型で "曲線精度" の項目を上書き，または nil.
+  alpha_line = num,     -- number 型で "ライン透明度" の項目を上書き，または nil.
+  start_pos = num,      -- number 型で "開始位置" の項目を上書き，または nil.
+  end_pos = num,        -- number 型で "終了位置" の項目を上書き，または nil.
+  end_shape = str,      -- string 型で "端の形状" の項目を上書き，または nil.
+  join_shape = str,     -- string 型で "線結合の形状" の項目を上書き，または nil.
+  miter_limit = num,    -- number 型で "マイター限界" の項目を上書き，または nil.
+  dash_pat = tbl,       -- table 型で "破線パターン" の項目を上書き，または nil.
+  dash_adj = bool,      -- boolean 型で "破線周期補正" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
+  dash_pos = num,       -- number 型で "破線位置" の項目を上書き，または nil.
+  dash_end_shape = str, -- string 型で "dash::端の形状" の項目を上書き，または nil.
+  inflation = num,      -- number 型で "塗り追加幅" の項目を上書き，または nil.
+  alpha_fill = num,     -- number 型で "塗り透明度" の項目を上書き，または nil.
+  mode_fill = str,      -- string 型で "塗り範囲" の項目を上書き，または nil.
+  rand_period = num,    -- number 型で "ランダム周期" の項目を上書き，または nil.
+  rand_amplify = num,   -- number 型で "ランダム振幅" の項目を上書き，または nil.
+  rand_fix_end = bool,  -- boolean 型で "ランダム固定端" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
+  rand_seed = num,      -- number 型で "ランダムシード" の項目を上書き，または nil.
+  antialias = num,      -- number 型で "ぼかし幅" の項目を上書き，または nil.
 }
 ```
 
@@ -735,26 +738,29 @@ obj.cx=obj.cx+100 -- 位置もずらせる
 
 ```lua
 {
-  start_X = num,       -- number 型で "始点X" の項目を上書き，または nil.
-  start_Y = num,       -- number 型で "始点Y" の項目を上書き，または nil.
-  end_X = num,         -- number 型で "終点X" の項目を上書き，または nil.
-  end_Y = num,         -- number 型で "終点Y" の項目を上書き，または nil.
-  line = num,          -- number 型で "ライン幅" の項目を上書き，または nil.
-  color = num,         -- number 型で "色" の項目を上書き，または nil.
-  line_shape = str,    -- string 型で "形状" の項目を上書き，または nil.
-  line_period = num,   -- number 型で "周期" の項目を上書き，または nil.
-  line_phase = num,    -- number 型で "周期位置" の項目を上書き，または nil.
-  line_amplify = num,  -- number 型で "振幅" の項目を上書き，または nil.
-  start_pos = num,     -- number 型で "開始位置" の項目を上書き，または nil.
-  end_pos = num,       -- number 型で "終了位置" の項目を上書き，または nil.
-  end_shape = str,     -- string 型で "端の形状" の項目を上書き，または nil.
-  dash_pat = tab,      -- table 型で "破線パターン" の項目を上書き，または nil.
-  dash_pos = num,      -- number 型で "破線位置" の項目を上書き，または nil.
-  rand_period = num,   -- number 型で "ランダム周期" の項目を上書き，または nil.
-  rand_amplify = num,  -- number 型で "ランダム振幅" の項目を上書き，または nil.
-  rand_fix_end = bool, -- boolean 型で "ランダム固定端" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
-  rand_seed = num,     -- number 型で "ランダムシード" の項目を上書き，または nil.
-  antialias = num,     -- number 型で "ぼかし幅" の項目を上書き，または nil.
+  start_X = num,        -- number 型で "始点X" の項目を上書き，または nil.
+  start_Y = num,        -- number 型で "始点Y" の項目を上書き，または nil.
+  end_X = num,          -- number 型で "終点X" の項目を上書き，または nil.
+  end_Y = num,          -- number 型で "終点Y" の項目を上書き，または nil.
+  line = num,           -- number 型で "ライン幅" の項目を上書き，または nil.
+  color = num,          -- number 型で "色" の項目を上書き，または nil.
+  line_shape = str,     -- string 型で "形状" の項目を上書き，または nil.
+  line_period = num,    -- number 型で "周期" の項目を上書き，または nil.
+  line_phase = num,     -- number 型で "周期位置" の項目を上書き，または nil.
+  line_amplify = num,   -- number 型で "振幅" の項目を上書き，または nil.
+  start_pos = num,      -- number 型で "開始位置" の項目を上書き，または nil.
+  end_pos = num,        -- number 型で "終了位置" の項目を上書き，または nil.
+  end_shape = str,      -- string 型で "端の形状" の項目を上書き，または nil.
+  join_shape = str,     -- string 型で "線結合の形状" の項目を上書き，または nil.
+  miter_limit = num,    -- number 型で "マイター限界" の項目を上書き，または nil.
+  dash_pat = tab,       -- table 型で "破線パターン" の項目を上書き，または nil.
+  dash_pos = num,       -- number 型で "破線位置" の項目を上書き，または nil.
+  dash_end_shape = str, -- string 型で "dash::端の形状" の項目を上書き，または nil.
+  rand_period = num,    -- number 型で "ランダム周期" の項目を上書き，または nil.
+  rand_amplify = num,   -- number 型で "ランダム振幅" の項目を上書き，または nil.
+  rand_fix_end = bool,  -- boolean 型で "ランダム固定端" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
+  rand_seed = num,      -- number 型で "ランダムシード" の項目を上書き，または nil.
+  antialias = num,      -- number 型で "ぼかし幅" の項目を上書き，または nil.
 }
 ```
 
@@ -762,28 +768,29 @@ obj.cx=obj.cx+100 -- 位置もずらせる
 
 ```lua
 {
-  start_X = num,       -- number 型で "始点X" の項目を上書き，または nil.
-  start_Y = num,       -- number 型で "始点Y" の項目を上書き，または nil.
-  end_X = num,         -- number 型で "終点X" の項目を上書き，または nil.
-  end_Y = num,         -- number 型で "終点Y" の項目を上書き，または nil.
-  start_radius = num,  -- number 型で "開始半径" の項目を上書き，または nil.
-  end_radius = num,    -- number 型で "終了半径" の項目を上書き，または nil.
-  line = num,          -- number 型で "ライン幅" の項目を上書き，または nil.
-  color = num,         -- number 型で "色" の項目を上書き，または nil.
-  line_shape = str,    -- string 型で "形状" の項目を上書き，または nil.
-  slope = num,         -- number 型で "傾き" の項目を上書き，または nil.
-  rotate = num,        -- number 型で "回転" の項目を上書き，または nil.
-  start_pos = num,     -- number 型で "開始位置" の項目を上書き，または nil.
-  end_pos = num,       -- number 型で "終了位置" の項目を上書き，または nil.
-  end_shape = str,     -- string 型で "端の形状" の項目を上書き，または nil.
-  precision = num,     -- number 型で "曲線精度" の項目を上書き，または nil.
-  dash_pat = tab,      -- table 型で "破線パターン" の項目を上書き，または nil.
-  dash_pos = num,      -- number 型で "破線位置" の項目を上書き，または nil.
-  rand_period = num,   -- number 型で "ランダム周期" の項目を上書き，または nil.
-  rand_amplify = num,  -- number 型で "ランダム振幅" の項目を上書き，または nil.
-  rand_fix_end = bool, -- boolean 型で "ランダム固定端" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
-  rand_seed = num,     -- number 型で "ランダムシード" の項目を上書き，または nil.
-  antialias = num,     -- number 型で "ぼかし幅" の項目を上書き，または nil.
+  start_X = num,        -- number 型で "始点X" の項目を上書き，または nil.
+  start_Y = num,        -- number 型で "始点Y" の項目を上書き，または nil.
+  end_X = num,          -- number 型で "終点X" の項目を上書き，または nil.
+  end_Y = num,          -- number 型で "終点Y" の項目を上書き，または nil.
+  start_radius = num,   -- number 型で "開始半径" の項目を上書き，または nil.
+  end_radius = num,     -- number 型で "終了半径" の項目を上書き，または nil.
+  line = num,           -- number 型で "ライン幅" の項目を上書き，または nil.
+  color = num,          -- number 型で "色" の項目を上書き，または nil.
+  line_shape = str,     -- string 型で "形状" の項目を上書き，または nil.
+  slope = num,          -- number 型で "傾き" の項目を上書き，または nil.
+  rotate = num,         -- number 型で "回転" の項目を上書き，または nil.
+  start_pos = num,      -- number 型で "開始位置" の項目を上書き，または nil.
+  end_pos = num,        -- number 型で "終了位置" の項目を上書き，または nil.
+  end_shape = str,      -- string 型で "端の形状" の項目を上書き，または nil.
+  precision = num,      -- number 型で "曲線精度" の項目を上書き，または nil.
+  dash_pat = tab,       -- table 型で "破線パターン" の項目を上書き，または nil.
+  dash_pos = num,       -- number 型で "破線位置" の項目を上書き，または nil.
+  dash_end_shape = str, -- string 型で "dash::端の形状" の項目を上書き，または nil.
+  rand_period = num,    -- number 型で "ランダム周期" の項目を上書き，または nil.
+  rand_amplify = num,   -- number 型で "ランダム振幅" の項目を上書き，または nil.
+  rand_fix_end = bool,  -- boolean 型で "ランダム固定端" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
+  rand_seed = num,      -- number 型で "ランダムシード" の項目を上書き，または nil.
+  antialias = num,      -- number 型で "ぼかし幅" の項目を上書き，または nil.
 }
 ```
 
@@ -791,29 +798,32 @@ obj.cx=obj.cx+100 -- 位置もずらせる
 
 ```lua
 {
-  color = num,         -- number 型で "色" の項目を上書き，または nil.
-  line = num,          -- number 型で "ライン幅" の項目を上書き，または nil.
-  head_type = str,     -- string 型で "矢じり配置" の項目を上書き，または nil.
-  head_fig = str,      -- string 型で "矢じり図形" の項目を上書き，または nil.
-  head_size = num,     -- number 型で "矢じりサイズ" の項目を上書き，または nil.
-  head_width = num,    -- number 型で "矢じり幅" の項目を上書き，または nil.
-  head_center = num,   -- number 型で "矢じり中心" の項目を上書き，または nil.
-  head_rot = num,      -- number 型で "矢じり角度" の項目を上書き，または nil.
-  head_pos = num,      -- number 型で "矢じり位置" の項目を上書き，または nil.
-  num_points = num,    -- number 型で "頂点数" の項目を上書き，または nil.
-  path_type = str,     -- string 型で "線タイプ" の項目を上書き，または nil.
-  points = tab,        -- table 型で "点リスト" の項目を上書き，または nil.
-  precision = num,     -- number 型で "曲線精度" の項目を上書き，または nil.
-  antialias = num,     -- number 型で "ぼかし幅" の項目を上書き，または nil.
-  start_pos = num,     -- number 型で "開始位置" の項目を上書き，または nil.
-  end_pos = num,       -- number 型で "終了位置" の項目を上書き，または nil.
-  end_shape = str,     -- string 型で "端の形状" の項目を上書き，または nil.
-  dash_pat = tab,      -- table 型で "破線パターン" の項目を上書き，または nil.
-  dash_pos = num,      -- number 型で "破線位置" の項目を上書き，または nil.
-  rand_period = num,   -- number 型で "ランダム周期" の項目を上書き，または nil.
-  rand_amplify = num,  -- number 型で "ランダム振幅" の項目を上書き，または nil.
-  rand_fix_end = bool, -- boolean 型で "ランダム固定端" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
-  rand_seed = num,     -- number 型で "ランダムシード" の項目を上書き，または nil.
+  line = num,           -- number 型で "ライン幅" の項目を上書き，または nil.
+  head_size = num,      -- number 型で "矢じりサイズ" の項目を上書き，または nil.
+  color = num,          -- number 型で "色" の項目を上書き，または nil.
+  num_points = num,     -- number 型で "頂点数" の項目を上書き，または nil.
+  path_type = str,      -- string 型で "線タイプ" の項目を上書き，または nil.
+  points = tab,         -- table 型で "点リスト" の項目を上書き，または nil.
+  precision = num,      -- number 型で "曲線精度" の項目を上書き，または nil.
+  start_pos = num,      -- number 型で "開始位置" の項目を上書き，または nil.
+  end_pos = num,        -- number 型で "終了位置" の項目を上書き，または nil.
+  end_shape = str,      -- string 型で "端の形状" の項目を上書き，または nil.
+  join_shape = str,     -- string 型で "線結合の形状" の項目を上書き，または nil.
+  miter_limit = num,    -- number 型で "マイター限界" の項目を上書き，または nil.
+  dash_pat = tab,       -- table 型で "破線パターン" の項目を上書き，または nil.
+  dash_pos = num,       -- number 型で "破線位置" の項目を上書き，または nil.
+  dash_end_shape = str, -- string 型で "dash::端の形状" の項目を上書き，または nil.
+  head_type = str,      -- string 型で "矢じり配置" の項目を上書き，または nil.
+  head_fig = str,       -- string 型で "矢じり図形" の項目を上書き，または nil.
+  head_width = num,     -- number 型で "矢じり幅" の項目を上書き，または nil.
+  head_center = num,    -- number 型で "矢じり中心" の項目を上書き，または nil.
+  head_rot = num,       -- number 型で "矢じり角度" の項目を上書き，または nil.
+  head_pos = num,       -- number 型で "矢じり位置" の項目を上書き，または nil.
+  rand_period = num,    -- number 型で "ランダム周期" の項目を上書き，または nil.
+  rand_amplify = num,   -- number 型で "ランダム振幅" の項目を上書き，または nil.
+  rand_fix_end = bool,  -- boolean 型で "ランダム固定端" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
+  rand_seed = num,      -- number 型で "ランダムシード" の項目を上書き，または nil.
+  antialias = num,      -- number 型で "ぼかし幅" の項目を上書き，または nil.
 }
 ```
 
@@ -821,27 +831,29 @@ obj.cx=obj.cx+100 -- 位置もずらせる
 
 ```lua
 {
-  width = num,         -- number 型で "幅" を上書き，または nil.
-  height = num,        -- number 型で "高さ" を上書き，または nil.
-  align_x = num,       -- number 型で "水平揃え" を上書き，または nil.
-  align_y = num,       -- number 型で "垂直揃え" を上書き，または nil.
-  radii = tab_num,     -- table 型や number 型で "角半径" や "丸角縦横比" などを上書き，または nil. 詳細は後述．
-  fixed_aspect = bool, -- boolean 型で "丸角縦横比固定" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
-  antialias = num,     -- number 型で "ぼかし幅" の項目を上書き，または nil.
-  color_line = num,    -- number 型で "ライン色" の項目を上書き，または nil.
-  alpha_line = num,    -- number 型で "ライン透明度" の項目を上書き，または nil.
-  line = num,          -- number 型で "ライン幅" の項目を上書き，または nil.
-  start_pos = num,     -- number 型で "開始位置" の項目を上書き，または nil.
-  end_pos = num,       -- number 型で "終了位置" の項目を上書き，または nil.
-  end_shape = str,     -- string 型で "端の形状" の項目を上書き，または nil.
-  dash_pat = tbl,      -- table 型で "破線パターン" の項目を上書き，または nil.
-  dash_pos = num,      -- number 型で "破線位置" の項目を上書き，または nil.
-  color_fill = num,    -- number 型で "塗り色" の項目を上書き，または nil.
-  alpha_fill = num,    -- number 型で "塗り透明度" の項目を上書き，または nil.
-  inflation = num,     -- number 型で "塗り追加幅" の項目を上書き，または nil.
-  rand_period = num,   -- number 型で "ランダム周期" の項目を上書き，または nil.
-  rand_amplify = num,  -- number 型で "ランダム振幅" の項目を上書き，または nil.
-  rand_seed = num,     -- number 型で "ランダムシード" の項目を上書き，または nil.
+  width = num,          -- number 型で "幅" を上書き，または nil.
+  height = num,         -- number 型で "高さ" を上書き，または nil.
+  line = num,           -- number 型で "ライン幅" の項目を上書き，または nil.
+  color_line = num,     -- number 型で "ライン色" の項目を上書き，または nil.
+  color_fill = num,     -- number 型で "塗り色" の項目を上書き，または nil.
+  radii = tab_num,      -- table 型や number 型で "角半径" や "丸角縦横比" などを上書き，または nil. 詳細は後述．
+  fixed_aspect = bool,  -- boolean 型で "丸角縦横比固定" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
+  align_x = num,        -- number 型で "水平揃え" を上書き，または nil.
+  align_y = num,        -- number 型で "垂直揃え" を上書き，または nil.
+  alpha_line = num,     -- number 型で "ライン透明度" の項目を上書き，または nil.
+  start_pos = num,      -- number 型で "開始位置" の項目を上書き，または nil.
+  end_pos = num,        -- number 型で "終了位置" の項目を上書き，または nil.
+  end_shape = str,      -- string 型で "端の形状" の項目を上書き，または nil.
+  join_shape = str,     -- string 型で "線結合の形状" の項目を上書き，または nil.
+  dash_pat = tbl,       -- table 型で "破線パターン" の項目を上書き，または nil.
+  dash_pos = num,       -- number 型で "破線位置" の項目を上書き，または nil.
+  dash_end_shape = str, -- string 型で "dash::端の形状" の項目を上書き，または nil.
+  inflation = num,      -- number 型で "塗り追加幅" の項目を上書き，または nil.
+  alpha_fill = num,     -- number 型で "塗り透明度" の項目を上書き，または nil.
+  rand_period = num,    -- number 型で "ランダム周期" の項目を上書き，または nil.
+  rand_amplify = num,   -- number 型で "ランダム振幅" の項目を上書き，または nil.
+  rand_seed = num,      -- number 型で "ランダムシード" の項目を上書き，または nil.
+  antialias = num,      -- number 型で "ぼかし幅" の項目を上書き，または nil.
 }
 ```
 
@@ -879,20 +891,20 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
 ```lua
 {
   intensity = num,  -- number 型で "強さ" の項目を上書き，または nil.
+  invert = bool,    -- boolean 型で "反転" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
   num_points = num, -- number 型で "頂点数" の項目を上書き，または nil.
   path_type = str,  -- string 型で "線タイプ" の項目を上書き，または nil.
   points = tab,     -- table 型で "点リスト" の項目を上書き，または nil.
   precision = num,  -- number 型で "曲線精度" の項目を上書き，または nil.
-  antialias = num,  -- number 型で "ぼかし幅" の項目を上書き，または nil.
   inflation = num,  -- number 型で "追加幅" の項目を上書き，または nil.
   mode_fill = num,  -- string 型で "範囲" の項目を上書き，または nil.
-  invert = bool,    -- boolean 型で "反転" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
   X = num, Y = num, -- number 型で "移動X", "移動Y" の項目を上書き，または nil.
   zoom = num,       -- number 型で "拡大率" の項目を上書き，または nil.
   rotate = num,     -- number 型で "回転" の項目を上書き，または nil.
+  antialias = num,  -- number 型で "ぼかし幅" の項目を上書き，または nil.
 
 -- 以降は require("Path_S") からの API で代替できるようになったため非推奨です．
-  pt_buff = str,    -- string 型で, パスの頂点情報を保持している画像バッファ名を指定，または nil. 詳細後述．
+  pt_buff = str, -- string 型で, パスの頂点情報を保持している画像バッファ名を指定，または nil. 詳細後述．
 }
 ```
 
@@ -915,29 +927,33 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
 
 ```lua
 {
-  line = num,       -- number 型で "ライン幅" の項目を上書き，または nil.
-  intensity = num,  -- number 型で "強さ" の項目を上書き，または nil.
-  num_points = num, -- number 型で "頂点数" の項目を上書き，または nil.
-  path_type = str,  -- string 型で "線タイプ" の項目を上書き，または nil.
-  points = tab,     -- table 型で "点リスト" の項目を上書き，または nil.
-  precision = num,  -- number 型で "曲線精度" の項目を上書き，または nil.
-  antialias = num,  -- number 型で "ぼかし幅" の項目を上書き，または nil.
-  loop = bool,      -- boolean 型で "ループ" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
-  start_pos = num,  -- number 型で "開始位置" の項目を上書き，または nil.
-  end_pos = num,    -- number 型で "終了位置" の項目を上書き，または nil.
-  end_shape = str,  -- string 型で "端の形状" の項目を上書き，または nil.
-  dash_pat = tab,   -- table 型で "破線パターン" の項目を上書き，または nil.
-  dash_adj = bool,  -- boolean 型で "破線周期補正" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
-  dash_pos = num,   -- number 型で "破線位置" の項目を上書き，または nil.
-  invert = bool,    -- boolean 型で "反転" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
-  X = num, Y = num, -- number 型で "移動X", "移動Y" の項目を上書き，または nil.
-  zoom = num,       -- number 型で "拡大率" の項目を上書き，または nil.
-  rotate = num,     -- number 型で "回転" の項目を上書き，または nil.
+  intensity = num,      -- number 型で "強さ" の項目を上書き，または nil.
+  invert = bool,        -- boolean 型で "反転" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
+  line = num,           -- number 型で "ライン幅" の項目を上書き，または nil.
+  num_points = num,     -- number 型で "頂点数" の項目を上書き，または nil.
+  path_type = str,      -- string 型で "線タイプ" の項目を上書き，または nil.
+  points = tab,         -- table 型で "点リスト" の項目を上書き，または nil.
+  loop = bool,          -- boolean 型で "ループ" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
+  precision = num,      -- number 型で "曲線精度" の項目を上書き，または nil.
+  start_pos = num,      -- number 型で "開始位置" の項目を上書き，または nil.
+  end_pos = num,        -- number 型で "終了位置" の項目を上書き，または nil.
+  end_shape = str,      -- string 型で "端の形状" の項目を上書き，または nil.
+  join_shape = str,     -- string 型で "線結合の形状" の項目を上書き，または nil.
+  miter_limit = num,    -- number 型で "マイター限界" の項目を上書き，または nil.
+  dash_pat = tab,       -- table 型で "破線パターン" の項目を上書き，または nil.
+  dash_adj = bool,      -- boolean 型で "破線周期補正" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
+  dash_pos = num,       -- number 型で "破線位置" の項目を上書き，または nil.
+  dash_end_shape = str, -- string 型で "dash::端の形状" の項目を上書き，または nil.
+  X = num, Y = num,     -- number 型で "移動X", "移動Y" の項目を上書き，または nil.
+  zoom = num,           -- number 型で "拡大率" の項目を上書き，または nil.
+  rotate = num,         -- number 型で "回転" の項目を上書き，または nil.
+  antialias = num,      -- number 型で "ぼかし幅" の項目を上書き，または nil.
 
 -- 以降は require("Path_S") からの API で代替できるようになったため非推奨です．
-  pt_buff = str,    -- string 型で, パスの頂点情報を保持している画像バッファ名を指定，または nil. 詳細後述．
-  len_buff = num,   -- number 型で, パス全体のピクセル長を指定，または nil. 詳細後述．
-  endpt_buff = tab, -- table 型で, パスの両端の座標と方向を記述，または nil. 詳細後述．
+  pt_buff = str,  -- string 型で, パスの頂点情報を保持している画像バッファ名を指定，または nil. 詳細後述．
+  len_buff = num, -- number 型で, パス全体のピクセル長を指定，または nil. 詳細後述．
+
+
 }
 ```
 
@@ -947,7 +963,9 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
 フィールド `.pt_buff` は `"tempbuffer"` か `"cache:****"` の形式の文字列で，`Path_S.lua` の `.send()` 関数によって頂点情報が保持されている画像バッファ名を指定します．この場合，次に注意してください:
 1.  「頂点数」または `.num_points` にはこのバッファに保持された点の個数を指定すること．
 1.  `.len_buff` にはパス全体のピクセル長を指定すること．
-1.  「端の形状」または `.end_shape` が `四角` の場合，`.endpt_buff` にはパスの両端の座標と方向を記述した配列を指定すること．形式は次の通り:
+1.  **この項目は v2.00 以降は不要になり，無視されるようになりました．**
+
+    「端の形状」または `.end_shape` が `四角` の場合，`.endpt_buff` にはパスの両端の座標と方向を記述した配列を指定すること．形式は次の通り:
 
     ```lua
     {
@@ -976,18 +994,18 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
 
 ```lua
 {
+  invert = bool,      -- boolean 型で "反転" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
   num_points = num,   -- number 型で "頂点数" の項目を上書き，または nil.
   path_type = str,    -- string 型で "線タイプ" の項目を上書き，または nil.
   points = tab,       -- table 型で "点リスト" の項目を上書き，または nil.
   precision = num,    -- number 型で "曲線精度" の項目を上書き，または nil.
-  antialias = num,    -- number 型で "ぼかし幅" の項目を上書き，または nil.
   inflation = num,    -- number 型で "追加幅" の項目を上書き，または nil.
   mode_fill = num,    -- string 型で "範囲" の項目を上書き，または nil.
-  invert = bool,      -- boolean 型で "反転" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
   X = num, Y = num,   -- number 型で "移動X", "移動Y" の項目を上書き，または nil.
   zoom = num,         -- number 型で "拡大率" の項目を上書き，または nil.
   rotate = num,       -- number 型で "回転" の項目を上書き，または nil.
   extra_filter = str, -- string 型で "追加のフィルタ効果" の項目を上書き，または nil.
+  antialias = num,    -- number 型で "ぼかし幅" の項目を上書き，または nil.
 }
 ```
 
@@ -1003,8 +1021,8 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
   num_points = num,   -- number 型で "頂点数" の項目を上書き，または nil.
   path_type = str,    -- string 型で "線タイプ" の項目を上書き，または nil.
   points = tab,       -- table 型で "点リスト" の項目を上書き，または nil.
-  precision = num,    -- number 型で "曲線精度" の項目を上書き，または nil.
   loop = bool,        -- boolean 型で "ループ" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
+  precision = num,    -- number 型で "曲線精度" の項目を上書き，または nil.
 }
 ```
 
