@@ -59,11 +59,14 @@ local end_pos = 100
 ---円 = 0
 ---四角 = 1
 ---平坦 = 2
+---三角 = 3
 local end_shape = 0
 
 ---$select:接合点の形状
 ---ラウンド = 0
 ---ベベル = 1
+---マイター = 2
+---ブランク = 3
 local elbow_shape = 0
 
 ---$value:破線パターン
@@ -76,6 +79,7 @@ local dash_pos = 0
 ---円 = 0
 ---四角 = 1
 ---平坦 = 2
+---三角 = 3
 local dash_end_shape = 0
 
 --group:塗り設定,false
@@ -250,9 +254,10 @@ local has_fill, has_chrome = alpha_fill > 0,
 -- generate a path.
 local pts, n_pts = { (radii[1][1] - radii[2][1]) / 2, -height / 2 }, 1;
 for i = 1, 4 do
-	local r, precision = radii[(i % 4) + 1], 0.25; -- difference at most 0.25 pixels is allowed.
+	local r, precision = radii[(i % 4) + 1], 0.5; -- difference at most 0.5 pixels is allowed.
 	local rx, ry, a0 = r[1], r[2], (i / 2 - 1) * math.pi;
-	local N = math.ceil(2 ^ -2.5 * math.pi * (math.max(rx, ry) / precision) ^ 0.5);
+	local N = math.ceil(2 ^ -2.5 * math.pi * ((math.max(rx, ry) + line / 2) / precision) ^ 0.5);
+	if math.min(rx, ry) <= 0 then rx, ry, N = 0, 0, 0 end
 
 	local cx, cy = width / 2 - rx, height / 2 - ry;
 	if i > 2 then cx = -cx end
@@ -275,7 +280,8 @@ end
 
 -- measure the path.
 local L, R, T, B, len = path_s.measure(pts, n_pts);
-local th = math.max(line * (end_shape == 1 and 0.5 ^ 0.5 or 0.5), inflation) + antialias;
+local th = math.max(line * (end_shape == 1 and 0.5 ^ 0.5 or 0.5),
+	inflation) + antialias;
 L, T = math.floor(L - th), math.floor(T - th);
 R, B = math.max(math.ceil(R + th), L + 1), math.max(math.ceil(B + th), T + 1);
 
@@ -307,7 +313,7 @@ if has_fill or has_chrome then
 		path_s.path_mask_line_buffered(
 			0, alpha_line, line, antialias,
 			cache_name, n_pts, len, true,
-			start_pos, end_pos, end_shape, elbow_shape,
+			start_pos, end_pos, end_shape, elbow_shape, 2,
 			dash_pat, dash_pos, true, dash_end_shape);
 		if has_fill then
 			obj.draw();

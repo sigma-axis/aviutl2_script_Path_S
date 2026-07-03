@@ -42,12 +42,18 @@ local end_pos = 100
 ---円 = 0
 ---四角 = 1
 ---平坦 = 2
+---三角 = 3
 local end_shape = 0
 
 ---$select:接合点の形状
 ---ラウンド = 0
 ---ベベル = 1
+---マイター = 2
+---ブランク = 3
 local elbow_shape = 0
+
+---$track:マイター限界, min = 100, max = 3200, step = 0.01, scale = 0.25
+local miter_limit = 400
 
 ---$value:破線パターン
 local dash_pat = {100,0}
@@ -62,6 +68,7 @@ local dash_pos = 0
 ---円 = 0
 ---四角 = 1
 ---平坦 = 2
+---三角 = 3
 local dash_end_shape = 0
 
 --group:配置,false
@@ -134,6 +141,7 @@ end
 		end_pos:		number?,
 		end_shape:		string?,
 		elbow_shape:	string?,
+		miter_limit:	number?,
 		dash_pat:		table?,
 		dash_adj:		boolean|number|nil,
 		dash_pos:		number?,
@@ -159,6 +167,7 @@ start_pos = tonumber(PI.start_pos) or start_pos;
 end_pos = tonumber(PI.end_pos) or end_pos;
 end_shape = path_s.PI.end_shape(PI.end_shape, end_shape);
 elbow_shape = path_s.PI.elbow_shape(PI.elbow_shape, elbow_shape);
+miter_limit = tonumber(PI.miter_limit) or miter_limit;
 if type(PI.dash_pat) == "table" then dash_pat = PI.dash_pat end
 dash_adj = path_s.PI.as_bool(PI.dash_adj, dash_adj);
 dash_pos = tonumber(PI.dash_pos) or dash_pos;
@@ -176,6 +185,7 @@ num_points = math.max(math.floor(0.5 + num_points), 2);
 precision = math.max(precision, 1);
 start_pos = start_pos / 100;
 end_pos = end_pos / 100;
+miter_limit = math.max(miter_limit / 100, 1);
 zoom = math.min(math.max(zoom / 100, 0), 50);
 rotate = math.pi / 180 * (rotate % 360);
 antialias = math.max(antialias, 1 / 1024);
@@ -189,13 +199,13 @@ if pt_buff then
 	path_s.path_mask_line_buffered(
 		alpha_outer, alpha_inner, line, antialias,
 		pt_buff, num_points, len_buff, loop,
-		start_pos, end_pos, end_shape, elbow_shape,
+		start_pos, end_pos, end_shape, elbow_shape, miter_limit,
 		dash_pat, dash_pos, dash_adj, dash_end_shape);
 else
 	path_s.path_mask_line(
 		alpha_outer, alpha_inner, line, antialias,
 		path_type, points, num_points - (loop and 0 or 1), loop, precision,
-		start_pos, end_pos, end_shape, elbow_shape,
+		start_pos, end_pos, end_shape, elbow_shape, miter_limit,
 		dash_pat, dash_pos, dash_adj, dash_end_shape,
 		zoom, rotate, X, Y);
 end

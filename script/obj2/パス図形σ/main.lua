@@ -44,12 +44,18 @@ local end_pos = 100
 ---円 = 0
 ---四角 = 1
 ---平坦 = 2
+---三角 = 3
 local end_shape = 0
 
 ---$select:接合点の形状
 ---ラウンド = 0
 ---ベベル = 1
+---マイター = 2
+---ブランク = 3
 local elbow_shape = 0
+
+---$track:マイター限界, min = 100, max = 3200, step = 0.01, scale = 0.25
+local miter_limit = 400
 
 ---$value:破線パターン
 local dash_pat = {100,0}
@@ -64,6 +70,7 @@ local dash_pos = 0
 ---円 = 0
 ---四角 = 1
 ---平坦 = 2
+---三角 = 3
 local dash_end_shape = 0
 
 --group:塗り設定,false
@@ -127,6 +134,7 @@ end
 		end_pos:		number?,
 		end_shape:		string?,
 		elbow_shape:	string?,
+		miter_limit:	number?,
 		dash_pat:		table?,
 		dash_adj:		boolean|number|nil,
 		dash_pos:		number?,
@@ -159,6 +167,7 @@ start_pos = tonumber(PI.start_pos) or start_pos;
 end_pos = tonumber(PI.end_pos) or end_pos;
 end_shape = path_s.PI.end_shape(PI.end_shape, end_shape);
 elbow_shape = path_s.PI.elbow_shape(PI.elbow_shape, elbow_shape);
+miter_limit = tonumber(PI.miter_limit) or miter_limit;
 if type(PI.dash_pat) == "table" then dash_pat = PI.dash_pat end
 dash_adj = path_s.PI.as_bool(PI.dash_adj, dash_adj);
 dash_pos = tonumber(PI.dash_pos) or dash_pos;
@@ -187,6 +196,7 @@ precision = math.max(precision, 1);
 alpha_line = math.min(math.max(1 - alpha_line / 100, 0), 1);
 start_pos = start_pos / 100;
 end_pos = end_pos / 100;
+miter_limit = math.max(miter_limit / 100, 1);
 inflation = math.max(inflation, 0);
 alpha_fill = math.min(math.max(1 - alpha_fill / 100, 0), 1);
 mode_fill = math.min(math.max(math.floor(0.5 + mode_fill), 0), 1);
@@ -209,7 +219,10 @@ if rand_amplify > 0 then
 		loop and 2 or rand_fix_end and 1 or 0, rand_seed);
 end
 local L, R, T, B, len = path_s.measure(points, num_points);
-local th = math.max(line * (end_shape == 1 and 0.5 ^ 0.5 or 0.5), inflation) + antialias;
+local th = math.max(line * math.max(
+	end_shape == 1 and 2 ^ 0.5 or 1,
+	elbow_shape == 2 and miter_limit or 1) / 2,
+	inflation) + antialias;
 L, T = math.floor(L - th), math.floor(T - th);
 R, B = math.max(math.ceil(R + th), L + 1), math.max(math.ceil(B + th), T + 1);
 
@@ -247,7 +260,7 @@ if has_fill or has_chrome then
 		path_s.path_mask_line_buffered(
 			0, alpha_line, line, antialias,
 			cache_name, num_segments, len, loop,
-			start_pos, end_pos, end_shape, elbow_shape,
+			start_pos, end_pos, end_shape, elbow_shape, miter_limit,
 			dash_pat, dash_pos, dash_adj, dash_end_shape);
 		if has_fill then
 			obj.draw();

@@ -66,9 +66,10 @@ end
 ---| 0 # 円
 ---| 1 # 四角
 ---| 2 # 平坦
+---| 3 # 三角
 local PI_choose_end_shape do
 	local name2num = {
-		["円"] = 0, ["四角"] = 1, ["平坦"] = 2,
+		["円"] = 0, ["四角"] = 1, ["平坦"] = 2, ["三角"] = 3,
 	};
 	---PI で塗りつぶしの「範囲」指定を適用する．
 	---このパラメタは次の形式で指定されているものとする:
@@ -81,16 +82,18 @@ local PI_choose_end_shape do
 		if type(gui_value) == "string" then
 			gui_value = name2num[pi_value] or gui_value;
 		end
-		return math.min(math.max(math.floor(0.5 + gui_value), 0), 2);
+		return math.min(math.max(math.floor(0.5 + gui_value), 0), 3);
 	end
 end
 
 ---@alias elbow_shape # 接合点の形状．
 ---| 0 # ラウンド
 ---| 1 # ベベル
+---| 2 # マイター
+---| 3 # ブランク
 local PI_choose_elbow_shape do
 	local name2num = {
-		["ラウンド"] = 0, ["ベベル"] = 1
+		["ラウンド"] = 0, ["ベベル"] = 1, ["マイター"] = 2, ["ブランク"] = 3,
 	};
 	---PI で塗りつぶしの「範囲」指定を適用する．
 	---このパラメタは次の形式で指定されているものとする:
@@ -103,7 +106,7 @@ local PI_choose_elbow_shape do
 		if type(gui_value) == "string" then
 			gui_value = name2num[pi_value] or gui_value;
 		end
-		return math.min(math.max(math.floor(0.5 + gui_value), 0), 1);
+		return math.min(math.max(math.floor(0.5 + gui_value), 0), 3);
 	end
 end
 
@@ -633,6 +636,7 @@ end
 ---@param end_pos number 「終了位置」を 0.0 から 1.0 に正規化した数値で指定．ただしループの場合はこの範囲を超えることもある．
 ---@param end_shape end_shape 「端の形状」を指定．
 ---@param elbow_shape elbow_shape 「接合点の形状」を指定．
+---@param miter_limit number 「マイター限界」を指定．1.0 以上の実数．
 ---@param dash_pat number[] 「破線パターン」を `{ opaque_len1, blank_len1, opaque_len2, blank_len2, ... }` の形式で指定．
 ---@param dash_pos number 「破線位置」をピクセル単位で指定．
 ---@param dash_adj boolean 「破線周期補正」を指定．
@@ -641,7 +645,7 @@ end
 local function path_mask_line_buffered(
 	alpha_outer, alpha_inner, line_width, antialias,
 	buffer_name, num_points, len_path, loop,
-	start_pos, end_pos, end_shape, elbow_shape,
+	start_pos, end_pos, end_shape, elbow_shape, miter_limit,
 	dash_pat, dash_pos, dash_adj, dash_end_shape,
 	target_buffer)
 	-- unwrap target_buffer.
@@ -736,7 +740,8 @@ local function path_mask_line_buffered(
 			alpha_inner - alpha_outer, alpha_outer;
 			num_points, math.max(line_width - 1, 0) / 2, antialias;
 
-			end_shape; elbow_shape; loop and 1 or 0;
+			end_shape; elbow_shape;
+			loop and 1 or 0; 1 - 2 / miter_limit ^ 2;
 		}, "mask");
 	else
 		obj.pixelshader("carve_dash@パスマスク(ライン)σ@Path_S", tgt_name, buffer_name,
@@ -745,7 +750,8 @@ local function path_mask_line_buffered(
 			num_points, math.max(line_width - 1, 0) / 2, antialias;
 			#dash_pat, dash_len0, dash_idx0 - 1;
 
-			end_shape; elbow_shape; dash_end_shape; loop and 1 or 0;
+			end_shape; elbow_shape; dash_end_shape;
+			loop and 1 or 0; 1 - 2 / miter_limit ^ 2; 0, 0, 0;
 
 			len_path * phase_whole0, len_path * phase_whole1, len_path * phase_whole2, len_path * 2;
 			unpack(dash_pat)
@@ -767,6 +773,7 @@ end
 ---@param end_pos number 「終了位置」を 0.0 から 1.0 に正規化した数値で指定．ただしループの場合はこの範囲を超えることもある．
 ---@param end_shape end_shape 「端の形状」を指定．
 ---@param elbow_shape elbow_shape 「接合点の形状」を指定．
+---@param miter_limit number 「マイター限界」を指定．1.0 以上の実数．
 ---@param dash_pat number[] 「破線パターン」を `{ opaque_len1, blank_len1, opaque_len2, blank_len2, ... }` の形式で指定．
 ---@param dash_pos number 「破線位置」をピクセル単位で指定．
 ---@param dash_adj boolean 「破線周期補正」を指定．
@@ -780,7 +787,7 @@ end
 local function path_mask_line(
 	alpha_outer, alpha_inner, line_width, antialias,
 	path_type, pts, n_segs, loop, prec,
-	start_pos, end_pos, end_shape, elbow_shape,
+	start_pos, end_pos, end_shape, elbow_shape, miter_limit,
 	dash_pat, dash_pos, dash_adj, dash_end_shape,
 	scale, rotate, dx, dy,
 	target_buffer, temp_buffer_name)
@@ -819,7 +826,7 @@ local function path_mask_line(
 	path_mask_line_buffered(
 		alpha_outer, alpha_inner, line_width, antialias,
 		temp_buffer_name, num_points, len, loop,
-		start_pos, end_pos, end_shape, elbow_shape,
+		start_pos, end_pos, end_shape, elbow_shape, miter_limit,
 		dash_pat, dash_pos, dash_adj, dash_end_shape,
 		target_buffer);
 end

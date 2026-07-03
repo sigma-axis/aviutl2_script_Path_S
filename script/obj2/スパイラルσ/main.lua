@@ -50,6 +50,7 @@ local end_pos = 100
 ---円 = 0
 ---四角 = 1
 ---平坦 = 2
+---三角 = 3
 local end_shape = 0
 
 ---$track:曲線精度, min = 1, max = 128, step = 1, scale = 0.25
@@ -65,6 +66,7 @@ local dash_pos = 0
 ---円 = 0
 ---四角 = 1
 ---平坦 = 2
+---三角 = 3
 local dash_end_shape = 0
 
 --group:ランダム変化,false
@@ -237,6 +239,6 @@ obj.clearbuffer("object", R - L, B - T, color);
 path_s.path_mask_line(
 	0, 1, line, antialias,
 	nil, pts, n_pts - 1, false, 1,
-	start_pos, end_pos, end_shape, 0,
+	start_pos, end_pos, end_shape, 0, 1,
 	dash_pat, dash_pos, false, dash_end_shape,
 	1, 0, obj.cx, obj.cy);

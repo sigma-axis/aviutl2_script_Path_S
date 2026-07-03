@@ -2,7 +2,7 @@ cbuffer constant0 : register(b0) {
 	float2 alpha_map;
 	float N_f, padding, aa_thick,
 		M_f, len_period0, idx_period0;
-	float end_shape_f, elbow_shape_f, dash_shape_f, loop_f;
+	float end_shape_f, elbow_shape_f, dash_shape_f, loop_f, dot_lim;
 	float4 phase_whole;
 	float4 phase_period[64];
 };
@@ -38,7 +38,7 @@ float4 carve_dash(float4 pos : SV_Position) : SV_Target
 		const float side = dot(float2(-d1.y, d1.x), pt1);
 
 		if (was_stroke_whole && was_stroke_period)
-			sq_dist = min(sq_dist, sq_dist_func_elbow(pt0, d0, d1, elbow_shape, padding));
+			sq_dist = min(sq_dist, sq_dist_func_elbow(pt0, d0, d1, elbow_shape, padding, dot_lim));
 		for (float rest = l; rest > 0 && idx_whole < 4; ) {
 			if (len_whole <= 0) len_whole += phase_whole[(++idx_whole) & 3];
 			if (len_period <= 0) {
@@ -74,7 +74,7 @@ float4 carve_dash(float4 pos : SV_Position) : SV_Target
 		const bool is_stroke_whole = phase_whole[0] <= 0,
 			is_stroke_period = ((uint(idx_period0) & 1) != 0) ^ (len_period0 <= 0);
 		if (was_stroke_whole && was_stroke_period)
-			sq_dist = min(sq_dist, sq_dist_func_elbow(pt0, d0, d1, elbow_shape, padding));
+			sq_dist = min(sq_dist, sq_dist_func_elbow(pt0, d0, d1, elbow_shape, padding, dot_lim));
 		if ((was_stroke_whole && was_stroke_period) != (is_stroke_whole && is_stroke_period)) {
 			sq_dist = min(sq_dist, sq_dist_func_end(pt0,
 				(was_stroke_whole && was_stroke_period) ? d0 : -d1,

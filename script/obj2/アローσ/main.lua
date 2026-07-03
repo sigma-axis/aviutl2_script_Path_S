@@ -38,12 +38,18 @@ local end_pos = 100
 ---円 = 0
 ---四角 = 1
 ---平坦 = 2
+---三角 = 3
 local end_shape = 0
 
 ---$select:接合点の形状
 ---ラウンド = 0
 ---ベベル = 1
+---マイター = 2
+---ブランク = 3
 local elbow_shape = 0
+
+---$track:マイター限界, min = 100, max = 3200, step = 0.01, scale = 0.25
+local miter_limit = 400
 
 ---$value:破線パターン
 local dash_pat = {100,0}
@@ -55,6 +61,7 @@ local dash_pos = 0
 ---円 = 0
 ---四角 = 1
 ---平坦 = 2
+---三角 = 3
 local dash_end_shape = 0
 
 --group:矢じり設定,false
@@ -127,6 +134,7 @@ end
 		end_pos:		number?,
 		end_shape:		string?,
 		elbow_shape:	string?,
+		miter_limit:	number?,
 		dash_pat:		table?,
 		dash_pos:		number?,
 		dash_end_shape:	string?,
@@ -154,6 +162,7 @@ start_pos = tonumber(PI.start_pos) or start_pos;
 end_pos = tonumber(PI.end_pos) or end_pos;
 end_shape = path_s.PI.end_shape(PI.end_shape, end_shape);
 elbow_shape = path_s.PI.elbow_shape(PI.elbow_shape, elbow_shape);
+miter_limit = tonumber(PI.miter_limit) or miter_limit;
 dash_pat = type(PI.dash_pat) == "table" and PI.dash_pat or dash_pat;
 dash_pos = tonumber(PI.dash_pos) or dash_pos;
 dash_end_shape = path_s.PI.end_shape(PI.dash_end_shape, dash_end_shape);
@@ -182,6 +191,7 @@ num_points = math.max(math.floor(0.5 + num_points), 2);
 precision = math.max(precision, 1);
 start_pos = math.min(math.max(start_pos / 100, 0), 1);
 end_pos = math.min(math.max(end_pos / 100, 0), 1);
+miter_limit = math.max(miter_limit / 100, 1);
 head_type = math.min(math.max(math.floor(0.5 + head_type), 0), 3);
 head_width = math.max(head_width / 100, 0);
 head_center = head_center / 100;
@@ -223,7 +233,10 @@ if rand_amplify > 0 then
 	end
 end
 local L, R, T, B = path_s.measure(points, num_points);
-local th = line * (end_shape == 1 and 0.5 ^ 0.5 or 0.5) + antialias;
+local th = line * math.max(
+	end_shape == 1 and 2 ^ 0.5 or 1,
+	elbow_shape == 2 and miter_limit or 1) / 2
+	+ antialias;
 if head_type ~= 0 then
 	-- take the arrow heads into account.
 	th = math.max(th, head_size / 2 * ((math.abs(head_center) + 1) ^ 2 + head_width ^ 2) ^ 0.5);
@@ -296,7 +309,7 @@ obj.clearbuffer(head_vertices and "tempbuffer" or "object", W, H, color);
 path_s.path_mask_line(
 	0, 1, line, antialias,
 	nil, points, num_points - 1, false, 1,
-	start_pos, end_pos, end_shape, elbow_shape,
+	start_pos, end_pos, end_shape, elbow_shape, miter_limit,
 	dash_pat, dash_pos, false, dash_end_shape,
 	1, 0, cx, cy,
 	head_vertices and { name = "tempbuffer", w = W, h = H } or nil,

@@ -238,25 +238,36 @@ Although, usage documentations for this script / plugin in languages other than 
 | `円` | ![Image of rounded endpoint](https://github.com/user-attachments/assets/0100b898-afe5-4b8a-b3eb-8ea5d6e30ce8) |
 | `四角` | ![Image of square endpoint](https://github.com/user-attachments/assets/f20cba23-64bd-472b-89ae-84ce36f0724f) |
 
-<!-- TODO: image of new shape "平坦" -->
+<!-- TODO: image of new shapes "平坦" and "三角" -->
 
 初期値は `円`.
 
 > [!NOTE]
 > スクリプトの `obj.effect()` で指定する場合，ライン両端は `"端の形状"`, 破線の途切れ目は `"dash::端の形状"` でそれぞれ指定します．
 
-####  接合点の形状
+####  接合点の形状 / マイター限界
 
 *ラインを描画するタイプのスクリプトでの設定です．*
 
 ラインの曲がり角での形状を指定します．
 
-| 接合点の形状 | 例 |
-|:---:|:---:|
-| `ラウンド` | TODO: Image of rounded joint |
-| `ベベル` | TODO: Image of bevel joint |
+- 「接合点の形状」は以下の選択肢があります:
 
-初期値は `ラウンド`.
+  | 接合点の形状 | 例 |
+  |:---:|:---:|
+  | `ラウンド` | TODO: Image of rounded joint |
+  | `ベベル` | TODO: Image of bevel joint |
+  | `マイター` | TODO: Image of rounded joint |
+  | `ブランク` | TODO: Image of bevel joint |
+
+  初期値は `ラウンド`.
+
+- 「マイター限界」は，「接合点の形状」が `マイター` の場合のみ有効です．尖った角の最大長さを，線幅からの比率で % 単位で指定します．
+
+  最小値は 100, 最大値は 3200, 初期値は 400.
+
+> [!CAUTION]
+> `ブランク` を曲線に対して適用すると「隙間」のあるような形状になってしまうので注意．
 
 ####  破線パターン / 破線周期補正 / 破線位置
 
@@ -1018,7 +1029,7 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
   - ライン系のスクリプトの調整項目追加:
     - 「端の形状」に「平坦」を追加．
     - 破線パターンにも「端の形状」を設定できるように (ライン全体の両端と独立に指定).
-    - 「接合点の形状」を追加．
+    - 「接合点の形状」と「マイター限界」を追加．
 
   - 「ラインσ」を更新:
     - 「始点X」「始点Y」のパラメタを追加．ラインの開始点が，以前はオブジェクトの中心点に固定だったのを動かせるように．
@@ -1033,10 +1044,10 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
   - `Path_S.lua` の API の仕様変更．次の関数に破壊的変更があります:
 
     - `path_mask_line()` 関数．
-      - 引数 `dash_end_shape` と `elbow_shape` の追加．
+      - 引数 `dash_end_shape`, `elbow_shape`, `miter_limit` を追加．
 
     - `path_mask_line_buffered()` 関数．
-      - 引数 `dash_end_shape` と `elbow_shape` の追加．
+      - 引数 `dash_end_shape` と `elbow_shape`, `miter_limit` の追加．
       - 引数 `end_points` の削除 (今まで特定条件で必要だったものが指定不要に).
 
     - `find_end_points()` 関数の削除．

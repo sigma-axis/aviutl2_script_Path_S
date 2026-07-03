@@ -50,12 +50,18 @@ local end_pos = 100
 ---円 = 0
 ---四角 = 1
 ---平坦 = 2
+---三角 = 3
 local end_shape = 0
 
 ---$select:接合点の形状
 ---ラウンド = 0
 ---ベベル = 1
+---マイター = 2
+---ブランク = 3
 local elbow_shape = 0
+
+---$track:マイター限界, min = 100, max = 3200, step = 0.01, scale = 0.25
+local miter_limit = 400
 
 ---$value:破線パターン
 local dash_pat = {100,0}
@@ -67,6 +73,7 @@ local dash_pos = 0
 ---円 = 0
 ---四角 = 1
 ---平坦 = 2
+---三角 = 3
 local dash_end_shape = 0
 
 --group:ランダム変化,false
@@ -115,6 +122,7 @@ end
 		end_pos:			number?,
 		end_shape:			string?,
 		elbow_shape:		string?,
+		miter_limit:		number?,
 		dash_pat:			table?,
 		dash_pos:			number?,
 		dash_end_shape:		string?,
@@ -144,6 +152,7 @@ start_pos = tonumber(PI.start_pos) or start_pos;
 end_pos = tonumber(PI.end_pos) or end_pos;
 end_shape = path_s.PI.end_shape(PI.end_shape, end_shape);
 elbow_shape = path_s.PI.elbow_shape(PI.elbow_shape, elbow_shape);
+miter_limit = tonumber(PI.miter_limit) or miter_limit;
 dash_pat = type(PI.dash_pat) == "table" and PI.dash_pat or dash_pat;
 dash_pos = tonumber(PI.dash_pos) or dash_pos;
 dash_end_shape = path_s.PI.end_shape(PI.dash_end_shape, dash_end_shape);
@@ -161,6 +170,7 @@ line_period = math.max(line_period, 4);
 line_amplify = math.max(line_amplify, 0);
 start_pos = math.min(math.max(start_pos / 100, 0), 1);
 end_pos = math.min(math.max(end_pos / 100, 0), 1);
+miter_limit = math.max(miter_limit / 100, 1);
 rand_period = math.max(rand_period, 4);
 rand_amplify = math.max(rand_amplify, 0);
 rand_seed = math.min(math.max(math.floor(0.5 + rand_seed), -2 ^ 16), 2 ^ 16 - 1);
@@ -271,7 +281,10 @@ end
 -- measure and move the path.
 path_s.transform(pts, n_pts, 1, math.atan2(end_Y - start_Y, end_X - start_X), start_X, start_Y);
 local L, R, T, B = path_s.measure(pts, n_pts);
-local th = math.ceil(line * (end_shape == 1 and 0.5 ^ 0.5 or 0.5) + antialias);
+local th = math.ceil(line * math.max(
+	end_shape == 1 and 2 ^ 0.5 or 1,
+	elbow_shape == 2 and miter_limit or 1) / 2
+	+ antialias);
 L, T = math.floor(L - th), math.floor(T - th);
 R, B = math.max(math.ceil(R + th), L + 1), math.max(math.ceil(B + th), T + 1);
 
@@ -283,6 +296,6 @@ obj.clearbuffer("object", R - L, B - T, color);
 path_s.path_mask_line(
 	0, 1, line, antialias,
 	nil, pts, n_pts - 1, false, 1,
-	start_pos, end_pos, end_shape, elbow_shape,
+	start_pos, end_pos, end_shape, elbow_shape, miter_limit,
 	dash_pat, dash_pos, false, dash_end_shape,
 	1, 0, obj.cx, obj.cy);
