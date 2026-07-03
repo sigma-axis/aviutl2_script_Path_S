@@ -91,14 +91,16 @@ end
 ---| 1 # ベベル
 ---| 2 # マイター
 ---| 3 # ブランク
+---| 4 # ブランク+ラウンド
+---| 5 # ブランク+ベベル
 local PI_choose_join_shape do
 	local name2num = {
-		["ラウンド"] = 0, ["ベベル"] = 1, ["マイター"] = 2, ["ブランク"] = 3,
+		["ラウンド"] = 0, ["ベベル"] = 1, ["マイター"] = 2, ["ブランク"] = 3, ["ブランク+ラウンド"] = 4, ["ブランク+ベベル"] = 5,
 	};
 	---PI で塗りつぶしの「範囲」指定を適用する．
 	---このパラメタは次の形式で指定されているものとする:
 	---
-	---`--select@join_shape:線結合の形状=0,ラウンド=0,ベベル=1`
+	---`--select@join_shape:線結合の形状=0,ラウンド=0,ベベル=1,マイター=2,ブランク=3,ブランク+ラウンド=4,ブランク+ベベル=5`
 	---@param pi_value any
 	---@param gui_value join_shape
 	---@return join_shape
@@ -106,7 +108,7 @@ local PI_choose_join_shape do
 		if type(gui_value) == "string" then
 			gui_value = name2num[pi_value] or gui_value;
 		end
-		return math.min(math.max(math.floor(0.5 + gui_value), 0), 3);
+		return math.min(math.max(math.floor(0.5 + gui_value), 0), 5);
 	end
 end
 
