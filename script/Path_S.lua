@@ -736,7 +736,7 @@ local function path_mask_line_buffered(
 			alpha_inner - alpha_outer, alpha_outer;
 			num_points, math.max(line_width - 1, 0) / 2, antialias;
 
-			end_shape; elbow_shape;
+			end_shape; elbow_shape; loop and 1 or 0;
 		}, "mask");
 	else
 		obj.pixelshader("carve_dash@パスマスク(ライン)σ@Path_S", tgt_name, buffer_name,

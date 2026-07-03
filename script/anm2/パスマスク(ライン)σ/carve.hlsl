@@ -33,7 +33,14 @@ float4 carve(float4 pos : SV_Position) : SV_Target
 		pt0 = pt1; d0 = d1;
 	}
 
-	if (!loop) sq_dist = min(sq_dist,
+	if (loop) {
+		float2 pt1 = get_point(1) - pos.xy, d1 = pt1 - pt0;
+		float l = length(d1);
+		d1 = l == 0 ? d0 : d1 / l;
+		sq_dist = min(sq_dist,
+			sq_dist_func_elbow(pt0, d0, d1, elbow_shape, padding));
+	}
+	else sq_dist = min(sq_dist,
 		sq_dist_func_end(pt0, d0, end_shape, padding));
 
 	const float a = 1 - saturate((sqrt(sq_dist) - padding) / aa_thick);

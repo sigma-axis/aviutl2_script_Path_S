@@ -242,7 +242,7 @@ Although, usage documentations for this script / plugin in languages other than 
 
 初期値は `円`.
 
-> [!INFO]
+> [!NOTE]
 > スクリプトの `obj.effect()` で指定する場合，ライン両端は `"端の形状"`, 破線の途切れ目は `"dash::端の形状"` でそれぞれ指定します．
 
 ####  接合点の形状
