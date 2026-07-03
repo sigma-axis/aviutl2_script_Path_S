@@ -60,7 +60,7 @@ local end_shape = 0
 ---ブランク = 3
 local join_shape = 0
 
----$track:マイター限界, min = 100, max = 3200, step = 0.01, scale = 0.25
+---$track:マイター限界, min = 100, max = 3200, step = 0.001, scale = 0.25
 local miter_limit = 400
 
 ---$value:破線パターン

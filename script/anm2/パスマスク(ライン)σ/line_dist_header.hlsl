@@ -1,22 +1,19 @@
 float sq_dist_func_end(float2 pt, float2 d, uint shape, float padding)
 {
-	static const float2 flip = { 1, -1 };
+	static const float2 flip = { 1, -1 }, c = { sqrt(0.5), 1 - sqrt(0.5) };
 	const float l = -dot(d, pt), L = abs(dot(flip * d.yx, pt));
 	float D = max(abs(l) + padding, L);
 	if (l < 0) return D * D;
 
 	switch (shape) {
-	case 0: default: return min(D * D, dot(pt, pt));
-	case 1:
-		D = min(D, max(abs(l), L));
-		return D * D;
-	case 2:
-		D = min(D, max(abs(l) + padding, L));
-		return D * D;
+	case 0: default: return dot(pt, pt);
+	case 1: D = max(abs(l), L); break;
+	case 2: break;
 	case 3:
-		D = min(D, max(sqrt(0.5) * (L + abs(l)) + (1 - sqrt(0.5)) * padding, L));
-		return D * D;
+		D = max(dot(c, float2(L + abs(l), padding)), L);
+		break;
 	}
+	return D * D;
 }
 float sq_dist_func_join(float2 pt, float2 d0, float2 d1, uint shape, float padding, float dot_lim)
 {
@@ -32,15 +29,11 @@ float sq_dist_func_join(float2 pt, float2 d0, float2 d1, uint shape, float paddi
 	else if (shape == 3) return D * D;
 
 	switch (shape) {
-	case 0: return min(D * D, dot(pt, pt));
-	default: {
+	case 0: return dot(pt, pt);
+	default:
 		float2 dd = d0 - d1, nd = flip * (d0 + d1).yx;
-		if (dot(dd, nd) < 0) nd = -nd;
-		dd += nd; dd = normalize(dd);
-		nd = flip * dd.yx;
-
-		D = min(D, abs(dot(dd, pt)) + (1 - abs(dot(nd, d0))) * padding);
+		dd = normalize(dd + (dot(dd, nd) < 0 ? -nd : nd));
+		D = max(abs(dot(dd, pt)) + (1 - abs(dot(dd, flip * d0.yx))) * padding, L);
 		return D * D;
-	}
 	}
 }
