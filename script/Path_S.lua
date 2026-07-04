@@ -31,7 +31,7 @@ local PI_choose_path_type do
 	---@param gui_value path_type
 	---@return path_type
 	function PI_choose_path_type(pi_value, gui_value)
-		if type(gui_value) == "string" then
+		if type(pi_value) == "string" then
 			gui_value = name2num[pi_value] or gui_value;
 		end
 		return math.min(math.max(math.floor(0.5 + gui_value), 0), 3);
@@ -55,7 +55,7 @@ local PI_choose_mode_fill do
 	---@param gui_value mode_fill
 	---@return mode_fill
 	function PI_choose_mode_fill(pi_value, gui_value)
-		if type(gui_value) == "string" then
+		if type(pi_value) == "string" then
 			gui_value = name2num[pi_value] or gui_value;
 		end
 		return math.min(math.max(math.floor(0.5 + gui_value), 0), 3);
@@ -79,7 +79,7 @@ local PI_choose_end_shape do
 	---@param gui_value end_shape
 	---@return end_shape
 	function PI_choose_end_shape(pi_value, gui_value)
-		if type(gui_value) == "string" then
+		if type(pi_value) == "string" then
 			gui_value = name2num[pi_value] or gui_value;
 		end
 		return math.min(math.max(math.floor(0.5 + gui_value), 0), 3);
@@ -105,7 +105,7 @@ local PI_choose_join_shape do
 	---@param gui_value join_shape
 	---@return join_shape
 	function PI_choose_join_shape(pi_value, gui_value)
-		if type(gui_value) == "string" then
+		if type(pi_value) == "string" then
 			gui_value = name2num[pi_value] or gui_value;
 		end
 		return math.min(math.max(math.floor(0.5 + gui_value), 0), 5);
