@@ -235,10 +235,10 @@ Although, usage documentations for this script / plugin in languages other than 
 
 | 端の形状 | 例 |
 |:---:|:---:|
-| `円` | ![Image of rounded endpoint](https://github.com/user-attachments/assets/0100b898-afe5-4b8a-b3eb-8ea5d6e30ce8) |
-| `四角` | ![Image of square endpoint](https://github.com/user-attachments/assets/f20cba23-64bd-472b-89ae-84ce36f0724f) |
-
-<!-- TODO: image of new shapes "平坦" and "三角" -->
+| `円` | ![Image of round endpoint](https://github.com/user-attachments/assets/64e6ef8c-ac9a-4887-99ad-d125dc167f7d) |
+| `四角` | ![Image of square endpoint](https://github.com/user-attachments/assets/6a092fdd-fefe-482d-b1fd-38834a8c8fe0) |
+| `平坦` | ![Image of flat endpoint](https://github.com/user-attachments/assets/d80725cc-20c6-4e46-a3fd-ac6ada038289) |
+| `三角` | ![Image of triangle endpoint](https://github.com/user-attachments/assets/703097e8-ba9b-486d-b347-7c3a29be7a2d) |
 
 初期値は `円`.
 
@@ -255,10 +255,10 @@ Although, usage documentations for this script / plugin in languages other than 
 
   | 線結合の形状 | 例 |
   |:---:|:---:|
-  | `ラウンド` | TODO: Image of rounded join |
-  | `ベベル` | TODO: Image of bevel join |
-  | `マイター` | TODO: Image of miter join |
-  | `ブランク`<br>`ブランク+ラウンド`<br>`ブランク+ベベル` | TODO: Image of bevel join |
+  | `ラウンド` | ![Image of round join](https://github.com/user-attachments/assets/41be87c6-e48d-4017-93ea-c2f001597073) |
+  | `ベベル` | ![Image of bevel join](https://github.com/user-attachments/assets/b831f3b8-341b-43eb-9fa7-7695da42e6a2) |
+  | `マイター` | ![Image of miter join](https://github.com/user-attachments/assets/0434615b-d4b0-4f85-b374-b4a695a5a3fe) |
+  | `ブランク`<br>`ブランク+ラウンド`<br>`ブランク+ベベル` | ![Image of blank join](https://github.com/user-attachments/assets/7671b2de-a6ab-44c0-9b3a-248fb546a720) |
 
   初期値は `ラウンド`.
 
@@ -270,7 +270,7 @@ Although, usage documentations for this script / plugin in languages other than 
 
   最小値は 100, 最大値は 3200, 初期値は 400 (28.955° 相当).
 
-> [!CAUTION]
+> [!NOTE]
 > `ブランク` 系を曲線に対して適用すると「隙間」のあるような形状になってしまうので注意．
 
 ####  破線パターン / 破線周期補正 / 破線位置
