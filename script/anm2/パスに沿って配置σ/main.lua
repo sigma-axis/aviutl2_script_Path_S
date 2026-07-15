@@ -142,9 +142,10 @@ if toggle_gui then
 		rate * obj.cy + (rate - 1) * cy - (B + T) / 2;
 
 	-- then draw to the framebuffer.
+	local prev_blend = obj.getoption("blend");
 	obj.setoption("blend", "diff");
 	obj.draw(0, 0, 0, 1 / rate);
-	obj.setoption("blend");
+	obj.setoption("blend", prev_blend);
 	obj.setoption("draw_state", false);
 
 	-- rewind the states.
