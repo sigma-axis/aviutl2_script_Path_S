@@ -87,6 +87,7 @@ local rand_amplify = 0
 
 ---$checksection:ランダム固定端
 local rand_fix_end = true
+
 ---$track:ランダムシード, min = -65536, max = 65535, step = 1
 local rand_seed = 10000
 

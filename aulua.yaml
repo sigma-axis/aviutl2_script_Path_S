@@ -3,13 +3,13 @@ project:
   variables:
     NAME: Path_S
     AUTHOR: σ軸
-    LEAST_AVIUTL_VERSION: "2005000"
-    LEAST_AVIUTL_VERSION_STRING: beta50
+    LEAST_AVIUTL_VERSION: "2005400"
+    LEAST_AVIUTL_VERSION_STRING: "2.0.54"
 
 package:
   id: Path_S
   name: パス描画スクリプト Path_S
-  version: v2.00 (for beta52)
+  version: v2.10-wip
   information: "{name} {version} by {AUTHOR}"
   script_sub_dir: ""
   uninstall_sub_folder_file: false
@@ -34,6 +34,8 @@ package:
       dest: Script/{id}/README.md
     - src: LICENSE
       dest: Script/{id}/LICENSE
+    - src: Tooltip.aul2
+      dest: Language/Default.{id}.aul2
   file_name: package.au2pkg.zip
 
 build:
