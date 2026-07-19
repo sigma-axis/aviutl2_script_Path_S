@@ -30,7 +30,11 @@ PI=PI = {\n  intensity: number?,\n  invert: boolean|number|nil,\n  line: number?
 effect.name=パスで囲った範囲のみに，後続のフィルタ効果，または直接スクリプトを記述して適用するフィルタ効果です．
 曲線精度=折れ線近似の最大サンプル間隔，ピクセル単位
 アンカー切り替え=パス編集用のアンカーと移動用のアンカーを切り替え．
+追加のフィルタ効果=「後続フィルタ」の範囲は「パス部分フィルタσここまで」で区切ることができます．
 PI=PI = {\n  invert: boolean|number|nil,\n  num_points: number?,\n  path_type: string?,\n  points: table?,\n  precision: number?,\n  inflation: number?,\n  mode_fill: string?,\n  X: number?,\n  Y: number?,\n  zoom: number?,\n  rotate: number?,\n  extra_filter: string?,\n  antialias: number?,\n}
+
+[Tips.パス部分フィルタσここまで@Path_S]
+effect.name=「パス部分フィルタσ」での「後続フィルタ」の範囲を指定します．
 
 [Tips.パスに沿って配置σ@Path_S]
 effect.name=パスに沿ってオブジェクトを配置するフィルタ効果です．個別オブジェクトでも間隔を空けて配置できます．\n各オブジェクト間の相対座標はパスに沿わずにそのまま反映されます．直前に「座標の拡大縮小(個別オブジェクト)」で 0 倍をしておくなどするとパスに沿った配置になります．
