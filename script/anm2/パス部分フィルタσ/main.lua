@@ -132,53 +132,34 @@ if extra_filter == 1 and extra_script:match("^%s*(.-)%s*$") == "" then return en
 
 --#endregion PI / normalize parameters.
 
--- backup the current image.
-local cache_name_ori, cache_name_eff = "cache:path_s/part/ori#"..obj.effect_id, "cache:path_s/part/eff";
-obj.copybuffer(cache_name_ori, "object");
+-- save the current context.
+---@type partial_filter_context?
+local cxt = path_s.partial_filter.make_cxt(
+	num_points, path_type, points, precision,
+	mode_fill, inflation, antialias, invert,
+	X, Y, zoom, rotate);
 
 -- apply following filters.
-local w0, h0, cx0, cy0 = obj.w, obj.h, obj.cx, obj.cy;
-if extra_filter == 0 then obj.effect();
+if extra_filter == 0 then
+	-- push the context so subsequent filter can combine.
+	path_s.partial_filter.push_cxt(cxt);
+	obj.effect();
+	-- then pop it off after.
+	cxt = path_s.partial_filter.pop_cxt(obj.effect_id);
 else
 	local f, c, e;
 	f, e = loadstring(extra_script);
 	if f then c, e = pcall(f) end
 	if not (f and c) then
 		path_s.print_script_error(tostring(e), extra_script);
-		obj.setoption("draw_state", true);
+		obj.load("text", "");
 		return;
 	end
 end
 if obj.w <= 0 or obj.h <= 0 then return end -- subsequent filter already drew.
-obj.copybuffer(cache_name_eff, "object");
 
--- adjust the size and center.
-local w1, h1, cx1, cy1 = obj.w, obj.h, obj.cx, obj.cy;
-local w, h, cx, cy do
-	local L, R, T, B =
-		math.min(-w0 / 2 - cx0, -w1 / 2 - cx1),
-		math.max(w0 / 2 - cx0, w1 / 2 - cx1),
-		math.min(-h0 / 2 - cy0, -h1 / 2 - cy1),
-		math.max(h0 / 2 - cy0, h1 / 2 - cy1);
-	w, h = math.ceil(R - L), math.ceil(B - T);
-	cx, cy = -(2 * L + w) / 2, -(2 * T + h) / 2;
-end
-
--- create the shape of the path.
-obj.clearbuffer("tempbuffer", w, h, 0x000000);
-obj.cx, obj.cy  = cx, cy;
-path_s.path_mask_area(
-	invert and 1 or 0, invert and 0 or 1, mode_fill, inflation, antialias,
-	path_type, points, num_points, precision,
-	zoom, rotate, X + (cx - cx0), Y + (cy - cy0),
-	{ name = "tempbuffer", w = w, h = h }, "object");
-
--- interpolate the original and effected buffers by that shape.
-obj.clearbuffer("object", w, h);
-obj.pixelshader("interpolate", "object", { cache_name_ori, cache_name_eff, "tempbuffer" }, {
-	-(w - w0) / 2 - (cx - cx0), -(h - h0) / 2 - (cy - cy0);
-	-(w - w1) / 2 - (cx - cx1), -(h - h1) / 2 - (cy - cy1);
-});
+-- if the context is still alive, combine with the original.
+if cxt then path_s.partial_filter.combine(cxt) end
 
 if extra_filter == 0 then
 	-- draw to the framebuffer.

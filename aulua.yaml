@@ -56,6 +56,8 @@ scripts:
         path: script/anm2/パスマスク(ライン)σ/main.lua
       - label: パス部分フィルタσ
         path: script/anm2/パス部分フィルタσ/main.lua
+      - label: パス部分フィルタσここまで
+        path: script/anm2/パス部分フィルタσここまで/main.lua
       - label: パスに沿って配置σ
         path: script/anm2/パスに沿って配置σ/main.lua
 

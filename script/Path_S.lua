@@ -833,6 +833,175 @@ local function path_mask_line(
 		target_buffer);
 end
 
+local partial_filter_make_cxt, partial_filter_push_cxt, partial_filter_pop_cxt, partial_filter_combine do
+	---@alias partial_filter_context { [1]: integer, [2]: path_type, [3]: number[], [4]: number, [5]: mode_fill, [6]: number, [7]: number, [8]: boolean, [9]: number, [10]: number, [11]: number, [12]: number, [13]: integer, [14]: integer, [15]: number, [16]: number, [17]: string } # パス部分フィルタσ で後続フィルタに伝達できる形でパスやフィルタ元の状態の情報を保持するテーブル．
+	local key_name_stack, key_name_cxt do
+		local g_key_stack, g_key_cxt = "path_s/part/cxt_stack#", "path_s/part/cxt#";
+		function key_name_stack(id) return g_key_stack..id end
+		function key_name_cxt(id, effect_id) return g_key_cxt..id.."&"..effect_id end
+	end
+	local function check_cxt(t)
+		-- num_points
+		if type(t[1]) ~= "number" or t[1] % 1 > 0 or t[1] < 3 then return false end
+		-- path_type
+		if type(t[2]) ~= "number" or t[2] ~= PI_choose_path_type(nil, t[2]) then return false end
+		-- points
+		if type(t[3]) ~= "table" then return false end
+		-- precision
+		if type(t[4]) ~= "number" or t[4] < 1 then return false end
+		-- mode_fill
+		if type(t[5]) ~= "number" or t[5] ~= PI_choose_mode_fill(nil, t[5]) then return false end
+		-- inflation
+		if type(t[6]) ~= "number" or t[6] < 0 then return false end
+		-- antialias
+		if type(t[7]) ~= "number" or t[7] < 1 / 1024 then return false end
+		-- invert
+		if type(t[8]) ~= "boolean" then return false end
+		-- X
+		if type(t[9]) ~= "number" then return false end
+		-- Y
+		if type(t[10]) ~= "number" then return false end
+		-- zoom
+		if type(t[11]) ~= "number" or t[11] <= 0 then return false end
+		-- rotate
+		if type(t[12]) ~= "number" then return false end
+		-- obj.w
+		if type(t[13]) ~= "number" or t[13] % 1 > 0 or t[13] <= 0 then return false end
+		-- obj.h
+		if type(t[14]) ~= "number" or t[14] % 1 > 0 or t[14] <= 0 then return false end
+		-- obj.cx
+		if type(t[15]) ~= "number" then return false end
+		-- obj.cy
+		if type(t[16]) ~= "number" then return false end
+		-- cache_name
+		if type(t[17]) ~= "string" or not t[17]:find("^cache:.") then return false end
+		return true;
+	end
+	---パス部分フィルタσ で後続フィルタに伝達する情報を登録し，登録情報のテーブルを作成する．`partial_filter_push_cxt()` や `partial_filter_combine()` で利用する．
+	---@param num_points integer # 頂点数．
+	---@param path_type path_type # 線タイプ．
+	---@param points number[] # 点リスト．
+	---@param precision number # 曲線精度．
+	---@param mode_fill mode_fill # 範囲．
+	---@param inflation number # 追加幅．
+	---@param antialias number # ぼかし幅．
+	---@param invert boolean # 反転．
+	---@param X number # 移動X．
+	---@param Y number # 移動Y．
+	---@param zoom number # 拡大率．1.0 で等倍．
+	---@param rotate number # 回転．ラジアン単位．
+	---@return partial_filter_context # 登録情報のテーブル．
+	function partial_filter_make_cxt(
+		num_points, path_type, points, precision,
+		mode_fill, inflation, antialias, invert,
+		X, Y, zoom, rotate)
+		local cache_name = "cache:path_s/part/ori#"..obj.effect_id;
+		obj.copybuffer(cache_name, "object");
+		return {
+			num_points, path_type, points, precision,
+			mode_fill, inflation, antialias, invert,
+			X, Y, zoom, rotate,
+			obj.w, obj.h, obj.cx, obj.cy, cache_name,
+		};
+	end
+	---パス部分フィルタσ で後続フィルタに伝達する情報のテーブルを `global` に登録する．`obj.effect()` 経由で後続フィルタからも参照できる．
+	---@param cxt partial_filter_context? 登録情報のテーブル．
+	function partial_filter_push_cxt(cxt)
+		local g_key_stack = key_name_stack(obj.id);
+		local stack do
+			local str_stack = global[g_key_stack];
+			if str_stack then
+				stack = buffer.decode(str_stack);
+				if type(stack) ~= "table" then stack = {} end
+			else stack = {} end
+		end
+		stack[#stack + 1] = obj.effect_id;
+		local g_key_cxt = key_name_cxt(obj.id, obj.effect_id);
+		global[g_key_cxt] = buffer.encode(cxt);
+		global[g_key_stack] = buffer.encode(stack);
+	end
+	---パス部分フィルタσ で登録した情報のテーブルを `global` から抜き出す．
+	---@param effect_id integer? 抜き出す対象の `obj.effect_id`. 省略時は stack top のみを抜き出して，そのテーブルを返す．stack が空の場合は `nil` を返す．指定時はこの id とそれ以降を stack から抜き出して，指定 id のテーブルを返す．id が見つからない場合は `nil` を返す．
+	---@return partial_filter_context? cxt 登録情報のテーブル，または nil．
+	function partial_filter_pop_cxt(effect_id)
+		local g_key_stack = key_name_stack(obj.id);
+		local stack do
+			local str_stack = global[g_key_stack];
+			if str_stack then
+				stack = buffer.decode(str_stack);
+				if type(stack) ~= "table" then stack = {} end
+			else stack = {} end
+		end
+		local idx = -1 if #stack > 0 then
+			if effect_id then
+				for i = #stack, 1, -1 do
+					if stack[i] == effect_id then idx = i; break end
+				end
+			else idx = #stack end
+		end
+		local cxt = nil if idx >= 0 then
+			for i = #stack, idx + 1, -1 do
+				local g_key_cxt = key_name_cxt(obj.id, stack[i]);
+				stack[i] = nil;
+				global[g_key_cxt] = nil;
+			end
+			local g_key_cxt = key_name_cxt(obj.id, stack[idx]);
+			stack[idx] = nil;
+			local str_cxt = global[g_key_cxt]; global[g_key_cxt] = nil;
+			if str_cxt then cxt = buffer.decode(str_cxt) end
+		end
+		global[g_key_stack] = #stack > 0 and buffer.encode(stack) or nil;
+
+		-- check the restored object.
+		if type(cxt) ~= "table" then return nil end
+		if not check_cxt(cxt) then return nil end
+		return cxt;
+	end
+	---登録情報のテーブルをもとにフィルタ加工前と加工後の 2 つの画像を合成する．
+	---@param cxt partial_filter_context 登録情報のテーブル．
+	function partial_filter_combine(cxt)
+		local num_points, path_type, points, precision,
+			mode_fill, inflation, antialias, invert,
+			X, Y, zoom, rotate,
+			w0, h0, cx0, cy0, cache_name =
+			cxt[1], cxt[2], cxt[3], cxt[4],
+			cxt[5], cxt[6], cxt[7], cxt[8],
+			cxt[9], cxt[10], cxt[11], cxt[12],
+			cxt[13], cxt[14], cxt[15], cxt[16], cxt[17];
+
+		-- adjust the size and center.
+		local w1, h1, cx1, cy1 = obj.w, obj.h, obj.cx, obj.cy;
+		local w, h, cx, cy do
+			local L, R, T, B =
+				math.min(-w0 / 2 - cx0, -w1 / 2 - cx1),
+				math.max(w0 / 2 - cx0, w1 / 2 - cx1),
+				math.min(-h0 / 2 - cy0, -h1 / 2 - cy1),
+				math.max(h0 / 2 - cy0, h1 / 2 - cy1);
+			w, h = math.ceil(R - L), math.ceil(B - T);
+			cx, cy = -(2 * L + w) / 2, -(2 * T + h) / 2;
+		end
+
+		-- create the shape of the path.
+		local cache_name_mask, cache_name_tmp =
+			"cache:path_s/part/mask", "cache:path_s/part/tmp";
+		obj.clearbuffer(cache_name_mask, w, h, 0x000000);
+		obj.cx, obj.cy  = cx, cy;
+		path_mask_area(
+			invert and 1 or 0, invert and 0 or 1, mode_fill, inflation, antialias,
+			path_type, points, num_points, precision,
+			zoom, rotate, X + (cx - cx0), Y + (cy - cy0),
+			{ name = cache_name_mask, w = w, h = h }, cache_name_tmp);
+
+		-- interpolate the original and effected buffers by that shape.
+		obj.clearbuffer(cache_name_tmp, w, h);
+		obj.pixelshader("interpolate@パス部分フィルタσ@Path_S", cache_name_tmp, { cache_name, "object", cache_name_mask }, {
+			-(w - w0) / 2 - (cx - cx0), -(h - h0) / 2 - (cy - cy0);
+			-(w - w1) / 2 - (cx - cx1), -(h - h1) / 2 - (cy - cy1);
+		});
+		obj.copybuffer("object", cache_name_tmp);
+	end
+end
+
 ---Lua のエラーメッセージを，AviUtl2 が標準で出力する形式を真似て出力する．
 ---@param err_mes string Lua からのエラーメッセージ．
 ---@param source string エラー元となった Lua スクリプトのソースコード．
@@ -879,5 +1048,14 @@ return {
 	path_mask_line_buffered = path_mask_line_buffered,
 	path_mask_line = path_mask_line,
 
+	partial_filter = {
+		make_cxt = partial_filter_make_cxt,
+		push_cxt = partial_filter_push_cxt,
+		pop_cxt = partial_filter_pop_cxt,
+		combine = partial_filter_combine,
+	},
+
 	print_script_error = print_script_error,
+
+	VERSION = "${PACKAGE_VERSION}",
 };
