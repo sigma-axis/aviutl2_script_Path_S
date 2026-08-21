@@ -1,4 +1,5 @@
 --information:スパイラルσ@Path_S ${PACKAGE_VERSION} by ${AUTHOR}
+---$script_tips:渦巻の形のラインを描画するオブジェクトです．
 --label:Path_S\図形
 --require:${LEAST_AVIUTL_VERSION}
 ---$track:始点X, min = -4000, max = 4000, step = 0.01, scale = 0.25
@@ -33,6 +34,7 @@ local color = 0xffffff
 ---対数螺旋 = 1
 local line_shape = 1
 
+---$tips:正で外向きに反時計回り / 0 で半直線 / 負で外向きに時計回り
 ---$track:傾き, min = -400, max = 400, step = 0.001, scale = 0.25
 local slope = 10
 
@@ -40,9 +42,11 @@ local slope = 10
 local rotate = 0
 
 --group:ライン設定,false
+---$tips:ライン描画範囲の始点，パス全体長からの % 単位
 ---$track:開始位置, min = 0, max = 100, step = 0.001
 local start_pos = 0
 
+---$tips:ライン描画範囲の終点，パス全体長からの % 単位
 ---$track:終了位置, min = 0, max = 100, step = 0.001
 local end_pos = 100
 
@@ -53,9 +57,11 @@ local end_pos = 100
 ---三角 = 3
 local end_shape = 0
 
+---$tips:折れ線近似の最大サンプル間隔，ピクセル単位
 ---$track:曲線精度, min = 1, max = 128, step = 1, scale = 0.25
 local precision = 8
 
+---$tips:実線部分の長さと空白部分の長さを交互に記述，ピクセル単位
 ---$value:破線パターン
 local dash_pat = {100,0}
 
@@ -70,15 +76,19 @@ local dash_pos = 0
 local dash_end_shape = 0
 
 --group:ランダム変化,false
+---$tips:パスの描画方向に沿ったランダム変動の周期，ピクセル単位
 ---$track:ランダム周期, min = 4, max = 1024, step = 0.01, scale = 0.25
 local rand_period = 32
 
+---$tips:ランダム変動の大きさ，ピクセル単位
 ---$track:ランダム振幅, min = 0, max = 1024, step = 0.001, scale = 0.125
 local rand_amplify = 0
 
+---$tips:パスの始点終点をランダム変動の影響から除外します．
 ---$check:ランダム固定端
 local rand_fix_end = false
 
+---$tips:正だと同じシードでも別オブジェクトだと別の乱数．\n負だと同じシードなら別オブジェクトでも同じ乱数．
 ---$track:ランダムシード, min = -65536, max = 65535, step = 1
 local rand_seed = 10000
 
@@ -86,6 +96,30 @@ local rand_seed = 10000
 ---$track:ぼかし幅, min = 0, max = 1000, step = 0.01, scale = 0.2
 local antialias = 1
 
+---$nolang: name
+---$tips:PI = {
+---     :  start_X, start_Y: number?,
+---     :  end_X, end_Y: number?,
+---     :  start_radius: number?,
+---     :  end_radius: number?,
+---     :  line: number?,
+---     :  color: number?,
+---     :  line_shape: string?,
+---     :  slope: number?,
+---     :  rotate: number?,
+---     :  start_pos: number?,
+---     :  end_pos: number?,
+---     :  end_shape: string?,
+---     :  precision: number?,
+---     :  dash_pat: table?,
+---     :  dash_pos: number?,
+---     :  dash_end_shape: string?,
+---     :  rand_period: number?,
+---     :  rand_amplify: number?,
+---     :  rand_fix_end: boolean|number|nil,
+---     :  rand_seed: number?,
+---     :  antialias: number?,
+---     :}
 ---$value:PI
 local PI = {}
 
@@ -102,31 +136,6 @@ end
 --#region PI / normalize parameters.
 
 -- take parameters.
---[==[
-	PI = {
-		start_X, start_Y:	number?,
-		end_X, end_Y:		number?,
-		start_radius:		number?,
-		end_radius:			number?,
-		line:				number?,
-		color:				number?,
-		line_shape:			string?,
-		slope:				number?,
-		rotate:				number?,
-		start_pos:			number?,
-		end_pos:			number?,
-		end_shape:			string?,
-		precision:			number?,
-		dash_pat:			table?,
-		dash_pos:			number?,
-		dash_end_shape:		string?,
-		rand_period:		number?,
-		rand_amplify:		number?,
-		rand_fix_end:		boolean|number|nil,
-		rand_seed:			number?,
-		antialias:			number?,
-	}
-]==]
 start_X = tonumber(PI.start_X) or start_X;
 start_Y = tonumber(PI.start_Y) or start_Y;
 end_X = tonumber(PI.end_X) or end_X;

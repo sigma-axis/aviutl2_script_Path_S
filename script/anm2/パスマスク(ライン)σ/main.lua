@@ -1,4 +1,5 @@
 --information:パスマスク(ライン)σ@Path_S ${PACKAGE_VERSION} by ${AUTHOR}
+---$script_tips:パスの通ったライン上の画像を切り抜くフィルタ効果です．
 --label:Path_S\クリッピング
 --filter
 --require:${LEAST_AVIUTL_VERSION}
@@ -28,13 +29,16 @@ local points = {-100.00,50.00,-75.00,0.00,-50.00,-50.00,-25.00,-50.00,0.00,-50.0
 ---$checksection:ループ
 local loop = false
 
+---$tips:折れ線近似の最大サンプル間隔，ピクセル単位
 ---$track:曲線精度, min = 1, max = 128, step = 1, scale = 0.25
 local precision = 8
 
 --group:ライン設定,false
+---$tips:ライン描画範囲の始点，パス全体長からの % 単位
 ---$track:開始位置, min = -400, max = 400, step = 0.001, scale = 0.25
 local start_pos = 0
 
+---$tips:ライン描画範囲の終点，パス全体長からの % 単位
 ---$track:終了位置, min = -400, max = 400, step = 0.001, scale = 0.25
 local end_pos = 100
 
@@ -57,9 +61,11 @@ local join_shape = 0
 ---$track:マイター限界, min = 100, max = 3200, step = 0.001, scale = 0.25
 local miter_limit = 400
 
+---$tips:実線部分の長さと空白部分の長さを交互に記述，ピクセル単位
 ---$value:破線パターン
 local dash_pat = {100,0}
 
+---$tips:ループが ON の場合のみ有効，ループ 1 周での破線パターンが整数回になるよう補正
 ---$checksection:破線周期補正
 local dash_adj = true
 
@@ -87,6 +93,7 @@ local zoom = 100
 ---$track:回転, min = -3600, max = 3600, step = 0.01, scale = 0.1
 local rotate = 0
 
+---$tips:パス編集用のアンカーと移動用のアンカーを切り替え．
 ---$check:アンカー切り替え
 local toggle_gui = false
 
@@ -94,6 +101,32 @@ local toggle_gui = false
 ---$track:ぼかし幅, min = 0, max = 1000, step = 0.01, scale = 0.2
 local antialias = 1
 
+---$nolang: name
+---$tips:PI = {
+---     :  intensity: number?,
+---     :  invert: boolean|number|nil,
+---     :  line: number?,
+---     :  num_points: number?,
+---     :  path_type: string?,
+---     :  points: table?,
+---     :  loop: boolean|number|nil,
+---     :  precision: number?,
+---     :  start_pos: number?,
+---     :  end_pos: number?,
+---     :  end_shape: string?,
+---     :  join_shape: string?,
+---     :  miter_limit: number?,
+---     :  dash_pat: table?,
+---     :  dash_adj: boolean|number|nil,
+---     :  dash_pos: number?,
+---     :  dash_end_shape: string?,
+---     :  X, Y: number?,
+---     :  zoom: number?,
+---     :  rotate: number?,
+---     :  antialias: number?,
+---     :  pt_buff: string?,
+---     :  len_buff: number?,
+---     :}
 ---$value:PI
 local PI = {}
 
@@ -131,30 +164,6 @@ end
 -- take parameters.
 --[==[
 	PI = {
-		intensity:		number?,
-		invert:			boolean|number|nil,
-		line:			number?,
-		num_points:		number?,
-		path_type:		string?,
-		points:			table?,
-		loop:			boolean|number|nil,
-		precision:		number?,
-		start_pos:		number?,
-		end_pos:		number?,
-		end_shape:		string?,
-		join_shape:		string?,
-		miter_limit:	number?,
-		dash_pat:		table?,
-		dash_adj:		boolean|number|nil,
-		dash_pos:		number?,
-		dash_end_shape:	string?,
-		X:				number?,
-		Y:				number?,
-		zoom:			number?,
-		rotate:			number?,
-		antialias:		number?,
-		pt_buff:		string?,
-		len_buff:		number?,
 	}
 ]==]
 intensity = tonumber(PI.intensity) or intensity;

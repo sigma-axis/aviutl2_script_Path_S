@@ -1,4 +1,5 @@
 --information:パスに沿って配置σ@Path_S ${PACKAGE_VERSION} by ${AUTHOR}
+---$script_tips:パスに沿ってオブジェクトを配置するフィルタ効果です．個別オブジェクトでも間隔を空けて配置できます．\n各オブジェクト間の相対座標はパスに沿わずにそのまま反映されます．直前に「座標の拡大縮小(個別オブジェクト)」で 0 倍をしておくなどするとパスに沿った配置になります．
 --label:Path_S\配置
 --require:${LEAST_AVIUTL_VERSION}
 ---$track:位置, min = -400, max = 400, step = 0.001, scale = 0.25
@@ -10,9 +11,11 @@ local rotate = 0
 ---$checksection:パスに沿って回転
 local rot_tangent = true
 
+---$tips:個別オブジェクト間の位置ズレ長さ，パス全体長からの % 単位
 ---$track:個別位置ズレ, min = -200, max = 200, step = 0.001, scale = 0.5
 local ofs_indiv = -5
 
+---$tips:パスの始点と終点の間に収まらないオブジェクトを表示するかどうかを指定．
 ---$select:範囲外
 ---非表示 = 0
 ---始点のみ表示 = 1
@@ -37,13 +40,28 @@ local points = {0,-100,55.23,-100,100,-55.23,100,0,100,55.23,55.23,100,0,100,-55
 ---$checksection:ループ
 local loop = true
 
+---$tips:折れ線近似の最大サンプル間隔，ピクセル単位
 ---$track:曲線精度, min = 1, max = 128, step = 1, scale = 0.25
 local precision = 8
 
+---$tips:パスの形状を編集画面に表示．動画出力時には自動的に無効化されます．
 ---$check:パスの表示
 local toggle_gui = false
 
 --group:その他,false
+---$nolang: name
+---$tips:PI = {
+---     :  position: number?,
+---     :  rotate: number?,
+---     :  rot_tangent: boolean|number|nil,
+---     :  ofs_indiv: number?,
+---     :  out_of_range: string?,
+---     :  num_points: number?,
+---     :  path_type: string?,
+---     :  points: table?,
+---     :  loop: boolean|number|nil,
+---     :  precision: number?,
+---     :}
 ---$value:PI
 local PI = {}
 
@@ -61,20 +79,6 @@ end
 --#region PI / normalize parameters.
 
 -- take parameters.
---[==[
-	PI = {
-		position:		number?,
-		rotate:			number?,
-		rot_tangent:	boolean|number|nil,
-		ofs_indiv:		number?,
-		out_of_range:	string?,
-		num_points:		number?,
-		path_type:		string?,
-		points:			table?,
-		loop:			boolean|number|nil,
-		precision:		number?,
-	}
-]==]
 position = tonumber(PI.position) or position;
 rotate = tonumber(PI.rotate) or rotate;
 rot_tangent = path_s.PI.as_bool(PI.rot_tangent, rot_tangent);

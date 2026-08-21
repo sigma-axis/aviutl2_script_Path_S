@@ -1,4 +1,5 @@
 --information:パス図形σ@Path_S ${PACKAGE_VERSION} by ${AUTHOR}
+---$script_tips:パスに沿ったラインと，パス内を塗りつぶした図形を描画するオブジェクトです．
 --label:Path_S\図形
 --require:${LEAST_AVIUTL_VERSION}
 ---$track:ライン幅, min = 0, max = 1000, step = 0.01, scale = 0.2
@@ -27,6 +28,7 @@ local points = {0,-100,55.23,-100,100,-55.23,100,0,100,55.23,55.23,100,0,100,-55
 ---$checksection:ループ
 local loop = true
 
+---$tips:折れ線近似の最大サンプル間隔，ピクセル単位
 ---$track:曲線精度, min = 1, max = 128, step = 1, scale = 0.25
 local precision = 8
 
@@ -34,9 +36,11 @@ local precision = 8
 ---$track:ライン透明度, min = 0, max = 100, step = 0.01
 local alpha_line = 0
 
+---$tips:ライン描画範囲の始点，パス全体長からの % 単位
 ---$track:開始位置, min = -400, max = 400, step = 0.001, scale = 0.25
 local start_pos = 0
 
+---$tips:ライン描画範囲の終点，パス全体長からの % 単位
 ---$track:終了位置, min = -400, max = 400, step = 0.001, scale = 0.25
 local end_pos = 100
 
@@ -59,9 +63,11 @@ local join_shape = 0
 ---$track:マイター限界, min = 100, max = 3200, step = 0.001, scale = 0.25
 local miter_limit = 400
 
+---$tips:実線部分の長さと空白部分の長さを交互に記述，ピクセル単位
 ---$value:破線パターン
 local dash_pat = {100,0}
 
+---$tips:ループが ON の場合のみ有効，ループ 1 周での破線パターンが整数回になるよう補正
 ---$checksection:破線周期補正
 local dash_adj = true
 
@@ -88,15 +94,19 @@ local alpha_fill = 0
 local mode_fill = 0
 
 --group:ランダム変化,false
+---$tips:パスの描画方向に沿ったランダム変動の周期，ピクセル単位
 ---$track:ランダム周期, min = 4, max = 1024, step = 0.001, scale = 0.25
 local rand_period = 32
 
+---$tips:ランダム変動の大きさ，ピクセル単位
 ---$track:ランダム振幅, min = 0, max = 1024, step = 0.01, scale = 0.125
 local rand_amplify = 0
 
+---$tips:パスの始点終点をランダム変動の影響から除外します．
 ---$checksection:ランダム固定端
 local rand_fix_end = true
 
+---$tips:正だと同じシードでも別オブジェクトだと別の乱数．\n負だと同じシードなら別オブジェクトでも同じ乱数．
 ---$track:ランダムシード, min = -65536, max = 65535, step = 1
 local rand_seed = 10000
 
@@ -104,6 +114,35 @@ local rand_seed = 10000
 ---$track:ぼかし幅, min = 0, max = 1000, step = 0.01, scale = 0.2
 local antialias = 1
 
+---$nolang: name
+---$tips:PI = {
+---     :  line: number?,
+---     :  color_line: number?,
+---     :  color_fill: number?,
+---     :  num_points: number?,
+---     :  path_type: string?,
+---     :  points: table?,
+---     :  loop: boolean|number|nil,
+---     :  precision: number?,
+---     :  alpha_line: number?,
+---     :  start_pos: number?,
+---     :  end_pos: number?,
+---     :  end_shape: string?,
+---     :  join_shape: string?,
+---     :  miter_limit: number?,
+---     :  dash_pat: table?,
+---     :  dash_adj: boolean|number|nil,
+---     :  dash_pos: number?,
+---     :  dash_end_shape: string?,
+---     :  inflation: number?,
+---     :  alpha_fill: number?,
+---     :  mode_fill: string?,
+---     :  rand_period: number?,
+---     :  rand_amplify: number?,
+---     :  rand_fix_end: boolean|number|nil,
+---     :  rand_seed: number?,
+---     :  antialias: number?,
+---     :}
 ---$value:PI
 local PI = {}
 
@@ -121,36 +160,6 @@ end
 --#region PI / normalize parameters.
 
 -- take parameters. (they don't affect to anchors.)
---[[
-	PI = {
-		line:			number?,
-		color_line:		number?,
-		color_fill:		number?,
-		num_points:		number?,
-		path_type:		string?,
-		points:			table?,
-		loop:			boolean|number|nil,
-		precision:		number?,
-		alpha_line:		number?,
-		start_pos:		number?,
-		end_pos:		number?,
-		end_shape:		string?,
-		join_shape:		string?,
-		miter_limit:	number?,
-		dash_pat:		table?,
-		dash_adj:		boolean|number|nil,
-		dash_pos:		number?,
-		dash_end_shape:	string?,
-		inflation:		number?,
-		alpha_fill:		number?,
-		mode_fill:		string?,
-		rand_period:	number?,
-		rand_amplify:	number?,
-		rand_fix_end:	boolean|number|nil,
-		rand_seed:		number?,
-		antialias:		number?,
-	}
-]]
 line = tonumber(PI.line) or line;
 color_line = tonumber(PI.color_line) or color_line;
 color_fill = tonumber(PI.color_fill) or color_fill;

@@ -9,7 +9,7 @@ project:
 package:
   id: Path_S
   name: パス描画スクリプト Path_S
-  version: v2.10
+  version: v2.11-wip
   information: "{name} {version} by {AUTHOR}"
   script_sub_dir: ""
   uninstall_sub_folder_file: false
@@ -74,3 +74,9 @@ scripts:
         path: script/obj2/アローσ/main.lua
       - label: スクウェアσ
         path: script/obj2/スクウェアσ/main.lua
+
+language:
+  files:
+    - path: build/Default.Path_S.aul2
+      text: false
+      tooltip: true

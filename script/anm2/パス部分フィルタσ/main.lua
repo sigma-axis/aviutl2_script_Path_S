@@ -1,4 +1,5 @@
 --information:パス部分フィルタσ@Path_S ${PACKAGE_VERSION} by ${AUTHOR}
+---$script_tips:パスで囲った範囲のみに，後続のフィルタ効果，または直接スクリプトを記述して適用するフィルタ効果です．
 --label:Path_S\加工
 --require:${LEAST_AVIUTL_VERSION}
 ---$checksection:反転
@@ -18,6 +19,7 @@ local path_type = 3
 ---$value:点リスト
 local points = {0,-100,55.23,-100,100,-55.23,100,0,100,55.23,55.23,100,0,100,-55.23,100,-100,55.23,-100,0,-100,-55.23,-55.23,-100}
 
+---$tips:折れ線近似の最大サンプル間隔，ピクセル単位
 ---$track:曲線精度, min = 1, max = 128, step = 1, scale = 0.25
 local precision = 8
 
@@ -46,10 +48,12 @@ local zoom = 100
 ---$track:回転, min = -3600, max = 3600, step = 0.01, scale = 0.1
 local rotate = 0
 
+---$tips:パス編集用のアンカーと移動用のアンカーを切り替え．
 ---$check:アンカー切り替え
 local toggle_gui = false
 
 --group:フィルタ設定,false
+---$tips:「後続フィルタ」の範囲は「パス部分フィルタσここまで」で区切ることができます．
 ---$select:追加のフィルタ効果
 ---後続フィルタ = 0
 ---スクリプト実行 = 1
@@ -62,6 +66,21 @@ local extra_script = 'obj.effect("グラデーション",\n  "形状","凸形",\
 ---$track:ぼかし幅, min = 0, max = 1000, step = 0.01, scale = 0.2
 local antialias = 1
 
+---$nolang: name
+---$tips:PI = {
+---     :  invert: boolean|number|nil,
+---     :  num_points: number?,
+---     :  path_type: string?,
+---     :  points: table?,
+---     :  precision: number?,
+---     :  inflation: number?,
+---     :  mode_fill: string?,
+---     :  X, Y: number?,
+---     :  zoom: number?,
+---     :  rotate: number?,
+---     :  extra_filter: string?,
+---     :  antialias: number?,
+---     :}
 ---$value:PI
 local PI = {}
 
@@ -84,23 +103,6 @@ end
 --#region PI / normalize parameters.
 
 -- take parameters.
---[==[
-	PI = {
-		invert:			boolean|number|nil,
-		num_points:		number?,
-		path_type:		string?,
-		points:			table?,
-		precision:		number?,
-		inflation:		number?,
-		mode_fill:		string?,
-		X:				number?,
-		Y:				number?,
-		zoom:			number?,
-		rotate:			number?,
-		extra_filter:	string?,
-		antialias:		number?,
-	}
-]==]
 invert = path_s.PI.as_bool(PI.invert, invert);
 num_points = tonumber(PI.num_points) or num_points;
 path_type = path_s.PI.path_type(PI.path_type, path_type);

@@ -1,4 +1,5 @@
 --information:スクウェアσ@Path_S ${PACKAGE_VERSION} by ${AUTHOR}
+---$script_tips:角丸四角形を描画するオブジェクトです．
 --label:Path_S\図形
 --require:${LEAST_AVIUTL_VERSION}
 ---$track:幅, min = 0, max = 4000, step = 0.01, scale = 0.25
@@ -20,9 +21,11 @@ local color_fill = 0xffffff
 local radius = 40
 
 --group:整列,false
+---$tips:-100: 右揃え / 0: 中央揃え / +100: 左揃え
 ---$track:水平揃え, min = -100, max = 100, step = 0.001
 local align_x = 0
 
+---$tips:-100: 下揃え / 0: 中央揃え / +100: 上揃え
 ---$track:垂直揃え, min = -100, max = 100, step = 0.001
 local align_y = 0
 
@@ -39,9 +42,11 @@ local r_RB = 40
 ---$track:左下半径, min = 0, max = 2000, step = 0.01, scale = 0.25
 local r_LB = 40
 
+---$tips:正で縦長 / 負で横長
 ---$track:丸角縦横比, min = -100, max = 100, step = 0.001
 local aspect = 0
 
+---$tips:角半径に対してサイズが小さいときの自動調整で，丸角の縦横比を固定します．
 ---$check:丸角縦横比固定
 local fixed_aspect = true
 
@@ -49,9 +54,11 @@ local fixed_aspect = true
 ---$track:ライン透明度, min = 0, max = 100, step = 0.01
 local alpha_line = 0
 
+---$tips:ライン描画範囲の始点，パス全体長からの % 単位
 ---$track:開始位置, min = -400, max = 400, step = 0.001, scale = 0.25
 local start_pos = 0
 
+---$tips:ライン描画範囲の終点，パス全体長からの % 単位
 ---$track:終了位置, min = -400, max = 400, step = 0.001, scale = 0.25
 local end_pos = 100
 
@@ -71,6 +78,7 @@ local end_shape = 0
 ---ブランク+ベベル = 5
 local join_shape = 0
 
+---$tips:実線部分の長さと空白部分の長さを交互に記述，ピクセル単位
 ---$value:破線パターン
 local dash_pat = {100,0}
 
@@ -92,12 +100,15 @@ local inflation = 0
 local alpha_fill = 0
 
 --group:ランダム変化,false
+---$tips:パスの描画方向に沿ったランダム変動の周期，ピクセル単位
 ---$track:ランダム周期, min = 4, max = 1024, step = 0.001, scale = 0.25
 local rand_period = 32
 
+---$tips:ランダム変動の大きさ，ピクセル単位
 ---$track:ランダム振幅, min = 0, max = 1024, step = 0.01, scale = 0.125
 local rand_amplify = 0
 
+---$tips:正だと同じシードでも別オブジェクトだと別の乱数．\n負だと同じシードなら別オブジェクトでも同じ乱数．
 ---$track:ランダムシード, min = -65536, max = 65535, step = 1
 local rand_seed = 10000
 
@@ -105,6 +116,32 @@ local rand_seed = 10000
 ---$track:ぼかし幅, min = 0, max = 1000, step = 0.01, scale = 0.2
 local antialias = 1
 
+---$nolang: name
+---$tips:PI = {
+---     :  width: number?,
+---     :  height: number?,
+---     :  line: number?,
+---     :  color_line: number?,
+---     :  color_fill: number?,
+---     :  radii: table|number|nil,
+---     :  fixed_aspect: boolean|number|nil,
+---     :  align_x: number?,
+---     :  align_y: number?,
+---     :  alpha_line: number?,
+---     :  start_pos: number?,
+---     :  end_pos: number?,
+---     :  end_shape: string?,
+---     :  join_shape: string?,
+---     :  dash_pat: table?,
+---     :  dash_pos: number?,
+---     :  dash_end_shape: string?,
+---     :  inflation: number?,
+---     :  alpha_fill: number?,
+---     :  rand_period: number?,
+---     :  rand_amplify: number?,
+---     :  rand_seed: number?,
+---     :  antialias: number?,
+---     :}
 ---$value:PI
 local PI = {}
 
@@ -126,33 +163,6 @@ local radii = {
 	{ apply_aspect(uniform and radius or math.max(r_LB, 0), aspect) },
 };
 
---[==[
-	PI = {
-		width:			number?,
-		height:			number?,
-		line:			number?,
-		color_line:		number?,
-		color_fill:		number?,
-		radii:			table|number|nil,
-		fixed_aspect:	boolean|number|nil,
-		align_x:		number?,
-		align_y:		number?,
-		alpha_line:		number?,
-		start_pos:		number?,
-		end_pos:		number?,
-		end_shape:		string?,
-		join_shape:		string?,
-		dash_pat:		table?,
-		dash_pos:		number?,
-		dash_end_shape:	string?,
-		inflation:		number?,
-		alpha_fill:		number?,
-		rand_period:	number?,
-		rand_amplify:	number?,
-		rand_seed:		number?,
-		antialias:		number?,
-	}
-]==]
 local function as_pair(c)
 	if type(c) == "number" then return c, c;
 	elseif type(c) == "table" then
