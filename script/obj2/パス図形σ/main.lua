@@ -63,6 +63,8 @@ local join_shape = 0
 ---$track:マイター限界, min = 100, max = 3200, step = 0.001, scale = 0.25
 local miter_limit = 400
 
+--hide@miter_limit:join_shape<2
+--hide@miter_limit:join_shape==3
 ---$tips:実線部分の長さと空白部分の長さを交互に記述，ピクセル単位
 ---$value:破線パターン
 local dash_pat = {100,0}
@@ -106,6 +108,7 @@ local rand_amplify = 0
 ---$checksection:ランダム固定端
 local rand_fix_end = true
 
+--hide@rand_fix_end:loop~=0
 ---$tips:正だと同じシードでも別オブジェクトだと別の乱数．\n負だと同じシードなら別オブジェクトでも同じ乱数．
 ---$track:ランダムシード, min = -65536, max = 65535, step = 1
 local rand_seed = 10000

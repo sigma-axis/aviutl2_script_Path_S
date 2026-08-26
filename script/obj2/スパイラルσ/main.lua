@@ -85,7 +85,7 @@ local rand_period = 32
 local rand_amplify = 0
 
 ---$tips:パスの始点終点をランダム変動の影響から除外します．
----$check:ランダム固定端
+---$checksection:ランダム固定端
 local rand_fix_end = false
 
 ---$tips:正だと同じシードでも別オブジェクトだと別の乱数．\n負だと同じシードなら別オブジェクトでも同じ乱数．

@@ -61,6 +61,8 @@ local join_shape = 0
 ---$track:マイター限界, min = 100, max = 3200, step = 0.001, scale = 0.25
 local miter_limit = 400
 
+--hide@miter_limit:join_shape<2
+--hide@miter_limit:join_shape==3
 ---$tips:実線部分の長さと空白部分の長さを交互に記述，ピクセル単位
 ---$value:破線パターン
 local dash_pat = {100,0}

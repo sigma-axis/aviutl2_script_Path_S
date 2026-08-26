@@ -57,6 +57,8 @@ local join_shape = 0
 ---$track:マイター限界, min = 100, max = 3200, step = 0.001, scale = 0.25
 local miter_limit = 400
 
+--hide@miter_limit:join_shape<2
+--hide@miter_limit:join_shape==3
 ---$tips:実線部分の長さと空白部分の長さを交互に記述，ピクセル単位
 ---$value:破線パターン
 local dash_pat = {100,0}
@@ -82,19 +84,24 @@ local head_type = 1
 ---$figure:矢じり図形
 local head_fig = "三角形"
 
+--hide@head_fig:head_type==0
 ---$tips:矢じりの横幅の拡大率，% 単位
 ---$track:矢じり幅, min = 0, max = 800, step = 0.001, scale = 0.25
 local head_width = 100
 
+--hide@head_width:head_type==0
 ---$track:矢じり中心, min = -100, max = 100, step = 0.001
 local head_center = -50
 
+--hide@head_center:head_type==0
 ---$track:矢じり角度, min = -3600, max = 3600, step = 0.01, scale = 0.1
 local head_rot = 0
 
+--hide@head_rot:head_type==0
 ---$track:矢じり位置, min = -100, max = 100, step = 0.001
 local head_pos = 0
 
+--hide@head_pos:head_type==0
 --group:ランダム変化,false
 ---$tips:パスの描画方向に沿ったランダム変動の周期，ピクセル単位
 ---$track:ランダム周期, min = 4, max = 1024, step = 0.001, scale = 0.25

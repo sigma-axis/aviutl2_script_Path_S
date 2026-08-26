@@ -62,6 +62,7 @@ local extra_filter = 0
 ---$text:追加スクリプト
 local extra_script = 'obj.effect("グラデーション",\n  "形状","凸形",\n  "角度",30,\n  "開始色",0x00ff00) -- グラデーション適用\nobj.cx=obj.cx+100 -- 位置もずらせる\n'
 
+--hide@extra_script:extra_filter~=1
 --group:その他,false
 ---$track:ぼかし幅, min = 0, max = 1000, step = 0.01, scale = 0.2
 local antialias = 1

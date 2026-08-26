@@ -34,12 +34,15 @@ local line_shape = 1
 ---$track:周期, min = 4, max = 1024, step = 0.001, scale = 0.25
 local line_period = 64
 
+--hide@line_period:line_shape==0
 ---$track:周期位置, min = -4000, max = 4000, step = 0.01, scale = 0.25
 local line_phase = 0
 
+--hide@line_phase:line_shape==0
 ---$track:振幅, min = 0, max = 1024, step = 0.01, scale = 0.125
 local line_amplify = 32
 
+--hide@line_amplify:line_shape==0
 --group:ライン設定,false
 ---$tips:ライン描画範囲の始点，パス全体長からの % 単位
 ---$track:開始位置, min = 0, max = 100, step = 0.001
@@ -68,6 +71,8 @@ local join_shape = 0
 ---$track:マイター限界, min = 100, max = 3200, step = 0.001, scale = 0.25
 local miter_limit = 400
 
+--hide@miter_limit:join_shape<2
+--hide@miter_limit:join_shape==3
 ---$tips:実線部分の長さと空白部分の長さを交互に記述，ピクセル単位
 ---$value:破線パターン
 local dash_pat = {100,0}
