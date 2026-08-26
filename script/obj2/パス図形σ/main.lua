@@ -108,7 +108,7 @@ local rand_amplify = 0
 ---$checksection:ランダム固定端
 local rand_fix_end = true
 
---hide@rand_fix_end:loop~=0
+-- --hide@rand_fix_end:loop~=0
 ---$tips:正だと同じシードでも別オブジェクトだと別の乱数．\n負だと同じシードなら別オブジェクトでも同じ乱数．
 ---$track:ランダムシード, min = -65536, max = 65535, step = 1
 local rand_seed = 10000

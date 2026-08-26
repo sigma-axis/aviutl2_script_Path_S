@@ -40,7 +40,7 @@ local points = {0,-100,55.23,-100,100,-55.23,100,0,100,55.23,55.23,100,0,100,-55
 ---$checksection:ループ
 local loop = true
 
---hide@out_of_range:loop~=0
+-- --hide@out_of_range:loop~=0
 ---$tips:折れ線近似の最大サンプル間隔，ピクセル単位
 ---$track:曲線精度, min = 1, max = 128, step = 1, scale = 0.25
 local precision = 8
