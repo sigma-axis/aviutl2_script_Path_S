@@ -38,6 +38,37 @@ local PI_choose_path_type do
 	end
 end
 
+---@alias mode_anchor # アンカー基準．
+---| 0 # 回転中心
+---| 1 # 左上
+---| 2 # 上
+---| 3 # 右上
+---| 4 # 左
+---| 5 # 中央
+---| 6 # 右
+---| 7 # 左下
+---| 8 # 下
+---| 9 # 右下
+local PI_choose_mode_anchor do
+	local name2num = {
+		["回転中心"] = 0, ["左上"] = 1, ["上"] = 2, ["右上"] = 3, ["左"] = 4, ["中央"] = 5, ["右"] = 6, ["左下"] = 7, ["下"] = 8, ["右下"] = 9,
+	};
+
+	---PI で「アンカー基準」指定を適用する．
+	---このパラメタは次の形式で指定されているものとする:
+	---
+	--`--select@mode_anchor:アンカー基準=5,回転中心=0,左上=1,上=2,右上=3,左=4,中央=5,右=6,左下=7,下=8,右下=9`
+	---@param pi_value any
+	---@param gui_value mode_anchor
+	---@return mode_anchor
+	function PI_choose_mode_anchor(pi_value, gui_value)
+		if type(pi_value) == "string" then
+			gui_value = name2num[pi_value] or gui_value;
+		end
+		return math.min(math.max(math.floor(0.5 + gui_value), 0), 9);
+	end
+end
+
 ---@alias mode_fill # 塗りつぶし範囲の指定．
 ---| 0 # 通常
 ---| 1 # 奇偶
@@ -112,6 +143,21 @@ local PI_choose_join_shape do
 	end
 end
 
+---「アンカー基準」の設定項目から，実際のアンカーの基準となる座標を取得する．
+---@param mode_anchor mode_anchor アンカー基準．
+---@return number cx, number cy アンカーの原点の X, Y 座標．
+local function anchor_offset(mode_anchor)
+		local cx, cy = 0, 0;
+		if mode_anchor == 0 then
+			cx, cy = obj.getvalue("center");
+			cx, cy = cx + obj.cx, cy + obj.cy;
+		else
+			cx = (((mode_anchor - 1) % 3) - 1) * obj.w / 2;
+			cy = (math.floor((mode_anchor - 1) / 3) - 1) * obj.h / 2;
+		end
+	return cx, cy;
+end
+
 local anchor, poll do
 	local function pt(pts, i) return tonumber(pts[i]) or 0 end
 	local function unpack1(x) if x ~= nil then return x end end
@@ -122,10 +168,11 @@ local anchor, poll do
 	---@param pts any[] 点列の配列， `{ x1, y1, x2, y2, x3, y3, ... }` の形式．
 	---@param n_segs integer パスの分割区間の個数．
 	---@param loop boolean 閉じたパスかどうか．
+	---@param mode_anchor mode_anchor アンカー基準．
 	---@param alt_points function? `alt_pts = alt_points(path_type, pts, n_segs, loop)` 想定されるアンカーの個数が `pts` の点の個数と異なる場合に呼ばれる関数．代替となる点列テーブルを返す．省略時は独自の方法で代替の点列を構築する．
 	---@return integer n_anchors 設定したアンカーの個数．
 	---@return table pts_corrected 足りない点や余剰な点を補正した点列．補正の必要がない場合は `pts` そのもの．
-	function anchor(var_name, path_type, pts, n_segs, loop, alt_points)
+	function anchor(var_name, path_type, pts, n_segs, loop, mode_anchor, alt_points)
 		local pts_per_seg =
 			path_type == 0 and 1 or
 			path_type == 1 and 1 or
@@ -167,8 +214,10 @@ local anchor, poll do
 				end
 			end
 		end
+
+		local cx, cy = anchor_offset(mode_anchor);
 		if path_type == 3 then
-			obj.setanchor(var_name, n_anchors, unpack1(alt_pts));
+			obj.setanchor(var_name, n_anchors, "offset", cx, cy, unpack1(alt_pts));
 
 			-- draw handles.
 			local pts2, pts3 = alt_pts or pts, {};
@@ -179,15 +228,19 @@ local anchor, poll do
 					pt(pts2, I - 3), pt(pts2, I - 2),
 					pt(pts2, I - 1), pt(pts2, I - 0),
 					pt(pts2, J + 1), pt(pts2, J + 2),
-				}, 4, "line", "inout");
+				}, 4, "offset", cx, cy, "line", "inout");
 				pts3[2 * i - 1], pts3[2 * i] = pt(pts2, I - 5), pt(pts2, I - 4);
 			end
 			if not loop then
 				pts3[2 * n_segs + 1], pts3[2 * n_segs + 2] =
 					pt(pts2, 6 * n_segs + 1), pt(pts2, 6 * n_segs + 2);
 			end
-			obj.setanchor(pts3, n_segs + (loop and 0 or 1), loop and "loop" or "line");
-		else obj.setanchor(var_name, n_anchors, loop and "loop" or "line", unpack1(alt_pts)) end
+			obj.setanchor(pts3, n_segs + (loop and 0 or 1),
+				"offset", cx, cy, loop and "loop" or "line");
+		else
+			obj.setanchor(var_name, n_anchors, "offset", cx, cy,
+				loop and "loop" or "line", unpack1(alt_pts));
+		end
 		return n_anchors, alt_pts or pts;
 	end
 
@@ -393,6 +446,7 @@ end
 ---@param dy number? Y方向の平行移動量．省略時は 0. 拡縮回転の後に適用される．
 local function transform(pts, n_pts, scale, rotate, dx, dy)
 	dx, dy = dx or 0, dy or 0;
+	if scale == 1 and rotate == 0 and dx == 0 and dy == 0 then return end
 	local c, s = scale * math.cos(rotate), scale * math.sin(rotate);
 	for i = 1, 2 * n_pts - 1, 2 do
 		local x, y = pts[i], pts[i + 1];
@@ -1029,11 +1083,13 @@ return {
 	PI = {
 		as_bool = PI_as_bool,
 		path_type = PI_choose_path_type,
+		mode_anchor = PI_choose_mode_anchor,
 		mode_fill = PI_choose_mode_fill,
 		end_shape = PI_choose_end_shape,
 		join_shape = PI_choose_join_shape,
 	},
 
+	anchor_offset = anchor_offset,
 	anchor = anchor,
 	poll = poll,
 	measure = measure,

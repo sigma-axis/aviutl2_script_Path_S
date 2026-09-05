@@ -156,7 +156,7 @@ local obj, math, tonumber, type = obj, math, tonumber, type;
 if obj.getoption("gui") then
 	num_points = math.max(math.floor(0.5 + (tonumber(num_points) or 4)), 2);
 	path_type = math.min(math.max(math.floor(0.5 + path_type), 0), 3);
-	local _, pts = path_s.anchor("points", path_type, points, num_points - (loop and 0 or 1), loop);
+	local _, pts = path_s.anchor("points", path_type, points, num_points - (loop and 0 or 1), loop, 5);
 	points = pts;
 end
 

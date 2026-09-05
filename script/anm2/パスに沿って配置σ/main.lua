@@ -40,6 +40,19 @@ local points = {0,-100,55.23,-100,100,-55.23,100,0,100,55.23,55.23,100,0,100,-55
 ---$checksection:ループ
 local loop = true
 
+---$select:アンカー基準
+---回転中心 = 0
+---左上 = 1
+---上 = 2
+---右上 = 3
+---左 = 4
+---中央 = 5
+---右 = 6
+---左下 = 7
+---下 = 8
+---右下 = 9
+local mode_anchor = 5
+
 --hide@out_of_range:loop==1
 ---$tips:折れ線近似の最大サンプル間隔，ピクセル単位
 ---$track:曲線精度, min = 1, max = 128, step = 1, scale = 0.25
@@ -61,6 +74,7 @@ local toggle_gui = false
 ---     :  path_type: string?,
 ---     :  points: table?,
 ---     :  loop: boolean|number|nil,
+---     :  mode_anchor: string?,
 ---     :  precision: number?,
 ---     :}
 ---$value:PI
@@ -68,12 +82,13 @@ local PI = {}
 
 local path_s = require("Path_S");
 local obj, math, tonumber, type = obj, math, tonumber, type;
+local cx0, cy0, cz0 = obj.getvalue("center");
 
 -- set anchors.
 if obj.getoption("gui") then
 	num_points = math.max(math.floor(0.5 + (tonumber(num_points) or 4)), 2);
 	path_type = math.min(math.max(math.floor(0.5 + path_type), 0), 3);
-	local _, pts = path_s.anchor("points", path_type, points, num_points - (loop and 0 or 1), loop);
+	local _, pts = path_s.anchor("points", path_type, points, num_points - (loop and 0 or 1), loop, mode_anchor);
 	points = pts;
 end
 
@@ -94,6 +109,7 @@ num_points = tonumber(PI.num_points) or num_points;
 path_type = path_s.PI.path_type(PI.path_type, path_type);
 if type(PI.points) == "table" then points = PI.points end
 loop = path_s.PI.as_bool(PI.loop, loop);
+mode_anchor = path_s.PI.mode_anchor(PI.mode_anchor, mode_anchor);
 precision = tonumber(PI.precision) or precision;
 
 -- normalize parameters.
@@ -110,6 +126,7 @@ toggle_gui = toggle_gui and
 --#endregion PI / normalize parameters.
 
 -- further calculations.
+local cx, cy = path_s.anchor_offset(mode_anchor);
 points, num_points = path_s.poll(path_type, points, num_points - (loop and 0 or 1), loop, precision);
 if toggle_gui then
 	-- backup the original object.
@@ -136,15 +153,15 @@ if toggle_gui then
 	-- carve by the path.
 	path_s.path_mask_line(
 		0, 1, 2, 1,
-		0, points, num_points - (loop and 0 or 1), loop, 1,
+		0, pts, num_points - (loop and 0 or 1), loop, 1,
 		0, 1, 0, 0, 1, { 6, 10 }, 0, true, 0,
 		1, 0, -(L + R) / 2, -(T + B) / 2);
 
 	-- adjust the position.
-	local cx, cy = obj.getvalue("center");
-	cx, cy, obj.cx, obj.cy = obj.cx, obj.cy,
-		rate * obj.cx + (rate - 1) * cx - (R + L) / 2,
-		rate * obj.cy + (rate - 1) * cy - (B + T) / 2;
+	local cx1, cy1 = obj.cx, obj.cy;
+	obj.cx, obj.cy =
+		(cx0 + cx1 - cx) * rate - (R + L) / 2 - cx0,
+		(cy0 + cy1 - cy) * rate - (B + T) / 2 - cy0;
 
 	-- then draw to the framebuffer.
 	local prev_blend = obj.getoption("blend");
@@ -155,7 +172,7 @@ if toggle_gui then
 
 	-- rewind the states.
 	obj.copybuffer("object", cache_name);
-	obj.cx, obj.cy = cx, cy;
+	obj.cx, obj.cy = cx1, cy1;
 end
 local ofs = position + ofs_indiv * (is_mult_obj and obj.index or 0);
 if loop then ofs = ofs % 1;
@@ -201,10 +218,9 @@ end
 
 -- convert anchor coordinates to screen coordinates.
 local Z = 0 do
-	local x, y, z = obj.getvalue("center");
-	X, Y, Z = X - obj.cx - x, Y - obj.cy - y, Z - obj.cz - z;
+	X, Y, Z = X + cx - cx0 - obj.cx, Y + cy - cy0 - obj.cy, Z - cz0 - obj.cz;
 
-	x, y, z = obj.getvalue("scale");
+	local x, y, z = obj.getvalue("scale");
 	X, Y, Z = obj.sx * x * X, obj.sy * y * Y, obj.sz * z * Z;
 
 	x, y, z = obj.getvalue("angle");
