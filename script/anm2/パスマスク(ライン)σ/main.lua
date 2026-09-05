@@ -40,7 +40,7 @@ local loop = false
 ---左下 = 7
 ---下 = 8
 ---右下 = 9
-local mode_anchor = 5
+local mode_anchor_base = 5
 
 ---$tips:折れ線近似の最大サンプル間隔，ピクセル単位
 ---$track:曲線精度, min = 1, max = 128, step = 1, scale = 0.25
@@ -125,7 +125,7 @@ local antialias = 1
 ---     :  path_type: string?,
 ---     :  points: table?,
 ---     :  loop: boolean|number|nil,
----     :  mode_anchor: string?,
+---     :  mode_anchor_base: string?,
 ---     :  precision: number?,
 ---     :  start_pos: number?,
 ---     :  end_pos: number?,
@@ -168,11 +168,12 @@ if (pt_buff and pt_buff ~= "tempbuffer" and not pt_buff:match("^cache:.+$")) or 
 -- set anchors.
 if obj.getoption("gui") and not pt_buff then
 	if toggle_gui then
-		obj.setanchor("X,Y", 0, "line", "offset", path_s.anchor_offset(mode_anchor));
+		obj.setanchor("X,Y", 0, "line", "offset", path_s.anchor_offset(mode_anchor_base));
 	else
 		num_points = math.max(math.floor(0.5 + (tonumber(num_points) or 4)), 2);
 		path_type = math.min(math.max(math.floor(0.5 + path_type), 0), 3);
-		local _, pts = path_s.anchor("points", path_type, points, num_points - (loop and 0 or 1), loop, mode_anchor);
+		local _, pts = path_s.anchor("points", path_type,
+			points, num_points - (loop and 0 or 1), loop, nil, mode_anchor_base);
 		points = pts;
 	end
 end
@@ -187,7 +188,7 @@ num_points = tonumber(PI.num_points) or num_points;
 path_type = path_s.PI.path_type(PI.path_type, path_type);
 if type(PI.points) == "table" then points = PI.points end
 loop = path_s.PI.as_bool(PI.loop, loop);
-mode_anchor = path_s.PI.mode_anchor(PI.mode_anchor, mode_anchor);
+mode_anchor_base = path_s.PI.mode_anchor_base(PI.mode_anchor_base, mode_anchor_base);
 precision = tonumber(PI.precision) or precision;
 start_pos = tonumber(PI.start_pos) or start_pos;
 end_pos = tonumber(PI.end_pos) or end_pos;
@@ -213,7 +214,7 @@ start_pos = start_pos / 100;
 end_pos = end_pos / 100;
 miter_limit = math.max(miter_limit / 100, 1);
 do
-	local cx, cy = path_s.anchor_offset(mode_anchor);
+	local cx, cy = path_s.anchor_offset(mode_anchor_base);
 	X, Y = X + cx, Y + cy;
 end
 zoom = math.min(math.max(zoom / 100, 0), 50);

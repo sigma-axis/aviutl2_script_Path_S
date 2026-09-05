@@ -39,7 +39,7 @@
 
   http://spring-fragrance.mints.ne.jp/aviutl
 
-  - `v2.1.1` で動作確認済み．
+  - `v2.1.8` で動作確認済み．
 
 ## 導入方法
 
@@ -922,18 +922,19 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
 
 ```lua
 {
-  intensity = num,  -- number 型で "強さ" の項目を上書き，または nil.
-  invert = bool,    -- boolean 型で "反転" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
-  num_points = num, -- number 型で "頂点数" の項目を上書き，または nil.
-  path_type = str,  -- string 型で "線タイプ" の項目を上書き，または nil.
-  points = tab,     -- table 型で "点リスト" の項目を上書き，または nil.
-  precision = num,  -- number 型で "曲線精度" の項目を上書き，または nil.
-  inflation = num,  -- number 型で "追加幅" の項目を上書き，または nil.
-  mode_fill = num,  -- string 型で "範囲" の項目を上書き，または nil.
-  X = num, Y = num, -- number 型で "移動X", "移動Y" の項目を上書き，または nil.
-  zoom = num,       -- number 型で "拡大率" の項目を上書き，または nil.
-  rotate = num,     -- number 型で "回転" の項目を上書き，または nil.
-  antialias = num,  -- number 型で "ぼかし幅" の項目を上書き，または nil.
+  intensity = num,        -- number 型で "強さ" の項目を上書き，または nil.
+  invert = bool,          -- boolean 型で "反転" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
+  num_points = num,       -- number 型で "頂点数" の項目を上書き，または nil.
+  path_type = str,        -- string 型で "線タイプ" の項目を上書き，または nil.
+  points = tab,           -- table 型で "点リスト" の項目を上書き，または nil.
+  mode_anchor_base = str, -- string 型で "アンカー基準" の項目を上書き，または nil.
+  precision = num,        -- number 型で "曲線精度" の項目を上書き，または nil.
+  inflation = num,        -- number 型で "追加幅" の項目を上書き，または nil.
+  mode_fill = num,        -- string 型で "範囲" の項目を上書き，または nil.
+  X = num, Y = num,       -- number 型で "移動X", "移動Y" の項目を上書き，または nil.
+  zoom = num,             -- number 型で "拡大率" の項目を上書き，または nil.
+  rotate = num,           -- number 型で "回転" の項目を上書き，または nil.
+  antialias = num,        -- number 型で "ぼかし幅" の項目を上書き，または nil.
 
 -- 以降は require("Path_S") からの API で代替できるようになったため非推奨です．
   pt_buff = str, -- string 型で, パスの頂点情報を保持している画像バッファ名を指定，または nil. 詳細後述．
@@ -959,33 +960,32 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
 
 ```lua
 {
-  intensity = num,      -- number 型で "強さ" の項目を上書き，または nil.
-  invert = bool,        -- boolean 型で "反転" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
-  line = num,           -- number 型で "ライン幅" の項目を上書き，または nil.
-  num_points = num,     -- number 型で "頂点数" の項目を上書き，または nil.
-  path_type = str,      -- string 型で "線タイプ" の項目を上書き，または nil.
-  points = tab,         -- table 型で "点リスト" の項目を上書き，または nil.
-  loop = bool,          -- boolean 型で "ループ" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
-  precision = num,      -- number 型で "曲線精度" の項目を上書き，または nil.
-  start_pos = num,      -- number 型で "開始位置" の項目を上書き，または nil.
-  end_pos = num,        -- number 型で "終了位置" の項目を上書き，または nil.
-  end_shape = str,      -- string 型で "端の形状" の項目を上書き，または nil.
-  join_shape = str,     -- string 型で "線結合の形状" の項目を上書き，または nil.
-  miter_limit = num,    -- number 型で "マイター限界" の項目を上書き，または nil.
-  dash_pat = tab,       -- table 型で "破線パターン" の項目を上書き，または nil.
-  dash_adj = bool,      -- boolean 型で "破線周期補正" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
-  dash_pos = num,       -- number 型で "破線位置" の項目を上書き，または nil.
-  dash_end_shape = str, -- string 型で "dash::端の形状" の項目を上書き，または nil.
-  X = num, Y = num,     -- number 型で "移動X", "移動Y" の項目を上書き，または nil.
-  zoom = num,           -- number 型で "拡大率" の項目を上書き，または nil.
-  rotate = num,         -- number 型で "回転" の項目を上書き，または nil.
-  antialias = num,      -- number 型で "ぼかし幅" の項目を上書き，または nil.
+  intensity = num,        -- number 型で "強さ" の項目を上書き，または nil.
+  invert = bool,          -- boolean 型で "反転" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
+  line = num,             -- number 型で "ライン幅" の項目を上書き，または nil.
+  num_points = num,       -- number 型で "頂点数" の項目を上書き，または nil.
+  path_type = str,        -- string 型で "線タイプ" の項目を上書き，または nil.
+  points = tab,           -- table 型で "点リスト" の項目を上書き，または nil.
+  loop = bool,            -- boolean 型で "ループ" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
+  mode_anchor_base = str, -- string 型で "アンカー基準" の項目を上書き，または nil.
+  precision = num,        -- number 型で "曲線精度" の項目を上書き，または nil.
+  start_pos = num,        -- number 型で "開始位置" の項目を上書き，または nil.
+  end_pos = num,          -- number 型で "終了位置" の項目を上書き，または nil.
+  end_shape = str,        -- string 型で "端の形状" の項目を上書き，または nil.
+  join_shape = str,       -- string 型で "線結合の形状" の項目を上書き，または nil.
+  miter_limit = num,      -- number 型で "マイター限界" の項目を上書き，または nil.
+  dash_pat = tab,         -- table 型で "破線パターン" の項目を上書き，または nil.
+  dash_adj = bool,        -- boolean 型で "破線周期補正" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
+  dash_pos = num,         -- number 型で "破線位置" の項目を上書き，または nil.
+  dash_end_shape = str,   -- string 型で "dash::端の形状" の項目を上書き，または nil.
+  X = num, Y = num,       -- number 型で "移動X", "移動Y" の項目を上書き，または nil.
+  zoom = num,             -- number 型で "拡大率" の項目を上書き，または nil.
+  rotate = num,           -- number 型で "回転" の項目を上書き，または nil.
+  antialias = num,        -- number 型で "ぼかし幅" の項目を上書き，または nil.
 
 -- 以降は require("Path_S") からの API で代替できるようになったため非推奨です．
   pt_buff = str,  -- string 型で, パスの頂点情報を保持している画像バッファ名を指定，または nil. 詳細後述．
   len_buff = num, -- number 型で, パス全体のピクセル長を指定，または nil. 詳細後述．
-
-
 }
 ```
 
@@ -1026,18 +1026,19 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
 
 ```lua
 {
-  invert = bool,      -- boolean 型で "反転" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
-  num_points = num,   -- number 型で "頂点数" の項目を上書き，または nil.
-  path_type = str,    -- string 型で "線タイプ" の項目を上書き，または nil.
-  points = tab,       -- table 型で "点リスト" の項目を上書き，または nil.
-  precision = num,    -- number 型で "曲線精度" の項目を上書き，または nil.
-  inflation = num,    -- number 型で "追加幅" の項目を上書き，または nil.
-  mode_fill = num,    -- string 型で "範囲" の項目を上書き，または nil.
-  X = num, Y = num,   -- number 型で "移動X", "移動Y" の項目を上書き，または nil.
-  zoom = num,         -- number 型で "拡大率" の項目を上書き，または nil.
-  rotate = num,       -- number 型で "回転" の項目を上書き，または nil.
-  extra_filter = str, -- string 型で "追加のフィルタ効果" の項目を上書き，または nil.
-  antialias = num,    -- number 型で "ぼかし幅" の項目を上書き，または nil.
+  invert = bool,          -- boolean 型で "反転" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
+  num_points = num,       -- number 型で "頂点数" の項目を上書き，または nil.
+  path_type = str,        -- string 型で "線タイプ" の項目を上書き，または nil.
+  points = tab,           -- table 型で "点リスト" の項目を上書き，または nil.
+  mode_anchor_base = str, -- string 型で "アンカー基準" の項目を上書き，または nil.
+  precision = num,        -- number 型で "曲線精度" の項目を上書き，または nil.
+  inflation = num,        -- number 型で "追加幅" の項目を上書き，または nil.
+  mode_fill = num,        -- string 型で "範囲" の項目を上書き，または nil.
+  X = num, Y = num,       -- number 型で "移動X", "移動Y" の項目を上書き，または nil.
+  zoom = num,             -- number 型で "拡大率" の項目を上書き，または nil.
+  rotate = num,           -- number 型で "回転" の項目を上書き，または nil.
+  extra_filter = str,     -- string 型で "追加のフィルタ効果" の項目を上書き，または nil.
+  antialias = num,        -- number 型で "ぼかし幅" の項目を上書き，または nil.
 }
 ```
 
@@ -1045,16 +1046,17 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
 
 ```lua
 {
-  position = num,     -- number 型で "位置" の項目を上書き，または nil.
-  rotate = num,       -- number 型で "回転" の項目を上書き，または nil.
-  rot_tangent = bool, -- boolean 型で "パスに沿って回転" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
-  ofs_indiv = num,    -- number 型で "個別位置ズレ" の項目を上書き，または nil.
-  out_of_range = str, -- string 型で "範囲外" の項目を上書き，または nil.
-  num_points = num,   -- number 型で "頂点数" の項目を上書き，または nil.
-  path_type = str,    -- string 型で "線タイプ" の項目を上書き，または nil.
-  points = tab,       -- table 型で "点リスト" の項目を上書き，または nil.
-  loop = bool,        -- boolean 型で "ループ" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
-  precision = num,    -- number 型で "曲線精度" の項目を上書き，または nil.
+  position = num,         -- number 型で "位置" の項目を上書き，または nil.
+  rotate = num,           -- number 型で "回転" の項目を上書き，または nil.
+  rot_tangent = bool,     -- boolean 型で "パスに沿って回転" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
+  ofs_indiv = num,        -- number 型で "個別位置ズレ" の項目を上書き，または nil.
+  out_of_range = str,     -- string 型で "範囲外" の項目を上書き，または nil.
+  num_points = num,       -- number 型で "頂点数" の項目を上書き，または nil.
+  path_type = str,        -- string 型で "線タイプ" の項目を上書き，または nil.
+  points = tab,           -- table 型で "点リスト" の項目を上書き，または nil.
+  loop = bool,            -- boolean 型で "ループ" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
+  mode_anchor_base = str, -- string 型で "アンカー基準" の項目を上書き，または nil.
+  precision = num,        -- number 型で "曲線精度" の項目を上書き，または nil.
 }
 ```
 
@@ -1084,6 +1086,11 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
 
   - 一部設定項目を状況に応じて非表示にするように (v2.11 から拡充).
   - 「パスに沿って配置σ」で移動範囲が大きい場合，「パスの表示」状態でのパスが正しい大きさで表示されていなかったのを修正．
+  - `Path_S.lua` にフィールド追加・関数の仕様変更:
+    - 関数 `anchor_offset`, `PI.mode_anchor_base` を追加．
+    - 関数 `anchor` に引数 `mode_anchor_base` を追加．
+
+      末尾の省略可能な引数のため，今までの呼び出しコードと互換性があります．
 
 ##  改版履歴
 

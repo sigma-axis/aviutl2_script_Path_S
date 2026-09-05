@@ -30,7 +30,7 @@ local points = {0,-100,55.23,-100,100,-55.23,100,0,100,55.23,55.23,100,0,100,-55
 ---左下 = 7
 ---下 = 8
 ---右下 = 9
-local mode_anchor = 5
+local mode_anchor_base = 5
 
 ---$tips:折れ線近似の最大サンプル間隔，ピクセル単位
 ---$track:曲線精度, min = 1, max = 128, step = 1, scale = 0.25
@@ -86,7 +86,7 @@ local antialias = 1
 ---     :  num_points: number?,
 ---     :  path_type: string?,
 ---     :  points: table?,
----     :  mode_anchor: string?,
+---     :  mode_anchor_base: string?,
 ---     :  precision: number?,
 ---     :  inflation: number?,
 ---     :  mode_fill: string?,
@@ -108,11 +108,12 @@ local obj, math, tonumber, type, tostring = obj, math, tonumber, type, tostring;
 -- set anchors.
 if obj.getoption("gui") then
 	if toggle_gui then
-		obj.setanchor("X,Y", 0, "line", "offset", path_s.anchor_offset(mode_anchor));
+		obj.setanchor("X,Y", 0, "line", "offset", path_s.anchor_offset(mode_anchor_base));
 	else
 		num_points = math.max(math.floor(0.5 + (tonumber(num_points) or 4)), 3);
 		path_type = math.min(math.max(math.floor(0.5 + path_type), 0), 3);
-		local _, pts = path_s.anchor("points", path_type, points, num_points, true, mode_anchor);
+		local _, pts = path_s.anchor("points", path_type, points, num_points,
+			true, nil, mode_anchor_base);
 		points = pts;
 	end
 end
@@ -124,7 +125,7 @@ invert = path_s.PI.as_bool(PI.invert, invert);
 num_points = tonumber(PI.num_points) or num_points;
 path_type = path_s.PI.path_type(PI.path_type, path_type);
 if type(PI.points) == "table" then points = PI.points end
-mode_anchor = path_s.PI.mode_anchor(PI.mode_anchor, mode_anchor);
+mode_anchor_base = path_s.PI.mode_anchor_base(PI.mode_anchor_base, mode_anchor_base);
 precision = tonumber(PI.precision) or precision;
 inflation = tonumber(PI.inflation) or inflation;
 mode_fill = path_s.PI.mode_fill(PI.mode_fill, mode_fill);
@@ -145,7 +146,7 @@ num_points = math.max(math.floor(0.5 + num_points), 3);
 precision = math.max(precision, 1);
 inflation = math.max(inflation, 0);
 do
-	local cx, cy = path_s.anchor_offset(mode_anchor);
+	local cx, cy = path_s.anchor_offset(mode_anchor_base);
 	X, Y = X + cx, Y + cy;
 end
 zoom = math.min(math.max(zoom / 100, 0), 50);

@@ -51,7 +51,7 @@ local loop = true
 ---左下 = 7
 ---下 = 8
 ---右下 = 9
-local mode_anchor = 5
+local mode_anchor_base = 5
 
 --hide@out_of_range:loop==1
 ---$tips:折れ線近似の最大サンプル間隔，ピクセル単位
@@ -74,7 +74,7 @@ local toggle_gui = false
 ---     :  path_type: string?,
 ---     :  points: table?,
 ---     :  loop: boolean|number|nil,
----     :  mode_anchor: string?,
+---     :  mode_anchor_base: string?,
 ---     :  precision: number?,
 ---     :}
 ---$value:PI
@@ -88,7 +88,8 @@ local cx0, cy0, cz0 = obj.getvalue("center");
 if obj.getoption("gui") then
 	num_points = math.max(math.floor(0.5 + (tonumber(num_points) or 4)), 2);
 	path_type = math.min(math.max(math.floor(0.5 + path_type), 0), 3);
-	local _, pts = path_s.anchor("points", path_type, points, num_points - (loop and 0 or 1), loop, mode_anchor);
+	local _, pts = path_s.anchor("points", path_type, points,
+		num_points - (loop and 0 or 1), loop, nil, mode_anchor_base);
 	points = pts;
 end
 
@@ -109,7 +110,7 @@ num_points = tonumber(PI.num_points) or num_points;
 path_type = path_s.PI.path_type(PI.path_type, path_type);
 if type(PI.points) == "table" then points = PI.points end
 loop = path_s.PI.as_bool(PI.loop, loop);
-mode_anchor = path_s.PI.mode_anchor(PI.mode_anchor, mode_anchor);
+mode_anchor_base = path_s.PI.mode_anchor_base(PI.mode_anchor_base, mode_anchor_base);
 precision = tonumber(PI.precision) or precision;
 
 -- normalize parameters.
@@ -126,7 +127,7 @@ toggle_gui = toggle_gui and
 --#endregion PI / normalize parameters.
 
 -- further calculations.
-local cx, cy = path_s.anchor_offset(mode_anchor);
+local cx, cy = path_s.anchor_offset(mode_anchor_base);
 points, num_points = path_s.poll(path_type, points, num_points - (loop and 0 or 1), loop, precision);
 if toggle_gui then
 	-- backup the original object.
