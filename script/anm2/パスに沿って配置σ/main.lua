@@ -40,7 +40,7 @@ local points = {0,-100,55.23,-100,100,-55.23,100,0,100,55.23,55.23,100,0,100,-55
 ---$checksection:ループ
 local loop = true
 
--- --hide@out_of_range:loop~=0
+--hide@out_of_range:loop==1
 ---$tips:折れ線近似の最大サンプル間隔，ピクセル単位
 ---$track:曲線精度, min = 1, max = 128, step = 1, scale = 0.25
 local precision = 8
@@ -169,7 +169,7 @@ else ofs = math.min(math.max(ofs, 0), 1) end
 local X, Y, A do
 	local i, j = path_s.find_index(-ofs, points, num_points);
 
-	-- -- calculate the position and the angle.
+	-- calculate the position and the angle.
 	X, Y =
 		(1 - j) * points[2 * i - 1] + j * points[2 * i + 1],
 		(1 - j) * points[2 * i - 0] + j * points[2 * i + 2];

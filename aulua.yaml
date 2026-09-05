@@ -3,13 +3,13 @@ project:
   variables:
     NAME: Path_S
     AUTHOR: σ軸
-    LEAST_AVIUTL_VERSION: "2010601"
-    LEAST_AVIUTL_VERSION_STRING: "2.1.6a"
+    LEAST_AVIUTL_VERSION: "2010800"
+    LEAST_AVIUTL_VERSION_STRING: "2.1.8"
 
 package:
   id: Path_S
   name: パス描画スクリプト Path_S
-  version: v2.12
+  version: v2.13-wip
   information: "{name} {version} by {AUTHOR}"
   script_sub_dir: ""
   uninstall_sub_folder_file: false
