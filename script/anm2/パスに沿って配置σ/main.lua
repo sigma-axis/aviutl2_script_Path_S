@@ -219,22 +219,32 @@ end
 
 -- convert anchor coordinates to screen coordinates.
 local Z = 0 do
-	X, Y, Z = X + cx - cx0 - obj.cx, Y + cy - cy0 - obj.cy, Z - cz0 - obj.cz;
+	local px, py, pz, c, s;
+	local x, y, z = cx - cx0 - obj.cx, cy - cy0 - obj.cy, -cz0 - obj.cz;
+	X, Y, Z = X + x, Y + y, Z + z;
 
-	local x, y, z = obj.getvalue("scale");
-	X, Y, Z = obj.sx * x * X, obj.sy * y * Y, obj.sz * z * Z;
+	px, py, pz = obj.getvalue("scale");
+	X, Y, Z = px * obj.sx * X, py * obj.sy * Y, pz * obj.sz * Z;
+	x, y, z = px * obj.sx * x, py * obj.sy * y, pz * obj.sz * z;
 
-	x, y, z = obj.getvalue("angle");
-	x, y, z =
-		math.pi / 180 * (obj.rx + x),
-		math.pi / 180 * (obj.ry + y),
-		math.pi / 180 * (obj.rz + z);
-	local c, s = math.cos(x), math.sin(x);
+	px, py, pz = obj.getvalue("angle");
+	px, py, pz =
+		math.pi / 180 * (px + obj.rx),
+		math.pi / 180 * (py + obj.ry),
+		math.pi / 180 * (pz + obj.rz);
+	c, s = math.cos(pz), math.sin(pz);
 	X, Y = c * X - s * Y, s * X + c * Y;
-	c, s = math.cos(y), math.sin(y);
+	pz = pz + math.pi / 180 * (rotate + A);
+	c, s = math.cos(pz), math.sin(pz);
+	x, y = c * x - s * y, s * x + c * y;
+	c, s = math.cos(py), math.sin(py);
 	Z, X = c * Z - s * X, s * Z + c * X;
-	c, s = math.cos(z), math.sin(z);
+	z, x = c * z - s * x, s * z + c * x;
+	c, s = math.cos(px), math.sin(px);
 	Y, Z = c * Y - s * Z, s * Y + c * Z;
+	y, z = c * y - s * z, s * y + c * z;
+
+	X, Y, Z = X - x, Y - y, Z - z;
 end
 
 -- apply the position and the angle.
