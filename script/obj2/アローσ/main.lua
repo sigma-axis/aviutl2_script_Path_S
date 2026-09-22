@@ -342,7 +342,7 @@ if head_vertices then
 		obj.drawpoly(head_vertices);
 		-- obj.setoption("blend");
 	end
-	obj.copybuffer("object", "tempbuffer");
+	assert(obj.copybuffer("object", "tempbuffer"));
 end
 
 -- adjust the center.

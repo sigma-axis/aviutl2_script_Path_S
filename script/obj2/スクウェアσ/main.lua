@@ -332,7 +332,7 @@ if has_fill or has_chrome then
 			dash_pat, dash_pos, true, dash_end_shape);
 		if has_fill then
 			obj.draw();
-			obj.copybuffer("object", "tempbuffer");
+			assert(obj.copybuffer("object", "tempbuffer"));
 		end
 	end
 end

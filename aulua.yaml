@@ -10,7 +10,7 @@ project:
 package:
   id: Path_S
   name: パス描画スクリプト Path_S
-  version: v2.21
+  version: v2.22-wip
   information: "{name} {version} by {AUTHOR}"
   script_sub_dir: ""
   uninstall_sub_folder_file: false

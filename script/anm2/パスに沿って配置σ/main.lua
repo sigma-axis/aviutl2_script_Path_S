@@ -132,7 +132,7 @@ points, num_points = path_s.poll(path_type, points, num_points - (loop and 0 or 
 if toggle_gui then
 	-- backup the original object.
 	local cache_name = "cache:path_s/place/obj";
-	obj.copybuffer(cache_name, "object");
+	assert(obj.copybuffer(cache_name, "object"));
 
 	-- find the bounding box.
 	local L, R, T, B, len = path_s.measure(points, num_points);
@@ -172,7 +172,7 @@ if toggle_gui then
 	obj.setoption("draw_state", false);
 
 	-- rewind the states.
-	obj.copybuffer("object", cache_name);
+	assert(obj.copybuffer("object", cache_name));
 	obj.cx, obj.cy = cx1, cy1;
 end
 local ofs = position + ofs_indiv * (is_mult_obj and obj.index or 0);

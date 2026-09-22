@@ -950,7 +950,7 @@ local partial_filter_make_cxt, partial_filter_push_cxt, partial_filter_pop_cxt, 
 		mode_fill, inflation, antialias, invert,
 		X, Y, zoom, rotate)
 		local cache_name = "cache:path_s/part/ori#"..obj.effect_id;
-		obj.copybuffer(cache_name, "object");
+		assert(obj.copybuffer(cache_name, "object"));
 		return {
 			num_points, path_type, points, precision,
 			mode_fill, inflation, antialias, invert,
@@ -1052,7 +1052,7 @@ local partial_filter_make_cxt, partial_filter_push_cxt, partial_filter_pop_cxt, 
 			-(w - w0) / 2 - (cx - cx0), -(h - h0) / 2 - (cy - cy0);
 			-(w - w1) / 2 - (cx - cx1), -(h - h1) / 2 - (cy - cy1);
 		});
-		obj.copybuffer("object", cache_name_tmp);
+		assert(obj.copybuffer("object", cache_name_tmp));
 	end
 end
 
