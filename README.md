@@ -17,8 +17,8 @@
 1.  [パス部分フィルタσここまで](#パス部分フィルタσここまで) (フィルタ効果)
 1.  [パスに沿って配置σ](#パスに沿って配置σ) (フィルタ効果)
 
-![Overview of objects of this script](https://github.com/user-attachments/assets/57cc741b-9d50-4f68-a30a-d0608a6ba11c)
-![Overview of effects of this script](https://github.com/user-attachments/assets/1bf5cc4b-013f-4027-a01a-36847e10db24)
+![オブジェクトの例](https://github.com/user-attachments/assets/57cc741b-9d50-4f68-a30a-d0608a6ba11c)
+![フィルタ効果の例](https://github.com/user-attachments/assets/1bf5cc4b-013f-4027-a01a-36847e10db24)
 
 - <details>
   <summary>元画像出典 (クリックで表示):</summary>
@@ -68,8 +68,8 @@ Although, usage documentations for this script / plugin in languages other than 
 
 [パラメタの説明 :arrow_down:](#パス図形σのパラメタ) [共通のパラメタの説明 :arrow_down:](#共通の設定項目)
 
-![Image of manipulating figure paths](https://github.com/user-attachments/assets/8fd01b02-daed-4ccf-ba51-0a040b4feb73)
-![Image of path strokes](https://github.com/user-attachments/assets/9059a77c-f2af-40d4-bbe2-8a1d61c99a05)
+![パスをアンカー操作で編集している様子](https://github.com/user-attachments/assets/8fd01b02-daed-4ccf-ba51-0a040b4feb73)
+![パスで描くラインの一覧](https://github.com/user-attachments/assets/9059a77c-f2af-40d4-bbe2-8a1d61c99a05)
 
 - 初期状態だと「オブジェクトを追加」メニューの「Path_S :arrow_right: 図形」に「パス図形σ@Path_S」が追加されています．
 
@@ -79,7 +79,7 @@ Although, usage documentations for this script / plugin in languages other than 
 
 [パラメタの説明 :arrow_down:](#ラインσのパラメタ) [共通のパラメタの説明 :arrow_down:](#共通の設定項目)
 
-![Image of kinds of curves](https://github.com/user-attachments/assets/cf053f16-5abe-421d-8492-7497aef98e8d)
+![ラインσでの曲線の例](https://github.com/user-attachments/assets/cf053f16-5abe-421d-8492-7497aef98e8d)
 
 - 初期状態だと「オブジェクトを追加」メニューの「Path_S :arrow_right: 図形」に「ラインσ@Path_S」が追加されています．
 
@@ -89,7 +89,7 @@ Although, usage documentations for this script / plugin in languages other than 
 
 [パラメタの説明 :arrow_down:](#スパイラルσのパラメタ) [共通のパラメタの説明 :arrow_down:](#共通の設定項目)
 
-![Image of two kinds of spirals](https://github.com/user-attachments/assets/bfd8010a-8911-4fa6-b59f-1c2222c3da37)
+![スパイラルσでの螺旋 2 種類](https://github.com/user-attachments/assets/bfd8010a-8911-4fa6-b59f-1c2222c3da37)
 
 - 初期状態だと「オブジェクトを追加」メニューの「Path_S :arrow_right: 図形」に「スパイラルσ@Path_S」が追加されています．
 
@@ -99,7 +99,7 @@ Although, usage documentations for this script / plugin in languages other than 
 
 [パラメタの説明 :arrow_down:](#アローσのパラメタ) [共通のパラメタの説明 :arrow_down:](#共通の設定項目)
 
-![Image of arrows with different placements of heads](https://github.com/user-attachments/assets/05c4cf9a-18fc-4535-87b6-aa2792b7f287)
+![アローσでの矢じりの配置例](https://github.com/user-attachments/assets/05c4cf9a-18fc-4535-87b6-aa2792b7f287)
 
 - 初期状態だと「オブジェクトを追加」メニューの「Path_S :arrow_right: 図形」に「アローσ@Path_S」が追加されています．
 
@@ -111,7 +111,7 @@ Although, usage documentations for this script / plugin in languages other than 
 
 [パラメタの説明 :arrow_down:](#スクウェアσのパラメタ) [共通のパラメタの説明 :arrow_down:](#共通の設定項目)
 
-![Image of two rounded rectangles](https://github.com/user-attachments/assets/2e54c079-5344-4884-a09e-cdd78b45db93)
+![スクウェアσでの角丸四角形の例](https://github.com/user-attachments/assets/2e54c079-5344-4884-a09e-cdd78b45db93)
 
 - 初期状態だと「オブジェクトを追加」メニューの「Path_S :arrow_right: 図形」に「スクウェアσ@Path_S」が追加されています．
 
@@ -121,7 +121,7 @@ Although, usage documentations for this script / plugin in languages other than 
 
 [パラメタの説明 :arrow_down:](#パスマスクσ--パスマスクラインσ--パス部分フィルタσのパラメタ) [共通のパラメタの説明 :arrow_down:](#共通の設定項目)
 
-![An image clipped by the inner part of a path](https://github.com/user-attachments/assets/02d94745-4678-4b7d-8f78-aeefca2edea6)
+![パス内部で切り抜いた画像の例](https://github.com/user-attachments/assets/02d94745-4678-4b7d-8f78-aeefca2edea6)
 
 - 初期状態だと「フィルタ効果を追加」メニューの「Path_S :arrow_right: クリッピング」に「パスマスクσ@Path_S」が追加されています．
 
@@ -131,7 +131,7 @@ Although, usage documentations for this script / plugin in languages other than 
 
 [パラメタの説明 :arrow_down:](#パスマスクσ--パスマスクラインσ--パス部分フィルタσのパラメタ) [共通のパラメタの説明 :arrow_down:](#共通の設定項目)
 
-![An image clipped by the stroke of a path](https://github.com/user-attachments/assets/21b6fe1e-c4b8-4d25-9ab5-6f0ed1e640ce)
+![パスのラインで切り抜いた画像の例](https://github.com/user-attachments/assets/21b6fe1e-c4b8-4d25-9ab5-6f0ed1e640ce)
 
 - 初期状態だと「フィルタ効果を追加」メニューの「Path_S :arrow_right: クリッピング」に「パスマスク(ライン)σ@Path_S」が追加されています．
 
@@ -141,7 +141,7 @@ Although, usage documentations for this script / plugin in languages other than 
 
 [パラメタの説明 :arrow_down:](#パスマスクσ--パスマスクラインσ--パス部分フィルタσのパラメタ) [共通のパラメタの説明 :arrow_down:](#共通の設定項目)
 
-![An image that only a specific area is blurred and monochromed](https://github.com/user-attachments/assets/c37f44be-5f8b-414e-9a66-0d295fd63d5e)
+![一部分だけ白黒・ぼかしをかけた画像](https://github.com/user-attachments/assets/c37f44be-5f8b-414e-9a66-0d295fd63d5e)
 
 - 初期状態だと「フィルタ効果を追加」メニューの「Path_S :arrow_right: 加工」に「パス部分フィルタσ@Path_S」が追加されています．
 
@@ -159,7 +159,7 @@ Although, usage documentations for this script / plugin in languages other than 
 
 [パラメタの説明 :arrow_down:](#パスに沿って配置σのパラメタ) [共通のパラメタの説明 :arrow_down:](#共通の設定項目)
 
-![Charcters of a text arrayed on a path](https://github.com/user-attachments/assets/58acd121-7966-4352-a9b5-960a9b76921d)
+![パスに沿って配置された文字列](https://github.com/user-attachments/assets/58acd121-7966-4352-a9b5-960a9b76921d)
 
 - 初期状態だと「フィルタ効果を追加」メニューの「Path_S :arrow_right: 配置」に「パスに沿って配置σ@Path_S」が追加されています．
 
@@ -175,8 +175,8 @@ Although, usage documentations for this script / plugin in languages other than 
 
 パスに含まれる "頂点" の個数を指定します．
 
-1.  [「線タイプ」](#線タイプ)が `折れ線`，`補間移動` の場合 :arrow_right: 指定する点の個数がそのまま "頂点" の数．
-1.  「線タイプ」が `2次ベジェ曲線`，`3次ベジェ曲線` の場合 :arrow_right: 制御点を除いた点の個数が "頂点" の数．
+- [「線タイプ」](#線タイプ)が `折れ線`，`補間移動` の場合 :arrow_right: 指定する点の個数がそのまま "頂点" の数．
+- 「線タイプ」が `2次ベジェ曲線`，`3次ベジェ曲線` の場合 :arrow_right: 制御点を除いた点の個数が "頂点" の数．
 
 最小値は 2 (主に線を描画するもの) または 3 (主にパス内部を描画するもの), 初期値は 4.
 
@@ -186,10 +186,10 @@ Although, usage documentations for this script / plugin in languages other than 
 
 | 線タイプ | 例 | 備考 |
 |:---:|:---:|:---|
-| `折れ線` | ![An example of straight paths](https://github.com/user-attachments/assets/194f2213-9d25-44e6-a710-fbea72aa4f09) |  |
-| `補間移動` | ![An example of interpolated path](https://github.com/user-attachments/assets/9c5d575d-0211-4d6d-9fa7-0f6bd605c5e9) | トラックバー移動方法の「補間移動」と同じ計算式． |
-| `2次ベジェ曲線` | ![An example of quadratic Bezier paths](https://github.com/user-attachments/assets/96fb023e-2243-4b0e-b3d4-db04d3745da5) | |
-| `3次ベジェ曲線` | ![An example of cubic Bezier paths](https://github.com/user-attachments/assets/a3563699-19e5-4ab8-9267-613989b88fa7) |初期値． |
+| `折れ線` | ![折れ線の例](https://github.com/user-attachments/assets/194f2213-9d25-44e6-a710-fbea72aa4f09) |  |
+| `補間移動` | ![補間移動の例](https://github.com/user-attachments/assets/9c5d575d-0211-4d6d-9fa7-0f6bd605c5e9) | トラックバー移動方法の「補間移動」と同じ計算式． |
+| `2次ベジェ曲線` | ![2次ベジェ曲線の例](https://github.com/user-attachments/assets/96fb023e-2243-4b0e-b3d4-db04d3745da5) | |
+| `3次ベジェ曲線` | ![3次ベジェ曲線の例](https://github.com/user-attachments/assets/a3563699-19e5-4ab8-9267-613989b88fa7) |初期値． |
 
 初期値は `3次ベジェ曲線`.
 
@@ -226,11 +226,36 @@ Although, usage documentations for this script / plugin in languages other than 
 
 最小値は 1, 最大値は 128, 初期値は 8.
 
-####  ぼかし幅
+####  ぼかし幅 / ノイズ強さ / ノイズシード / ドットサイズ
 
-パスで囲った領域や，ライン部分のアンチエイリアスの幅を指定します．
+パスで囲った領域や，ライン部分のアンチエイリアスのに関する設定です．スクリプトによってはライン部分と塗り部分の 2 か所に設定があります．
 
-最小値は 0, 最大値は 1000, 初期値は 1.
+- **ぼかし幅**
+  
+  アンチエイリアスの幅をピクセル単位で指定します．
+
+  最小値は 0, 最大値は 1000, 初期値は 1.
+
+- **ノイズ強さ**
+  
+  アンチエイリアス幅の範囲に与えるノイズの強さを % 単位で指定します．
+
+  最小値は 0, 最大値は 100, 初期値は 0.
+
+- **ノイズシード**
+
+  ノイズのパターンを決定する乱数のシードを指定します．
+
+  - 0 以上のシードだと同じシードでも別オブジェクトだと別の乱数．
+  - 負のシードだと，同じシードなら別オブジェクトでも同じ乱数．
+
+  最小値は -65536, 最大値は 65535, 初期値は 10000.
+
+- **ドットサイズ**
+
+  ノイズのパターン模様の拡大率を % 単位で指定します．
+
+  最小値は 100, 最大値は 6400, 初期値は 100.
 
 ####  ライン幅
 
@@ -265,10 +290,10 @@ Although, usage documentations for this script / plugin in languages other than 
 
 | 端の形状 | 例 |
 |:---:|:---:|
-| `円` | ![Image of round endpoint](https://github.com/user-attachments/assets/64e6ef8c-ac9a-4887-99ad-d125dc167f7d) |
-| `四角` | ![Image of square endpoint](https://github.com/user-attachments/assets/6a092fdd-fefe-482d-b1fd-38834a8c8fe0) |
-| `平坦` | ![Image of flat endpoint](https://github.com/user-attachments/assets/d80725cc-20c6-4e46-a3fd-ac6ada038289) |
-| `三角` | ![Image of triangle endpoint](https://github.com/user-attachments/assets/703097e8-ba9b-486d-b347-7c3a29be7a2d) |
+| `円` | ![「円」の端の形状のサンプル](https://github.com/user-attachments/assets/64e6ef8c-ac9a-4887-99ad-d125dc167f7d) |
+| `四角` | ![「四角」の端の形状のサンプル](https://github.com/user-attachments/assets/6a092fdd-fefe-482d-b1fd-38834a8c8fe0) |
+| `平坦` | ![「平坦」の端の形状のサンプル](https://github.com/user-attachments/assets/d80725cc-20c6-4e46-a3fd-ac6ada038289) |
+| `三角` | ![「三角」の端の形状のサンプル](https://github.com/user-attachments/assets/703097e8-ba9b-486d-b347-7c3a29be7a2d) |
 
 初期値は `円`.
 
@@ -281,18 +306,22 @@ Although, usage documentations for this script / plugin in languages other than 
 
 ラインの曲がり角での形状を指定します．
 
-- 「線結合の形状」は以下の選択肢があります:
+- **線結合の形状**
+
+  以下の選択肢があります:
 
   | 線結合の形状 | 例 |
   |:---:|:---:|
-  | `ラウンド` | ![Image of round join](https://github.com/user-attachments/assets/41be87c6-e48d-4017-93ea-c2f001597073) |
-  | `ベベル` | ![Image of bevel join](https://github.com/user-attachments/assets/b831f3b8-341b-43eb-9fa7-7695da42e6a2) |
-  | `マイター` | ![Image of miter join](https://github.com/user-attachments/assets/0434615b-d4b0-4f85-b374-b4a695a5a3fe) |
-  | `ブランク`<br>`ブランク+ラウンド`<br>`ブランク+ベベル` | ![Image of blank join](https://github.com/user-attachments/assets/7671b2de-a6ab-44c0-9b3a-248fb546a720) |
+  | `ラウンド` | ![ラウンド結合の例](https://github.com/user-attachments/assets/41be87c6-e48d-4017-93ea-c2f001597073) |
+  | `ベベル` | ![ベベル結合の例](https://github.com/user-attachments/assets/b831f3b8-341b-43eb-9fa7-7695da42e6a2) |
+  | `マイター` | ![マイター結合の例](https://github.com/user-attachments/assets/0434615b-d4b0-4f85-b374-b4a695a5a3fe) |
+  | `ブランク`<br>`ブランク+ラウンド`<br>`ブランク+ベベル` | ![「ブランク」結合の例](https://github.com/user-attachments/assets/7671b2de-a6ab-44c0-9b3a-248fb546a720) |
 
   初期値は `ラウンド`.
 
-- 「マイター限界」は，「線結合の形状」が `マイター`, `ブランク+ラウンド`, `ブランク+ベベル` の場合のみ有効です．
+- **マイター限界**
+
+  「線結合の形状」が `マイター`, `ブランク+ラウンド`, `ブランク+ベベル` の場合のみ有効です．
 
   - `マイター` の場合，尖った角の最大長さを，線幅からの比率で % 単位で指定します．これを超える場合ベベル結合になります．
     - 角度 $2\sin^{-1} (1/L)$ 未満の鋭角がベベル結合になります．ここに $L \geqq 1$ はマイター限界．
@@ -301,7 +330,7 @@ Although, usage documentations for this script / plugin in languages other than 
   最小値は 100, 最大値は 3200, 初期値は 400 (28.955° 相当).
 
 > [!NOTE]
-> `ブランク` 系を曲線に対して適用すると「隙間」のあるような形状になってしまうので注意．
+> `ブランク` 系を (直線でない) 曲線に対して適用すると「隙間」のあるような形状になってしまうので注意．
 
 ####  破線パターン / 破線周期補正 / 破線位置
 
@@ -309,25 +338,31 @@ Although, usage documentations for this script / plugin in languages other than 
 
 ラインを破線として描画できます．
 
-1.  「破線パターン」でパターンを指定します．
+- **破線パターン**
 
-    奇数個目の数値が実線部分，偶数個目が空白部分の長さで，それぞれピクセル単位で指定します．
+  破線のパターンを指定します．
 
-    例:
+  奇数個目の数値が実線部分，偶数個目が空白部分の長さで，それぞれピクセル単位で指定します．
 
-    - `100,0` :arrow_right: 通常の実線 (初期値).
-    - `80,40` :arrow_right: 「80 ピクセルの実線 + 40 ピクセルの空白」の繰り返しパターン．
-    - `80,40,1,40` :arrow_right: 「80 ピクセルの実線 + 40 ピクセルの空白 + 1 ピクセルの実線 + 40 ピクセルの空白」の繰り返しパターン．
+  例:
 
-    初期値は `100,0`. 指定できる数値の個数は最大で 256 個までです．
+  - `100,0` :arrow_right: 通常の実線 (初期値).
+  - `80,40` :arrow_right: 「80 ピクセルの実線 + 40 ピクセルの空白」の繰り返しパターン．
+  - `80,40,1,40` :arrow_right: 「80 ピクセルの実線 + 40 ピクセルの空白 + 1 ピクセルの実線 + 40 ピクセルの空白」の繰り返しパターン．
 
-1.  「破線周期補正」は[「ループ」](#ループ)が ON の場合のみ有効です．破線パターンの周期を，ループの長さの整数分の1倍になるように微調整します．
+  初期値は `100,0`. 指定できる数値の個数は最大で 256 個までです．
 
-    初期値は ON.
+- **破線周期補正**
 
-1.  「破線位置」は破線パターンの開始位置を，ライン開始点からのピクセル単位で指定します．
+  [「ループ」](#ループ)が ON の場合のみ有効です．破線パターンの周期を，ループの長さの整数分の1倍になるように微調整します．
 
-    最小値は -4000, 最大値は 4000, 初期値は 0.
+  初期値は ON.
+
+- **破線位置**
+
+  破線パターンの開始位置を，ライン開始点からのピクセル単位で指定します．
+
+  最小値は -4000, 最大値は 4000, 初期値は 0.
 
 ####  追加幅 / 塗り追加幅
 
@@ -345,10 +380,10 @@ Although, usage documentations for this script / plugin in languages other than 
 
 | 範囲 | 例 |
 |:---:|:---:|
-| `内側` | ![Image of inner fill mode](https://github.com/user-attachments/assets/01ec1000-7812-4205-be59-ebb7f45623ae) |
-| `奇偶` | ![Image of parity fill mode](https://github.com/user-attachments/assets/e759daeb-ab71-4fc7-901b-e4f932dcfd44) |
-| `内側反転` | ![Image of inverted inner fill mode](https://github.com/user-attachments/assets/9e831812-8204-4455-915e-fc61764b6073) |
-| `奇偶反転` | ![Image of inverted parity fill mode](https://github.com/user-attachments/assets/5c1f8c26-27dc-40a0-a86d-a013f1d1a1e0) |
+| `内側` | ![「内側」塗り範囲の例](https://github.com/user-attachments/assets/01ec1000-7812-4205-be59-ebb7f45623ae) |
+| `奇偶` | ![「奇偶」塗り範囲の例](https://github.com/user-attachments/assets/e759daeb-ab71-4fc7-901b-e4f932dcfd44) |
+| `内側反転` | ![「内側反転」塗り範囲の例](https://github.com/user-attachments/assets/9e831812-8204-4455-915e-fc61764b6073) |
+| `奇偶反転` | ![「奇偶反転」塗り範囲の例](https://github.com/user-attachments/assets/5c1f8c26-27dc-40a0-a86d-a013f1d1a1e0) |
 
 - 「反転」の系統は，[「追加幅」](#追加幅--塗り追加幅)での膨張の方向にも影響します．
 
@@ -360,24 +395,32 @@ Although, usage documentations for this script / plugin in languages other than 
 
 パスにランダムさを加えます．
 
-1.  「ランダム周期」で指定したピクセル数ごとにパス上の点を分割し，その分割した両端をランダムに動かします．数値が小さいほどギザギザした，細かく動いたパスになります．
+- **ランダム周期**
 
-    最小値は 4, 最大値は 1024, 初期値は 32.
+  指定したピクセル数ごとにパス上の点を分割し，その分割した両端をランダムに動かします．数値が小さいほどギザギザした，細かく動いたパスになります．
 
-1.  「ランダム振幅」は，ランダムで点を移動する最大距離を指定します．0 だと乱数の影響はありません．
+  最小値は 4, 最大値は 1024, 初期値は 32.
 
-    最小値は 0, 最大値は 1024, 初期値は 0.
+- **ランダム振幅**
 
-1.  「ランダム固定端」が ON のとき，ラインの開始点と終了点は乱数の影響を受けません．
+  各点のランダム移動距離の最大値を指定します．0 だと乱数の影響はありません．
 
-    初期値はスクリプトによって異なります．
+  最小値は 0, 最大値は 1024, 初期値は 0.
 
-1.  「ランダムシード」は乱数のシードを指定します．
+- **ランダム固定端**
 
-    - 正の (正確には非負の) シードだと同じシードでも別オブジェクトだと別の乱数．
-    - 負のシードだと，同じシードなら別オブジェクトでも同じ乱数．
+  ON にすると，ラインの開始点と終了点は乱数の影響を受けません．
 
-    整数値で指定，最小値は -65536, 最大値は 65535, 初期値は 10000.
+  初期値はスクリプトによって異なります．
+
+- **ランダムシード**
+
+  ランダムさを決定する乱数のシードを指定します．
+
+  - 0 以上のシードだと同じシードでも別オブジェクトだと別の乱数．
+  - 負のシードだと，同じシードなら別オブジェクトでも同じ乱数．
+
+  整数値で指定，最小値は -65536, 最大値は 65535, 初期値は 10000.
 
 
 ### パス図形σのパラメタ
@@ -386,16 +429,25 @@ Although, usage documentations for this script / plugin in languages other than 
 
 図形のライン部分の色と透明度を指定します．
 
-1.  「ライン色」の初期値は `808080` (50% の灰色).
-1.  「ライン透明度」は % 単位で指定，最小値は 0, 最大値は 100, 初期値は 0 (完全不透明).
+- **ライン色**
+
+  初期値は `808080` (50% の灰色).
+
+- **ライン透明度**
+
+  % 単位で指定，最小値は 0, 最大値は 100, 初期値は 0 (完全不透明).
 
 ####  塗り色 / 塗り透明度
 
 図形内部の塗りつぶしの色と透明度を指定します．
 
-1.  「塗り色」の初期値は `ffffff` (白).
-1.  「塗り透明度」は % 単位で指定，最小値は 0, 最大値は 100, 初期値は 0 (完全不透明).
+- **塗り色**
 
+  初期値は `ffffff` (白).
+
+- **塗り透明度**
+
+  % 単位で指定，最小値は 0, 最大値は 100, 初期値は 0 (完全不透明).
 
 ### ラインσのパラメタ
 
@@ -430,14 +482,21 @@ Although, usage documentations for this script / plugin in languages other than 
 
 ラインの周期関数としての，周期や位相，波としての振幅を指定します．
 
-1.  「周期」はピクセル単位で指定，最小値は 4, 最大値は 1024, 初期値は 64.
-1.  「周期位置」は位相を調整します．開始点からのピクセル数で初期位相の点を指定します．
+- **周期**
 
-    最小値は -4000, 最大値は 4000, 初期値は 0.
+  ピクセル単位で指定，最小値は 4, 最大値は 1024, 初期値は 64.
 
-1.  「振幅」は波としての振幅をピクセル単位で指定します．
+- **周期位置**
 
-    最小値は 0, 最大値は 1024, 初期値は 32.
+  位相を調整します．開始点からのピクセル数で初期位相の点を指定します．
+
+  最小値は -4000, 最大値は 4000, 初期値は 0.
+
+- **振幅**
+
+  波としての振幅をピクセル単位で指定します．
+
+  最小値は 0, 最大値は 1024, 初期値は 32.
 
 
 ### スパイラルσのパラメタ
@@ -470,8 +529,8 @@ Although, usage documentations for this script / plugin in languages other than 
 
 | 形状 | 例 |
 |:---:|:---|
-| `アルキメデス螺旋` | ![Archimedean Spiral](https://github.com/user-attachments/assets/a9a55709-a623-4bf1-a33f-339fc44de4e3) |
-| `対数螺旋` | ![Logarithmic Spiral](https://github.com/user-attachments/assets/2c3f425a-56b0-40a4-889b-ab64b8452216) |
+| `アルキメデス螺旋` | ![アルキメデス螺旋](https://github.com/user-attachments/assets/a9a55709-a623-4bf1-a33f-339fc44de4e3) |
+| `対数螺旋` | ![対数螺旋](https://github.com/user-attachments/assets/2c3f425a-56b0-40a4-889b-ab64b8452216) |
 
 初期値は `対数螺旋`.
 
@@ -507,10 +566,10 @@ Although, usage documentations for this script / plugin in languages other than 
 
 | 矢じり配置 | 例 |
 |:---:|:---:|
-| `なし` | ![Example of no arrowheads](https://github.com/user-attachments/assets/6daf1471-8611-4638-b423-dc1f8da017d5) |
-| `終点` | ![Example of arrowhead on the end](https://github.com/user-attachments/assets/56c92338-d48b-4a09-abad-14f2b2349a76) |
-| `両方` | ![Example of two arrowheads with the same directions](https://github.com/user-attachments/assets/fd51402e-c87e-4cde-a8ba-aa918691328a) |
-| `双方向` | ![Example of two arrowheads with the opposite directions](https://github.com/user-attachments/assets/aeccddf4-4647-4625-b0d7-061adbfaa72d) |
+| `なし` | ![矢じりが「なし」の例](https://github.com/user-attachments/assets/6daf1471-8611-4638-b423-dc1f8da017d5) |
+| `終点` | ![矢じりが「終点」の例](https://github.com/user-attachments/assets/56c92338-d48b-4a09-abad-14f2b2349a76) |
+| `両方` | ![矢じりが「両方」の例](https://github.com/user-attachments/assets/fd51402e-c87e-4cde-a8ba-aa918691328a) |
+| `双方向` | ![矢じりが「双方向」の例](https://github.com/user-attachments/assets/aeccddf4-4647-4625-b0d7-061adbfaa72d) |
 
 初期値は `終点`.
 
@@ -522,22 +581,37 @@ Although, usage documentations for this script / plugin in languages other than 
 
 ####  矢じりサイズ / 矢じり幅
 
-矢じり部分の大きさを指定します．「矢じりサイズ」で全体の大きさを，「矢じり幅」で横幅部分の比率をそれぞれ指定します．
+矢じり部分の大きさを調節します．
 
-1.  「矢じりサイズ」はピクセル単位で指定，最小値は 0, 最大値は 1024, 初期値は 32.
-1.  「矢じり幅」は % 単位で指定，最小値は 0, 最大値は 800, 初期値は 100.
+- **矢じりサイズ**
+
+  全体の大きさをピクセル単位で指定します．特に矢じりの長さはこの値そのものになります．
+  
+  最小値は 0, 最大値は 1024, 初期値は 32.
+
+- **矢じり幅**
+
+  横幅部分の比率，長さからの比率で % 単位で指定します．
+
+  最小値は 0, 最大値は 800, 初期値は 100.
 
 ####  矢じり中心 / 矢じり角度
 
-矢じり部分の基準位置や回転中心，回転角度を微調整します．
+矢じり部分の位置，角度を微調整します．
 
-1.  「矢じり中心」は基準位置を，元図形の縦方向の位置から % 単位で指定します．0% で中央, -100% で図形の最下端，+100% で再上端の指定です．
+- **矢じり中心**
 
-    最小値は -100, 最大値は 100, 初期値は -50.
+  矢じりを描画する基準位置を，元図形の縦方向の位置から % 単位で指定します．ここが「矢じり角度」での回転の回転中心になります．
+  
+  0% で中央, -100% で図形の最下端，+100% で再上端の指定です．
 
-1.  「矢じり角度」は矢じり部分の向きを調整できます．
+  最小値は -100, 最大値は 100, 初期値は -50.
 
-    時計回りの度数法で指定，最小値は -3600, 最大値は 3600, 初期値は 0.
+- **矢じり角度**
+
+  矢じり部分の向きを時計回りの度数法で指定します．
+
+  最小値は -3600, 最大値は 3600, 初期値は 0.
 
 ####  矢じり位置
 
@@ -550,7 +624,7 @@ Although, usage documentations for this script / plugin in languages other than 
 
 ####  幅, 高さ
 
-四角形の幅と高さをピクセル単位で指定します．実際のオブジェクトのサイズは，ライン幅やぼかし幅などでこの数値よりも大きくなります．
+四角形の幅と高さをピクセル単位で指定します．実際のオブジェクトのサイズは，[「ライン幅」](#ライン幅)や「ぼかし幅」などでこの数値よりも大きくなります．
 
 最小値は 0, 最大値は 4000, 初期値は 100.
 
@@ -601,15 +675,25 @@ Although, usage documentations for this script / plugin in languages other than 
 
 図形のライン部分の色と透明度を指定します．
 
-1.  「ライン色」の初期値は `808080` (50% の灰色).
-1.  「ライン透明度」は % 単位で指定，最小値は 0, 最大値は 100, 初期値は 0 (完全不透明).
+- **ライン色**
+
+  初期値は `808080` (50% の灰色).
+
+- **ライン透明度**
+
+  % 単位で指定，最小値は 0, 最大値は 100, 初期値は 0 (完全不透明).
 
 ####  塗り色 / 塗り透明度
 
 図形内部の塗りつぶしの色と透明度を指定します．
 
-1.  「塗り色」の初期値は `ffffff` (白).
-1.  「塗り透明度」は % 単位で指定，最小値は 0, 最大値は 100, 初期値は 0 (完全不透明).
+- **塗り色**
+
+  初期値は `ffffff` (白).
+
+- **塗り透明度**
+
+  % 単位で指定，最小値は 0, 最大値は 100, 初期値は 0 (完全不透明).
 
 
 ### パスマスクσ / パスマスク(ライン)σ / パス部分フィルタσのパラメタ
@@ -631,19 +715,29 @@ Although, usage documentations for this script / plugin in languages other than 
 > [!TIP]
 > 「パスマスクσ」において，[「範囲」](#範囲--塗り範囲)を `内側反転` や `奇偶反転` にした場合とは影響が異なり，[「追加幅」](#追加幅--塗り追加幅)を変化させたときに膨張する方向が変わってきます．
 
-####  移動X, 移動Y, 拡大率, 回転
+####  移動X / 移動Y / 拡大率 / 回転
 
 指定したパスを，各頂点を操作せず拡大・回転・平行移動することができます．
 
 [「アンカー切り替え」](#アンカー切り替え)が ON の場合，「移動X」と「移動Y」をアンカーによるマウス操作でも動かせるようになります．
 
-1.  「移動X」と「移動Y」はピクセル単位で指定，最小値は -4000, 最大値は 4000, 初期値は 0.
-1.  「拡大率」は % 単位で指定，最小値は 0, 最大値は 5000, 初期値は 100.
-1.  「回転」は時計回りの度数単位で指定，最小値は -3600, 最大値は 3600, 初期値は 0.
+- **移動X / 移動Y**
+
+  平行移動の量をピクセル単位で指定します．
+  
+  最小値は -4000, 最大値は 4000, 初期値は 0.
+
+- **拡大率**
+
+  % 単位で指定，最小値は 0, 最大値は 5000, 初期値は 100.
+
+- **回転**
+  
+  時計回りの度数単位で指定，最小値は -3600, 最大値は 3600, 初期値は 0.
 
 ####  アンカー切り替え
 
-プレビュー画面のアンカーを，[「点リスト」](#点リスト)の操作と，[「移動X」と「移動Y」](#移動x-移動y-拡大率-回転)の操作とで切り替えます．
+プレビュー画面のアンカーを，[「点リスト」](#点リスト)の操作と，[「移動X」と「移動Y」](#移動x--移動y--拡大率--回転)の操作とで切り替えます．
 
 - OFF の場合は「点リスト」のアンカーを表示・操作．
 - ON の場合は「移動X」と「移動Y」のアンカーを表示・操作．
@@ -658,25 +752,31 @@ Although, usage documentations for this script / plugin in languages other than 
 
 パスで囲った範囲に適用するフィルタを，後続フィルタかスクリプトでの直接記入かを選びます．
 
-| 追加のフィルタ効果 | 説明 |
-|:---:|:---|
-| `後続フィルタ` | 「パス部分フィルタσ」よりも後に配置したフィルタ効果を適用します． |
-| `スクリプト実行` | 直下のスクリプト記入欄 (「追加スクリプト」) に記述されたスクリプトを実行します． |
+- **追加のフィルタ効果**
 
-- `後続フィルタ` 指定のとき[「パス部分フィルタσここまで」](#パス部分フィルタσここまで)ある場合，そこよりも前のフィルタ効果が対象になります．
+  | 追加のフィルタ効果 | 説明 |
+  |:---:|:---|
+  | `後続フィルタ` | 「パス部分フィルタσ」よりも後に配置したフィルタ効果を適用します． |
+  | `スクリプト実行` | 直下のスクリプト記入欄 (「追加スクリプト」) に記述されたスクリプトを実行します． |
 
-「追加のフィルタ効果」の初期値は `後続フィルタ`.
+  - `後続フィルタ` 指定のとき[「パス部分フィルタσここまで」](#パス部分フィルタσここまで)ある場合，そこよりも前のフィルタ効果が対象になります．
 
-「追加スクリプト」にはサンプルとして次を初期値として記述しています:
+  初期値は `後続フィルタ`.
 
-```lua
-obj.effect("グラデーション",
-  "形状","凸形",
-  "角度",30,
-  "開始色",0x00ff00) -- グラデーション適用
-obj.cx=obj.cx+100 -- 位置もずらせる
-```
-- 「追加スクリプト」は [`PI`](#pi) による操作ができません．
+- **追加スクリプト**
+
+  「追加のフィルタ効果」で `スクリプト実行` を選んだ場合に有効です．ここに記述されたスクリプトが，パスで囲った範囲に対して適用されます．
+
+  初期値はサンプルとして次を記述しています:
+
+  ```lua
+  obj.effect("グラデーション",
+    "形状","凸形",
+    "角度",30,
+    "開始色",0x00ff00) -- グラデーション適用
+  obj.cx=obj.cx+100 -- 位置もずらせる
+  ```
+  - 「追加スクリプト」は [`PI`](#pi) による操作ができません．
 
 ### パスに沿って配置σのパラメタ
 
@@ -737,32 +837,39 @@ obj.cx=obj.cx+100 -- 位置もずらせる
 
 ```lua
 {
-  line = num,           -- number 型で "ライン幅" の項目を上書き，または nil.
-  color_line = num,     -- number 型で "ライン色" の項目を上書き，または nil.
-  color_fill = num,     -- number 型で "塗り色" の項目を上書き，または nil.
-  num_points = num,     -- number 型で "頂点数" の項目を上書き，または nil.
-  path_type = str,      -- string 型で "線タイプ" の項目を上書き，または nil.
-  points = tab,         -- table 型で "点リスト" の項目を上書き，または nil.
-  loop = bool,          -- boolean 型で "ループ" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
-  precision = num,      -- number 型で "曲線精度" の項目を上書き，または nil.
-  alpha_line = num,     -- number 型で "ライン透明度" の項目を上書き，または nil.
-  start_pos = num,      -- number 型で "開始位置" の項目を上書き，または nil.
-  end_pos = num,        -- number 型で "終了位置" の項目を上書き，または nil.
-  end_shape = str,      -- string 型で "端の形状" の項目を上書き，または nil.
-  join_shape = str,     -- string 型で "線結合の形状" の項目を上書き，または nil.
-  miter_limit = num,    -- number 型で "マイター限界" の項目を上書き，または nil.
-  dash_pat = tbl,       -- table 型で "破線パターン" の項目を上書き，または nil.
-  dash_adj = bool,      -- boolean 型で "破線周期補正" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
-  dash_pos = num,       -- number 型で "破線位置" の項目を上書き，または nil.
-  dash_end_shape = str, -- string 型で "dash::端の形状" の項目を上書き，または nil.
-  inflation = num,      -- number 型で "塗り追加幅" の項目を上書き，または nil.
-  alpha_fill = num,     -- number 型で "塗り透明度" の項目を上書き，または nil.
-  mode_fill = str,      -- string 型で "塗り範囲" の項目を上書き，または nil.
-  rand_period = num,    -- number 型で "ランダム周期" の項目を上書き，または nil.
-  rand_amplify = num,   -- number 型で "ランダム振幅" の項目を上書き，または nil.
-  rand_fix_end = bool,  -- boolean 型で "ランダム固定端" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
-  rand_seed = num,      -- number 型で "ランダムシード" の項目を上書き，または nil.
-  antialias = num,      -- number 型で "ぼかし幅" の項目を上書き，または nil.
+  line = num,                 -- number 型で "ライン幅" の項目を上書き，または nil.
+  color_line = num,           -- number 型で "ライン色" の項目を上書き，または nil.
+  color_fill = num,           -- number 型で "塗り色" の項目を上書き，または nil.
+  num_points = num,           -- number 型で "頂点数" の項目を上書き，または nil.
+  path_type = str,            -- string 型で "線タイプ" の項目を上書き，または nil.
+  points = tab,               -- table 型で "点リスト" の項目を上書き，または nil.
+  loop = bool,                -- boolean 型で "ループ" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
+  precision = num,            -- number 型で "曲線精度" の項目を上書き，または nil.
+  alpha_line = num,           -- number 型で "ライン透明度" の項目を上書き，または nil.
+  start_pos = num,            -- number 型で "開始位置" の項目を上書き，または nil.
+  end_pos = num,              -- number 型で "終了位置" の項目を上書き，または nil.
+  end_shape = str,            -- string 型で "端の形状" の項目を上書き，または nil.
+  join_shape = str,           -- string 型で "線結合の形状" の項目を上書き，または nil.
+  miter_limit = num,          -- number 型で "マイター限界" の項目を上書き，または nil.
+  dash_pat = tbl,             -- table 型で "破線パターン" の項目を上書き，または nil.
+  dash_adj = bool,            -- boolean 型で "破線周期補正" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
+  dash_pos = num,             -- number 型で "破線位置" の項目を上書き，または nil.
+  dash_end_shape = str,       -- string 型で "dash::端の形状" の項目を上書き，または nil.
+  antialias = num,            -- number 型で "ぼかし幅" の項目を上書き，または nil.
+  noise_intensity = num,      -- number 型で "ノイズ強さ" の項目を上書き，または nil.
+  noise_seed = num,           -- number 型で "ノイズシード" の項目を上書き，または nil.
+  noise_size = num,           -- number 型で "noise::ドットサイズ" の項目を上書き，または nil.
+  inflation = num,            -- number 型で "塗り追加幅" の項目を上書き，または nil.
+  alpha_fill = num,           -- number 型で "塗り透明度" の項目を上書き，または nil.
+  mode_fill = str,            -- string 型で "塗り範囲" の項目を上書き，または nil.
+  fill_antialias = num,       -- number 型で "fill::ぼかし幅" の項目を上書き，または nil.
+  fill_noise_intensity = num, -- number 型で "fill::ノイズ強さ" の項目を上書き，または nil.
+  fill_noise_seed = num,      -- number 型で "fill::ノイズシード" の項目を上書き，または nil.
+  fill_noise_size = num,      -- number 型で "fill::noise::ドットサイズ" の項目を上書き，または nil.
+  rand_period = num,          -- number 型で "ランダム周期" の項目を上書き，または nil.
+  rand_amplify = num,         -- number 型で "ランダム振幅" の項目を上書き，または nil.
+  rand_fix_end = bool,        -- boolean 型で "ランダム固定端" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
+  rand_seed = num,            -- number 型で "ランダムシード" の項目を上書き，または nil.
 }
 ```
 
@@ -770,29 +877,32 @@ obj.cx=obj.cx+100 -- 位置もずらせる
 
 ```lua
 {
-  start_X = num,        -- number 型で "始点X" の項目を上書き，または nil.
-  start_Y = num,        -- number 型で "始点Y" の項目を上書き，または nil.
-  end_X = num,          -- number 型で "終点X" の項目を上書き，または nil.
-  end_Y = num,          -- number 型で "終点Y" の項目を上書き，または nil.
-  line = num,           -- number 型で "ライン幅" の項目を上書き，または nil.
-  color = num,          -- number 型で "色" の項目を上書き，または nil.
-  line_shape = str,     -- string 型で "形状" の項目を上書き，または nil.
-  line_period = num,    -- number 型で "周期" の項目を上書き，または nil.
-  line_phase = num,     -- number 型で "周期位置" の項目を上書き，または nil.
-  line_amplify = num,   -- number 型で "振幅" の項目を上書き，または nil.
-  start_pos = num,      -- number 型で "開始位置" の項目を上書き，または nil.
-  end_pos = num,        -- number 型で "終了位置" の項目を上書き，または nil.
-  end_shape = str,      -- string 型で "端の形状" の項目を上書き，または nil.
-  join_shape = str,     -- string 型で "線結合の形状" の項目を上書き，または nil.
-  miter_limit = num,    -- number 型で "マイター限界" の項目を上書き，または nil.
-  dash_pat = tab,       -- table 型で "破線パターン" の項目を上書き，または nil.
-  dash_pos = num,       -- number 型で "破線位置" の項目を上書き，または nil.
-  dash_end_shape = str, -- string 型で "dash::端の形状" の項目を上書き，または nil.
-  rand_period = num,    -- number 型で "ランダム周期" の項目を上書き，または nil.
-  rand_amplify = num,   -- number 型で "ランダム振幅" の項目を上書き，または nil.
-  rand_fix_end = bool,  -- boolean 型で "ランダム固定端" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
-  rand_seed = num,      -- number 型で "ランダムシード" の項目を上書き，または nil.
-  antialias = num,      -- number 型で "ぼかし幅" の項目を上書き，または nil.
+  start_X = num,         -- number 型で "始点X" の項目を上書き，または nil.
+  start_Y = num,         -- number 型で "始点Y" の項目を上書き，または nil.
+  end_X = num,           -- number 型で "終点X" の項目を上書き，または nil.
+  end_Y = num,           -- number 型で "終点Y" の項目を上書き，または nil.
+  line = num,            -- number 型で "ライン幅" の項目を上書き，または nil.
+  color = num,           -- number 型で "色" の項目を上書き，または nil.
+  line_shape = str,      -- string 型で "形状" の項目を上書き，または nil.
+  line_period = num,     -- number 型で "周期" の項目を上書き，または nil.
+  line_phase = num,      -- number 型で "周期位置" の項目を上書き，または nil.
+  line_amplify = num,    -- number 型で "振幅" の項目を上書き，または nil.
+  start_pos = num,       -- number 型で "開始位置" の項目を上書き，または nil.
+  end_pos = num,         -- number 型で "終了位置" の項目を上書き，または nil.
+  end_shape = str,       -- string 型で "端の形状" の項目を上書き，または nil.
+  join_shape = str,      -- string 型で "線結合の形状" の項目を上書き，または nil.
+  miter_limit = num,     -- number 型で "マイター限界" の項目を上書き，または nil.
+  dash_pat = tab,        -- table 型で "破線パターン" の項目を上書き，または nil.
+  dash_pos = num,        -- number 型で "破線位置" の項目を上書き，または nil.
+  dash_end_shape = str,  -- string 型で "dash::端の形状" の項目を上書き，または nil.
+  antialias = num,       -- number 型で "ぼかし幅" の項目を上書き，または nil.
+  noise_intensity = num, -- number 型で "ノイズ強さ" の項目を上書き，または nil.
+  noise_seed = num,      -- number 型で "ノイズシード" の項目を上書き，または nil.
+  noise_size = num,      -- number 型で "noise::ドットサイズ" の項目を上書き，または nil.
+  rand_period = num,     -- number 型で "ランダム周期" の項目を上書き，または nil.
+  rand_amplify = num,    -- number 型で "ランダム振幅" の項目を上書き，または nil.
+  rand_fix_end = bool,   -- boolean 型で "ランダム固定端" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
+  rand_seed = num,       -- number 型で "ランダムシード" の項目を上書き，または nil.
 }
 ```
 
@@ -800,29 +910,32 @@ obj.cx=obj.cx+100 -- 位置もずらせる
 
 ```lua
 {
-  start_X = num,        -- number 型で "始点X" の項目を上書き，または nil.
-  start_Y = num,        -- number 型で "始点Y" の項目を上書き，または nil.
-  end_X = num,          -- number 型で "終点X" の項目を上書き，または nil.
-  end_Y = num,          -- number 型で "終点Y" の項目を上書き，または nil.
-  start_radius = num,   -- number 型で "開始半径" の項目を上書き，または nil.
-  end_radius = num,     -- number 型で "終了半径" の項目を上書き，または nil.
-  line = num,           -- number 型で "ライン幅" の項目を上書き，または nil.
-  color = num,          -- number 型で "色" の項目を上書き，または nil.
-  line_shape = str,     -- string 型で "形状" の項目を上書き，または nil.
-  slope = num,          -- number 型で "傾き" の項目を上書き，または nil.
-  rotate = num,         -- number 型で "回転" の項目を上書き，または nil.
-  start_pos = num,      -- number 型で "開始位置" の項目を上書き，または nil.
-  end_pos = num,        -- number 型で "終了位置" の項目を上書き，または nil.
-  end_shape = str,      -- string 型で "端の形状" の項目を上書き，または nil.
-  precision = num,      -- number 型で "曲線精度" の項目を上書き，または nil.
-  dash_pat = tab,       -- table 型で "破線パターン" の項目を上書き，または nil.
-  dash_pos = num,       -- number 型で "破線位置" の項目を上書き，または nil.
-  dash_end_shape = str, -- string 型で "dash::端の形状" の項目を上書き，または nil.
-  rand_period = num,    -- number 型で "ランダム周期" の項目を上書き，または nil.
-  rand_amplify = num,   -- number 型で "ランダム振幅" の項目を上書き，または nil.
-  rand_fix_end = bool,  -- boolean 型で "ランダム固定端" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
-  rand_seed = num,      -- number 型で "ランダムシード" の項目を上書き，または nil.
-  antialias = num,      -- number 型で "ぼかし幅" の項目を上書き，または nil.
+  start_X = num,         -- number 型で "始点X" の項目を上書き，または nil.
+  start_Y = num,         -- number 型で "始点Y" の項目を上書き，または nil.
+  end_X = num,           -- number 型で "終点X" の項目を上書き，または nil.
+  end_Y = num,           -- number 型で "終点Y" の項目を上書き，または nil.
+  start_radius = num,    -- number 型で "開始半径" の項目を上書き，または nil.
+  end_radius = num,      -- number 型で "終了半径" の項目を上書き，または nil.
+  line = num,            -- number 型で "ライン幅" の項目を上書き，または nil.
+  color = num,           -- number 型で "色" の項目を上書き，または nil.
+  line_shape = str,      -- string 型で "形状" の項目を上書き，または nil.
+  slope = num,           -- number 型で "傾き" の項目を上書き，または nil.
+  rotate = num,          -- number 型で "回転" の項目を上書き，または nil.
+  start_pos = num,       -- number 型で "開始位置" の項目を上書き，または nil.
+  end_pos = num,         -- number 型で "終了位置" の項目を上書き，または nil.
+  end_shape = str,       -- string 型で "端の形状" の項目を上書き，または nil.
+  precision = num,       -- number 型で "曲線精度" の項目を上書き，または nil.
+  dash_pat = tab,        -- table 型で "破線パターン" の項目を上書き，または nil.
+  dash_pos = num,        -- number 型で "破線位置" の項目を上書き，または nil.
+  dash_end_shape = str,  -- string 型で "dash::端の形状" の項目を上書き，または nil.
+  antialias = num,       -- number 型で "ぼかし幅" の項目を上書き，または nil.
+  noise_intensity = num, -- number 型で "ノイズ強さ" の項目を上書き，または nil.
+  noise_seed = num,      -- number 型で "ノイズシード" の項目を上書き，または nil.
+  noise_size = num,      -- number 型で "noise::ドットサイズ" の項目を上書き，または nil.
+  rand_period = num,     -- number 型で "ランダム周期" の項目を上書き，または nil.
+  rand_amplify = num,    -- number 型で "ランダム振幅" の項目を上書き，または nil.
+  rand_fix_end = bool,   -- boolean 型で "ランダム固定端" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
+  rand_seed = num,       -- number 型で "ランダムシード" の項目を上書き，または nil.
 }
 ```
 
@@ -830,32 +943,35 @@ obj.cx=obj.cx+100 -- 位置もずらせる
 
 ```lua
 {
-  line = num,           -- number 型で "ライン幅" の項目を上書き，または nil.
-  head_size = num,      -- number 型で "矢じりサイズ" の項目を上書き，または nil.
-  color = num,          -- number 型で "色" の項目を上書き，または nil.
-  num_points = num,     -- number 型で "頂点数" の項目を上書き，または nil.
-  path_type = str,      -- string 型で "線タイプ" の項目を上書き，または nil.
-  points = tab,         -- table 型で "点リスト" の項目を上書き，または nil.
-  precision = num,      -- number 型で "曲線精度" の項目を上書き，または nil.
-  start_pos = num,      -- number 型で "開始位置" の項目を上書き，または nil.
-  end_pos = num,        -- number 型で "終了位置" の項目を上書き，または nil.
-  end_shape = str,      -- string 型で "端の形状" の項目を上書き，または nil.
-  join_shape = str,     -- string 型で "線結合の形状" の項目を上書き，または nil.
-  miter_limit = num,    -- number 型で "マイター限界" の項目を上書き，または nil.
-  dash_pat = tab,       -- table 型で "破線パターン" の項目を上書き，または nil.
-  dash_pos = num,       -- number 型で "破線位置" の項目を上書き，または nil.
-  dash_end_shape = str, -- string 型で "dash::端の形状" の項目を上書き，または nil.
-  head_type = str,      -- string 型で "矢じり配置" の項目を上書き，または nil.
-  head_fig = str,       -- string 型で "矢じり図形" の項目を上書き，または nil.
-  head_width = num,     -- number 型で "矢じり幅" の項目を上書き，または nil.
-  head_center = num,    -- number 型で "矢じり中心" の項目を上書き，または nil.
-  head_rot = num,       -- number 型で "矢じり角度" の項目を上書き，または nil.
-  head_pos = num,       -- number 型で "矢じり位置" の項目を上書き，または nil.
-  rand_period = num,    -- number 型で "ランダム周期" の項目を上書き，または nil.
-  rand_amplify = num,   -- number 型で "ランダム振幅" の項目を上書き，または nil.
-  rand_fix_end = bool,  -- boolean 型で "ランダム固定端" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
-  rand_seed = num,      -- number 型で "ランダムシード" の項目を上書き，または nil.
-  antialias = num,      -- number 型で "ぼかし幅" の項目を上書き，または nil.
+  line = num,            -- number 型で "ライン幅" の項目を上書き，または nil.
+  head_size = num,       -- number 型で "矢じりサイズ" の項目を上書き，または nil.
+  color = num,           -- number 型で "色" の項目を上書き，または nil.
+  num_points = num,      -- number 型で "頂点数" の項目を上書き，または nil.
+  path_type = str,       -- string 型で "線タイプ" の項目を上書き，または nil.
+  points = tab,          -- table 型で "点リスト" の項目を上書き，または nil.
+  precision = num,       -- number 型で "曲線精度" の項目を上書き，または nil.
+  start_pos = num,       -- number 型で "開始位置" の項目を上書き，または nil.
+  end_pos = num,         -- number 型で "終了位置" の項目を上書き，または nil.
+  end_shape = str,       -- string 型で "端の形状" の項目を上書き，または nil.
+  join_shape = str,      -- string 型で "線結合の形状" の項目を上書き，または nil.
+  miter_limit = num,     -- number 型で "マイター限界" の項目を上書き，または nil.
+  dash_pat = tab,        -- table 型で "破線パターン" の項目を上書き，または nil.
+  dash_pos = num,        -- number 型で "破線位置" の項目を上書き，または nil.
+  dash_end_shape = str,  -- string 型で "dash::端の形状" の項目を上書き，または nil.
+  antialias = num,       -- number 型で "ぼかし幅" の項目を上書き，または nil.
+  noise_intensity = num, -- number 型で "ノイズ強さ" の項目を上書き，または nil.
+  noise_seed = num,      -- number 型で "ノイズシード" の項目を上書き，または nil.
+  noise_size = num,      -- number 型で "noise::ドットサイズ" の項目を上書き，または nil.
+  head_type = str,       -- string 型で "矢じり配置" の項目を上書き，または nil.
+  head_fig = str,        -- string 型で "矢じり図形" の項目を上書き，または nil.
+  head_width = num,      -- number 型で "矢じり幅" の項目を上書き，または nil.
+  head_center = num,     -- number 型で "矢じり中心" の項目を上書き，または nil.
+  head_rot = num,        -- number 型で "矢じり角度" の項目を上書き，または nil.
+  head_pos = num,        -- number 型で "矢じり位置" の項目を上書き，または nil.
+  rand_period = num,     -- number 型で "ランダム周期" の項目を上書き，または nil.
+  rand_amplify = num,    -- number 型で "ランダム振幅" の項目を上書き，または nil.
+  rand_fix_end = bool,   -- boolean 型で "ランダム固定端" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
+  rand_seed = num,       -- number 型で "ランダムシード" の項目を上書き，または nil.
 }
 ```
 
@@ -863,29 +979,67 @@ obj.cx=obj.cx+100 -- 位置もずらせる
 
 ```lua
 {
-  width = num,          -- number 型で "幅" を上書き，または nil.
-  height = num,         -- number 型で "高さ" を上書き，または nil.
-  line = num,           -- number 型で "ライン幅" の項目を上書き，または nil.
-  color_line = num,     -- number 型で "ライン色" の項目を上書き，または nil.
-  color_fill = num,     -- number 型で "塗り色" の項目を上書き，または nil.
-  radii = tab_num,      -- table 型や number 型で "角半径" や "丸角縦横比" などを上書き，または nil. 詳細は後述．
-  fixed_aspect = bool,  -- boolean 型で "丸角縦横比固定" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
-  align_x = num,        -- number 型で "水平揃え" を上書き，または nil.
-  align_y = num,        -- number 型で "垂直揃え" を上書き，または nil.
-  alpha_line = num,     -- number 型で "ライン透明度" の項目を上書き，または nil.
-  start_pos = num,      -- number 型で "開始位置" の項目を上書き，または nil.
-  end_pos = num,        -- number 型で "終了位置" の項目を上書き，または nil.
-  end_shape = str,      -- string 型で "端の形状" の項目を上書き，または nil.
-  join_shape = str,     -- string 型で "線結合の形状" の項目を上書き，または nil.
-  dash_pat = tbl,       -- table 型で "破線パターン" の項目を上書き，または nil.
-  dash_pos = num,       -- number 型で "破線位置" の項目を上書き，または nil.
-  dash_end_shape = str, -- string 型で "dash::端の形状" の項目を上書き，または nil.
-  inflation = num,      -- number 型で "塗り追加幅" の項目を上書き，または nil.
-  alpha_fill = num,     -- number 型で "塗り透明度" の項目を上書き，または nil.
-  rand_period = num,    -- number 型で "ランダム周期" の項目を上書き，または nil.
-  rand_amplify = num,   -- number 型で "ランダム振幅" の項目を上書き，または nil.
-  rand_seed = num,      -- number 型で "ランダムシード" の項目を上書き，または nil.
-  antialias = num,      -- number 型で "ぼかし幅" の項目を上書き，または nil.
+---     :  width: number?,
+---     :  height: number?,
+---     :  line: number?,
+---     :  color_line: number?,
+---     :  color_fill: number?,
+---     :  radii: table|number|nil,
+---     :  fixed_aspect: boolean|number|nil,
+---     :  align_x: number?,
+---     :  align_y: number?,
+---     :  alpha_line: number?,
+---     :  start_pos: number?,
+---     :  end_pos: number?,
+---     :  end_shape: string?,
+---     :  join_shape: string?,
+---     :  dash_pat: table?,
+---     :  dash_pos: number?,
+---     :  dash_end_shape: string?,
+---     :  antialias: number?,
+---     :  noise_intensity: number?,
+---     :  noise_seed: number?,
+---     :  noise_size: number?,
+---     :  inflation: number?,
+---     :  alpha_fill: number?,
+---     :  fill_antialias: number?,
+---     :  fill_noise_intensity: number?,
+---     :  fill_noise_seed: number?,
+---     :  fill_noise_size: number?,
+---     :  rand_period: number?,
+---     :  rand_amplify: number?,
+---     :  rand_seed: number?,
+
+  width = num,                  -- number 型で "幅" を上書き，または nil.
+  height = num,                 -- number 型で "高さ" を上書き，または nil.
+  line = num,                   -- number 型で "ライン幅" の項目を上書き，または nil.
+  color_line = num,             -- number 型で "ライン色" の項目を上書き，または nil.
+  color_fill = num,             -- number 型で "塗り色" の項目を上書き，または nil.
+  radii = tab_num,              -- table 型や number 型で "角半径" や "丸角縦横比" などを上書き，または nil. 詳細は後述．
+  fixed_aspect = bool,          -- boolean 型で "丸角縦横比固定" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
+  align_x = num,                -- number 型で "水平揃え" を上書き，または nil.
+  align_y = num,                -- number 型で "垂直揃え" を上書き，または nil.
+  alpha_line = num,             -- number 型で "ライン透明度" の項目を上書き，または nil.
+  start_pos = num,              -- number 型で "開始位置" の項目を上書き，または nil.
+  end_pos = num,                -- number 型で "終了位置" の項目を上書き，または nil.
+  end_shape = str,              -- string 型で "端の形状" の項目を上書き，または nil.
+  join_shape = str,             -- string 型で "線結合の形状" の項目を上書き，または nil.
+  dash_pat = tbl,               -- table 型で "破線パターン" の項目を上書き，または nil.
+  dash_pos = num,               -- number 型で "破線位置" の項目を上書き，または nil.
+  dash_end_shape = str,         -- string 型で "dash::端の形状" の項目を上書き，または nil.
+  antialias = num,              -- number 型で "ぼかし幅" の項目を上書き，または nil.
+  noise_intensity = num,        -- number 型で "ノイズ強さ" の項目を上書き，または nil.
+  noise_seed = num,             -- number 型で "ノイズシード" の項目を上書き，または nil.
+  noise_size = num,             -- number 型で "noise::ドットサイズ" の項目を上書き，または nil.
+  inflation = num,              -- number 型で "塗り追加幅" の項目を上書き，または nil.
+  alpha_fill = num,             -- number 型で "塗り透明度" の項目を上書き，または nil.
+  fill_antialias = num,         -- number 型で "fill::ぼかし幅" の項目を上書き，または nil.
+  fill_noise_intensity = num,   -- number 型で "fill::ノイズ強さ" の項目を上書き，または nil.
+  fill_noise_seed = num,        -- number 型で "fill::ノイズシード" の項目を上書き，または nil.
+  fill_noise_size = num,        -- number 型で "fill::noise::ドットサイズ" の項目を上書き，または nil.
+  rand_period = num,            -- number 型で "ランダム周期" の項目を上書き，または nil.
+  rand_amplify = num,           -- number 型で "ランダム振幅" の項目を上書き，または nil.
+  rand_seed = num,              -- number 型で "ランダムシード" の項目を上書き，または nil.
 }
 ```
 
@@ -931,10 +1085,13 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
   precision = num,        -- number 型で "曲線精度" の項目を上書き，または nil.
   inflation = num,        -- number 型で "追加幅" の項目を上書き，または nil.
   mode_fill = num,        -- string 型で "範囲" の項目を上書き，または nil.
+  antialias = num,        -- number 型で "ぼかし幅" の項目を上書き，または nil.
+  noise_intensity = num,  -- number 型で "ノイズ強さ" の項目を上書き，または nil.
+  noise_seed = num,       -- number 型で "ノイズシード" の項目を上書き，または nil.
+  noise_size = num,       -- number 型で "noise::ドットサイズ" の項目を上書き，または nil.
   X = num, Y = num,       -- number 型で "移動X", "移動Y" の項目を上書き，または nil.
   zoom = num,             -- number 型で "拡大率" の項目を上書き，または nil.
   rotate = num,           -- number 型で "回転" の項目を上書き，または nil.
-  antialias = num,        -- number 型で "ぼかし幅" の項目を上書き，または nil.
 
 -- 以降は require("Path_S") からの API で代替できるようになったため非推奨です．
   pt_buff = str, -- string 型で, パスの頂点情報を保持している画像バッファ名を指定，または nil. 詳細後述．
@@ -978,10 +1135,13 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
   dash_adj = bool,        -- boolean 型で "破線周期補正" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
   dash_pos = num,         -- number 型で "破線位置" の項目を上書き，または nil.
   dash_end_shape = str,   -- string 型で "dash::端の形状" の項目を上書き，または nil.
+  antialias = num,        -- number 型で "ぼかし幅" の項目を上書き，または nil.
+  noise_intensity = num,  -- number 型で "ノイズ強さ" の項目を上書き，または nil.
+  noise_seed = num,       -- number 型で "ノイズシード" の項目を上書き，または nil.
+  noise_size = num,       -- number 型で "noise::ドットサイズ" の項目を上書き，または nil.
   X = num, Y = num,       -- number 型で "移動X", "移動Y" の項目を上書き，または nil.
   zoom = num,             -- number 型で "拡大率" の項目を上書き，または nil.
   rotate = num,           -- number 型で "回転" の項目を上書き，または nil.
-  antialias = num,        -- number 型で "ぼかし幅" の項目を上書き，または nil.
 
 -- 以降は require("Path_S") からの API で代替できるようになったため非推奨です．
   pt_buff = str,  -- string 型で, パスの頂点情報を保持している画像バッファ名を指定，または nil. 詳細後述．
@@ -1034,11 +1194,14 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
   precision = num,        -- number 型で "曲線精度" の項目を上書き，または nil.
   inflation = num,        -- number 型で "追加幅" の項目を上書き，または nil.
   mode_fill = num,        -- string 型で "範囲" の項目を上書き，または nil.
+  antialias = num,        -- number 型で "ぼかし幅" の項目を上書き，または nil.
+  noise_intensity = num,  -- number 型で "ノイズ強さ" の項目を上書き，または nil.
+  noise_seed = num,       -- number 型で "ノイズシード" の項目を上書き，または nil.
+  noise_size = num,       -- number 型で "noise::ドットサイズ" の項目を上書き，または nil.
   X = num, Y = num,       -- number 型で "移動X", "移動Y" の項目を上書き，または nil.
   zoom = num,             -- number 型で "拡大率" の項目を上書き，または nil.
   rotate = num,           -- number 型で "回転" の項目を上書き，または nil.
   extra_filter = str,     -- string 型で "追加のフィルタ効果" の項目を上書き，または nil.
-  antialias = num,        -- number 型で "ぼかし幅" の項目を上書き，または nil.
 }
 ```
 
@@ -1078,7 +1241,7 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
 
 ##  次の改版予定
 
-- **v2.22** (2026-??-??)
+- **v2.30** (2026-??-??)
 
   - ラインや塗りの輪郭部分をノイズ模様にできる設定項目を追加．
   - ラインと塗りの両方を持つオブジェクト系スクリプトで，「ぼかし幅」をライン部分と塗り部分で個別に指定するように (**破壊的変更**).
