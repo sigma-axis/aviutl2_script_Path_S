@@ -47,6 +47,21 @@ local inflation = 0
 ---奇偶反転 = 3
 local mode_fill = 0
 
+--group:塗り境界設定,false
+---$track:ぼかし幅, min = 0, max = 1000, step = 0.01, scale = 0.2
+local antialias = 1
+
+---$track:ノイズ強さ, min = 0, max = 100, step = 0.01
+local noise_intensity = 0
+
+---$tips:0 以上だと同じシードでも別オブジェクトだと別の乱数．
+---     :負だと同じシードなら別オブジェクトでも同じ乱数．
+---$track:noise::シード, min = -65536, max = 65535, step = 1
+local noise_seed = 10000
+
+---$track:noise::ドットサイズ, min = 100, max = 6400, step = 0.01, scale = 0.0625
+local noise_size = 100
+
 --group:配置,false
 ---$track:移動X, min = -4000, max = 4000, step = 0.01, scale = 0.25
 local X = 0
@@ -75,13 +90,6 @@ local extra_filter = 0
 ---$text:追加スクリプト
 local extra_script = 'obj.effect("グラデーション",\n  "形状","凸形",\n  "角度",30,\n  "開始色",0x00ff00) -- グラデーション適用\nobj.cx=obj.cx+100 -- 位置もずらせる\n'
 
---group:境界設定,false
----$track:ぼかし幅, min = 0, max = 1000, step = 0.01, scale = 0.2
-local antialias = 1
-
----$track:noise::ノイズ強さ, min = 0, max = 100, step = 0.01
-local noise_intensity = 0
-
 --hide@extra_script:extra_filter~=1
 --group:その他,false
 ---$nolang: name
@@ -94,12 +102,14 @@ local noise_intensity = 0
 ---     :  precision: number?,
 ---     :  inflation: number?,
 ---     :  mode_fill: string?,
+---     :  antialias: number?,
+---     :  noise_intensity: number?,
+---     :  noise_seed: number?,
+---     :  noise_size: number?,
 ---     :  X, Y: number?,
 ---     :  zoom: number?,
 ---     :  rotate: number?,
 ---     :  extra_filter: string?,
----     :  antialias: number?,
----     :  noise_intensity: number?,
 ---     :}
 ---$value:PI
 local PI = {}
@@ -134,6 +144,10 @@ mode_anchor_base = path_s.PI.mode_anchor_base(PI.mode_anchor_base, mode_anchor_b
 precision = tonumber(PI.precision) or precision;
 inflation = tonumber(PI.inflation) or inflation;
 mode_fill = path_s.PI.mode_fill(PI.mode_fill, mode_fill);
+antialias = tonumber(PI.antialias) or antialias;
+noise_intensity = tonumber(PI.noise_intensity) or noise_intensity;
+noise_seed = tonumber(PI.noise_seed) or noise_seed;
+noise_size = tonumber(PI.noise_size) or noise_size;
 X = tonumber(PI.X) or X;
 Y = tonumber(PI.Y) or Y;
 zoom = tonumber(PI.zoom) or zoom;
@@ -144,13 +158,22 @@ if type(PI.extra_filter) == "string" then
 	};
 	extra_filter = name2num[PI.extra_filter] or extra_filter;
 end
-antialias = tonumber(PI.antialias) or antialias;
-noise_intensity = tonumber(PI.noise_intensity) or noise_intensity;
 
 -- normalize parameters.
 num_points = math.max(math.floor(0.5 + num_points), 3);
 precision = math.max(precision, 1);
 inflation = math.max(inflation, 0);
+antialias = math.max(antialias, 1 / 1024);
+noise_intensity = math.min(math.max(noise_intensity / 100, 0), 1);
+noise_seed = math.floor(0.5 + noise_seed);
+if noise_seed >= 0 then
+	noise_seed = noise_seed
+		+  2525 * (obj.id % 2 ^ 20)
+		+ 13579 * (obj.effect_id % 2 ^ 20)
+		+ 54321 * (obj.index % 2 ^ 20);
+end
+noise_seed = noise_seed % 2 ^ 20;
+noise_size = math.max(noise_size / 100, 1);
 do
 	local cx, cy = path_s.anchor_offset(mode_anchor_base);
 	X, Y = X + cx, Y + cy;
@@ -158,8 +181,6 @@ end
 zoom = math.min(math.max(zoom / 100, 0), 50);
 rotate = math.pi / 180 * (rotate % 360);
 extra_filter = math.min(math.max(math.floor(0.5 + extra_filter), 0), 1);
-antialias = math.max(antialias, 1 / 1024);
-noise_intensity = math.min(math.max(noise_intensity / 100, 0), 1);
 if extra_filter == 1 and extra_script:match("^%s*(.-)%s*$") == "" then return end
 
 --#endregion PI / normalize parameters.
@@ -169,8 +190,8 @@ local cxt; cxt = path_s.partial_filter.make_cxt(
 	num_points, path_type, points, precision,
 	mode_fill, inflation, {
 		width = antialias, intensity = noise_intensity,
-		seed = 12345,
-		cx = X + obj.w / 2, cy = Y + obj.h / 2, size = 1
+		seed = noise_seed,
+		cx = X + obj.w / 2, cy = Y + obj.h / 2, size = noise_size
 	}, invert,
 	X, Y, zoom, rotate);
 

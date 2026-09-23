@@ -94,6 +94,21 @@ local dash_pos = 0
 ---三角 = 3
 local dash_end_shape = 0
 
+--group:ライン境界設定,false
+---$track:ぼかし幅, min = 0, max = 1000, step = 0.01, scale = 0.2
+local antialias = 1
+
+---$track:ノイズ強さ, min = 0, max = 100, step = 0.01
+local noise_intensity = 0
+
+---$tips:0 以上だと同じシードでも別オブジェクトだと別の乱数．
+---     :負だと同じシードなら別オブジェクトでも同じ乱数．
+---$track:noise::シード, min = -65536, max = 65535, step = 1
+local noise_seed = 10000
+
+---$track:noise::ドットサイズ, min = 100, max = 6400, step = 0.01, scale = 0.0625
+local noise_size = 100
+
 --group:配置,false
 ---$track:移動X, min = -4000, max = 4000, step = 0.01, scale = 0.25
 local X = 0
@@ -111,13 +126,6 @@ local rotate = 0
 ---$tips:パス編集用のアンカーと移動用のアンカーを切り替え．
 ---$check:アンカー切り替え
 local toggle_gui = false
-
---group:境界設定,false
----$track:ぼかし幅, min = 0, max = 1000, step = 0.01, scale = 0.2
-local antialias = 1
-
----$track:noise::ノイズ強さ, min = 0, max = 100, step = 0.01
-local noise_intensity = 0
 
 --group:その他,false
 ---$nolang: name
@@ -140,11 +148,13 @@ local noise_intensity = 0
 ---     :  dash_adj: boolean|number|nil,
 ---     :  dash_pos: number?,
 ---     :  dash_end_shape: string?,
+---     :  antialias: number?,
+---     :  noise_intensity: number?,
+---     :  noise_seed: number?,
+---     :  noise_size: number?,
 ---     :  X, Y: number?,
 ---     :  zoom: number?,
 ---     :  rotate: number?,
----     :  antialias: number?,
----     :  noise_intensity: number?,
 ---     :}
 ---$value:PI
 local PI = {}
@@ -204,12 +214,14 @@ if type(PI.dash_pat) == "table" then dash_pat = PI.dash_pat end
 dash_adj = path_s.PI.as_bool(PI.dash_adj, dash_adj);
 dash_pos = tonumber(PI.dash_pos) or dash_pos;
 dash_end_shape = path_s.PI.end_shape(PI.dash_end_shape, dash_end_shape);
+antialias = tonumber(PI.antialias) or antialias;
+noise_intensity = tonumber(PI.noise_intensity) or noise_intensity;
+noise_seed = tonumber(PI.noise_seed) or noise_seed;
+noise_size = tonumber(PI.noise_size) or noise_size;
 X = tonumber(PI.X) or X;
 Y = tonumber(PI.Y) or Y;
 zoom = tonumber(PI.zoom) or zoom;
 rotate = tonumber(PI.rotate) or rotate;
-antialias = tonumber(PI.antialias) or antialias;
-noise_intensity = tonumber(PI.noise_intensity) or noise_intensity;
 
 -- normalize parameters.
 intensity = math.min(math.max(intensity / 100, 0), 1);
@@ -219,14 +231,23 @@ precision = math.max(precision, 1);
 start_pos = start_pos / 100;
 end_pos = end_pos / 100;
 miter_limit = math.max(miter_limit / 100, 1);
+antialias = math.max(antialias, 1 / 1024);
+noise_intensity = math.min(math.max(noise_intensity / 100, 0), 1);
+noise_seed = math.floor(0.5 + noise_seed);
+if noise_seed >= 0 then
+	noise_seed = noise_seed
+		+  2525 * (obj.id % 2 ^ 20)
+		+ 13579 * (obj.effect_id % 2 ^ 20)
+		+ 54321 * (obj.index % 2 ^ 20);
+end
+noise_seed = noise_seed % 2 ^ 20;
+noise_size = math.max(noise_size / 100, 1);
 do
 	local cx, cy = path_s.anchor_offset(mode_anchor_base);
 	X, Y = X + cx, Y + cy;
 end
 zoom = math.min(math.max(zoom / 100, 0), 50);
 rotate = math.pi / 180 * (rotate % 360);
-antialias = math.max(antialias, 1 / 1024);
-noise_intensity = math.min(math.max(noise_intensity / 100, 0), 1);
 if intensity <= 0 then return end
 
 --#endregion PI / normalize parameters.
@@ -243,8 +264,8 @@ else
 	path_s.path_mask_line(
 		alpha_outer, alpha_inner, line, {
 			width = antialias, intensity = noise_intensity,
-			seed = 12345,
-			cx = X + obj.w / 2, cy = Y + obj.h / 2, size = 1
+			seed = noise_seed,
+			cx = X + obj.w / 2, cy = Y + obj.h / 2, size = noise_size,
 		},
 		path_type, points, num_points - (loop and 0 or 1), loop, precision,
 		start_pos, end_pos, end_shape, join_shape, miter_limit,
