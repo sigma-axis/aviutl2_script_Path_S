@@ -304,12 +304,15 @@ end
 local L, R, T, B, len = path_s.measure(pts, n_pts);
 local th = math.max(line * (end_shape == 1 and 0.5 ^ 0.5 or 0.5),
 	inflation) + antialias;
+L, R, T, B = -- align to pixel at the specified center.
+	L + align_x * width / 2, R + align_x * width / 2,
+	T + align_y * height / 2, B + align_y * height / 2;
 L, T = math.floor(L - th), math.floor(T - th);
 R, B = math.max(math.ceil(R + th), L + 1), math.max(math.ceil(B + th), T + 1);
 
 -- prepare the canvas.
 obj.clearbuffer("object", R - L, B - T);
-obj.cx, obj.cy = -(L + R + align_x * width) / 2, -(T + B + align_y * height) / 2;
+obj.cx, obj.cy = -(L + R) / 2, -(T + B) / 2;
 
 -- draw the figures.
 if has_fill or has_chrome then
@@ -318,7 +321,7 @@ if has_fill or has_chrome then
 		cache_name = "cache:path_s/coords";
 		obj.setoption("drawtarget", "tempbuffer", obj.w, obj.h);
 	end
-	path_s.send(pts, n_pts, -L, -T, cache_name);
+	path_s.send(pts, n_pts, align_x * width / 2 - L, align_y * height / 2 - T, cache_name);
 	local noise_setting = {
 		width = antialias, intensity = noise_intensity,
 		seed = 12345,
