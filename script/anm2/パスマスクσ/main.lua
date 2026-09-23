@@ -69,10 +69,14 @@ local rotate = 0
 ---$check:アンカー切り替え
 local toggle_gui = false
 
---group:その他,false
+--group:境界設定,false
 ---$track:ぼかし幅, min = 0, max = 1000, step = 0.01, scale = 0.2
 local antialias = 1
 
+---$track:noise::ノイズ強さ, min = 0, max = 100, step = 0.01
+local noise_intensity = 0
+
+--group:その他,false
 ---$nolang: name
 ---$tips:PI = {
 ---     :  intensity: number?,
@@ -88,7 +92,7 @@ local antialias = 1
 ---     :  zoom: number?,
 ---     :  rotate: number?,
 ---     :  antialias: number?,
----     :  pt_buff: string?,
+---     :  noise_intensity, number?,
 ---     :}
 ---$value:PI
 local PI = {}
@@ -98,6 +102,7 @@ local PI = {}
 ]]
 --[[pixelshader@carve:
 ---$include "../../path_coord_header.hlsl"
+---$include "../../ibukihash.hlsl"
 ---$include "carve.hlsl"
 ]]
 local path_s = require("Path_S");
@@ -137,6 +142,7 @@ Y = tonumber(PI.Y) or Y;
 zoom = tonumber(PI.zoom) or zoom;
 rotate = tonumber(PI.rotate) or rotate;
 antialias = tonumber(PI.antialias) or antialias;
+noise_intensity = tonumber(PI.noise_intensity) or noise_intensity;
 
 -- normalize parameters.
 intensity = math.min(math.max(intensity / 100, 0), 1);
@@ -150,6 +156,7 @@ end
 zoom = math.min(math.max(zoom / 100, 0), 50);
 rotate = math.pi / 180 * (rotate % 360);
 antialias = math.max(antialias, 1 / 1024);
+noise_intensity = math.min(math.max(noise_intensity / 100, 0), 1);
 if intensity <= 0 then return end
 
 --#endregion PI / normalize parameters.
@@ -165,7 +172,11 @@ if pt_buff then
 else
 	path_s.path_mask_area(
 		alpha_outer, alpha_inner, mode_fill,
-		inflation, antialias,
+		inflation, {
+			width = antialias, intensity = noise_intensity,
+			seed = 12345,
+			cx = X + obj.w / 2, cy = Y + obj.h / 2, size = 1
+		},
 		path_type, points, num_points, precision,
 		zoom, rotate, X, Y);
 end

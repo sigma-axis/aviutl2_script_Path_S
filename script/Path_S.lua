@@ -143,6 +143,33 @@ local PI_choose_join_shape do
 	end
 end
 
+---@class noise_setting ノイズの設定．
+---@field width number ノイズを描画する幅．ピクセル単位．正の実数 (0 は不可).
+---@field intensity number ノイズの強さ．0.0 -- 1.0.
+---@field seed integer ノイズのシード．
+---@field cx number ノイズの原点の X 座標．バッファ左上からのピクセル単位の相対座標．
+---@field cy number ノイズの原点の Y 座標．バッファ左上からのピクセル単位の相対座標．
+---@field size number ノイズのドットサイズ．1.0 以上の実数.
+
+---@alias antialias # アンチエイリアス幅，またはノイズの設定．
+---| number # アンチエイリアス幅．ピクセル単位．正の実数 (0 は不可).
+---| noise_setting # ノイズを利用して描画する場合の設定．
+
+---アンチエイリアス設定の型をノイズ設定の型に矯正する．
+---@param antialias antialias
+---@return noise_setting
+local function wrap_antialias(antialias)
+	if type(antialias) == "number" then
+		return {
+			width = antialias,
+			intensity = 0,
+			seed = 0,
+			cx = 0, cy = 0, size = 1,
+		};
+	end
+	return antialias;
+end
+
 ---「アンカー基準」の設定項目から，実際のアンカーの基準となる座標を取得する．
 ---@param mode_anchor_base mode_anchor_base アンカー基準．
 ---@return number cx, number cy アンカーの原点の X, Y 座標．
@@ -595,7 +622,7 @@ end
 ---@param alpha_inner number パス内側のマスクのアルファ値を 0.0 から 1.0 で指定．
 ---@param mode_fill mode_fill 塗りつぶし範囲の指定．
 ---@param inflation number 「追加幅」をピクセル単位で指定．0 以上の実数．
----@param antialias number 「ぼかし幅」をピクセル単位で指定．正の実数 (0 は不可).
+---@param antialias antialias 「ぼかし幅」をピクセル単位で指定．正の実数 (0 は不可). またはノイズ設定のテーブル．
 ---@param buffer_name string 折れ線の頂点データのあるバッファ名．
 ---@param num_points integer バッファに含まれる頂点数．3 以上．
 ---@param target_buffer { name: string, w: integer, h: integer }? マスク適用先のバッファ名 (e.g. "object", "cache:foo") とその幅と高さを指定．省略時は `{ name = "object", w = obj.w, h = obj.h }`.
@@ -604,8 +631,9 @@ local function path_mask_area_buffered(
 	inflation, antialias,
 	buffer_name, num_points,
 	target_buffer)
-	-- unwrap target_buffer.
+	-- normalize parameters.
 	local tgt_name = target_buffer and target_buffer.name or "object";
+	antialias = wrap_antialias(antialias);
 
 	-- handle the trivial case.
 	if alpha_outer == alpha_inner then mask_uniform(alpha_outer, tgt_name); return end
@@ -614,8 +642,10 @@ local function path_mask_area_buffered(
 	obj.pixelshader("carve@パスマスクσ@Path_S", tgt_name, buffer_name,
 	{
 		alpha_inner - alpha_outer, alpha_outer;
-		num_points, mode_fill,
-		inflation, antialias,
+		num_points, mode_fill, inflation;
+		antialias.width;
+		antialias.cx, antialias.cy; 1 / antialias.size;
+		math.max(1 - antialias.intensity, 1 / 1024), antialias.seed;
 	}, "mask");
 end
 
@@ -624,7 +654,7 @@ end
 ---@param alpha_inner number パス内側のマスクのアルファ値を 0.0 から 1.0 で指定．
 ---@param mode_fill mode_fill 塗りつぶし範囲の指定．
 ---@param inflation number 「追加幅」をピクセル単位で指定．0 以上の実数．
----@param antialias number 「ぼかし幅」をピクセル単位で指定．正の実数 (0 は不可).
+---@param antialias antialias 「ぼかし幅」をピクセル単位で指定．正の実数 (0 は不可). またはノイズ設定のテーブル．
 ---@param path_type path_type|nil 「線タイプ」(パスの種類) を指定．`nil` を指定した場合，折れ線への変換や点列のコピーを省略する．このとき `pts` は既に折れ線の前提で，テーブルの内容も書き換わる．
 ---@param pts any[] 点列の配列， `{ x1, y1, x2, y2, x3, y3, ... }` の形式．
 ---@param n_segs integer パスの分割区間の個数．1 以上．
@@ -641,11 +671,12 @@ local function path_mask_area(
 	path_type, pts, n_segs, prec,
 	scale, rotate, dx, dy,
 	target_buffer, temp_buffer_name)
-	-- unwrap target_buffer.
+	-- normalize parameters.
 	local tgt_name, tgt_w, tgt_h = "object", obj.w, obj.h;
 	if target_buffer then
 		tgt_name, tgt_w, tgt_h = target_buffer.name, target_buffer.w, target_buffer.h;
 	end
+	antialias = wrap_antialias(antialias);
 
 	-- handle the trivial case.
 	if alpha_outer == alpha_inner then mask_uniform(alpha_outer, tgt_name); return end
@@ -660,7 +691,7 @@ local function path_mask_area(
 	-- apply translation / scaling / rotation.
 	transform(points, num_points, scale, rotate, dx, dy);
 	local L, R, T, B = measure(points, num_points);
-	local th = inflation + antialias;
+	local th = inflation + antialias.width;
 	L, R, T, B = L - th, R + th, T - th, B + th;
 
 	-- check if the path overlaps this object.
@@ -683,7 +714,7 @@ end
 ---@param alpha_outer number パス外側のマスクのアルファ値を 0.0 から 1.0 で指定．
 ---@param alpha_inner number パス内側のマスクのアルファ値を 0.0 から 1.0 で指定．
 ---@param line_width number 「ライン幅」をピクセル単位で指定．0 以上の実数．
----@param antialias number 「ぼかし幅」をピクセル単位で指定．正の実数 (0 は不可).
+---@param antialias antialias 「ぼかし幅」をピクセル単位で指定．正の実数 (0 は不可). またはノイズ設定のテーブル．
 ---@param buffer_name string 折れ線の頂点データのあるバッファ名．
 ---@param num_points integer バッファに含まれる頂点数．2 以上．
 ---@param len_path number バッファに含まれる折れ線の累計長さ．
@@ -704,8 +735,9 @@ local function path_mask_line_buffered(
 	start_pos, end_pos, end_shape, join_shape, miter_limit,
 	dash_pat, dash_pos, dash_adj, dash_end_shape,
 	target_buffer)
-	-- unwrap target_buffer.
+	-- normalize parameters.
 	local tgt_name = target_buffer and target_buffer.name or "object";
+	antialias = wrap_antialias(antialias);
 
 	-- handle the trivial case.
 	if alpha_outer == alpha_inner then mask_uniform(alpha_outer, tgt_name); return end
@@ -794,7 +826,10 @@ local function path_mask_line_buffered(
 		obj.pixelshader("carve@パスマスク(ライン)σ@Path_S", tgt_name, buffer_name,
 		{
 			alpha_inner - alpha_outer, alpha_outer;
-			num_points, math.max(line_width - 1, 0) / 2, antialias;
+			num_points, math.max(line_width - 1, 0) / 2, antialias.width;
+
+			antialias.cx, antialias.cy; 1 / antialias.size;
+			math.max(1 - antialias.intensity, 1 / 1024); antialias.seed;
 
 			end_shape; join_shape;
 			loop and 1 or 0; 1 - 2 / miter_limit ^ 2;
@@ -803,11 +838,15 @@ local function path_mask_line_buffered(
 		obj.pixelshader("carve_dash@パスマスク(ライン)σ@Path_S", tgt_name, buffer_name,
 		{
 			alpha_inner - alpha_outer, alpha_outer;
-			num_points, math.max(line_width - 1, 0) / 2, antialias;
+			num_points, math.max(line_width - 1, 0) / 2, antialias.width;
+
+			antialias.cx, antialias.cy; 1 / antialias.size;
+			math.max(1 - antialias.intensity, 1 / 1024); antialias.seed;
+
 			#dash_pat, dash_len0, dash_idx0 - 1;
 
 			end_shape; join_shape; dash_end_shape;
-			loop and 1 or 0; 1 - 2 / miter_limit ^ 2; 0, 0, 0;
+			loop and 1 or 0; 1 - 2 / miter_limit ^ 2; 0, 0;
 
 			len_path * phase_whole0, len_path * phase_whole1, len_path * phase_whole2, len_path * 2;
 			unpack(dash_pat)
@@ -819,7 +858,7 @@ end
 ---@param alpha_outer number パス外側のマスクのアルファ値を 0.0 から 1.0 で指定．
 ---@param alpha_inner number パス内側のマスクのアルファ値を 0.0 から 1.0 で指定．
 ---@param line_width number 「ライン幅」をピクセル単位で指定．0 以上の実数．
----@param antialias number 「ぼかし幅」をピクセル単位で指定．正の実数 (0 は不可).
+---@param antialias antialias 「ぼかし幅」をピクセル単位で指定．正の実数 (0 は不可). またはノイズ設定のテーブル．
 ---@param path_type path_type|nil 「線タイプ」(パスの種類) を指定．`nil` を指定した場合，折れ線への変換や点列のコピーを省略する．このとき `pts` は既に折れ線の前提で，テーブルの内容も書き換わる．
 ---@param pts any[] 点列の配列， `{ x1, y1, x2, y2, x3, y3, ... }` の形式．
 ---@param n_segs integer パスの分割区間の個数．1 以上．
@@ -847,11 +886,12 @@ local function path_mask_line(
 	dash_pat, dash_pos, dash_adj, dash_end_shape,
 	scale, rotate, dx, dy,
 	target_buffer, temp_buffer_name)
-	-- unwrap target_buffer.
+	-- normalize parameters.
 	local tgt_name, tgt_w, tgt_h = "object", obj.w, obj.h;
 	if target_buffer then
 		tgt_name, tgt_w, tgt_h = target_buffer.name, target_buffer.w, target_buffer.h;
 	end
+	antialias = wrap_antialias(antialias);
 
 	-- handle the trivial case.
 	if alpha_outer == alpha_inner then mask_uniform(alpha_outer, tgt_name); return end
@@ -866,7 +906,7 @@ local function path_mask_line(
 	-- apply translation / scaling / rotation.
 	transform(points, num_points, scale, rotate, dx, dy);
 	local L, R, T, B, len = measure(points, num_points);
-	local th = line_width / 2 + antialias;
+	local th = line_width / 2 + antialias.width;
 	L, R, T, B = L - th, R + th, T - th, B + th;
 
 	-- check if the path overlaps this object.
@@ -888,7 +928,7 @@ local function path_mask_line(
 end
 
 local partial_filter_make_cxt, partial_filter_push_cxt, partial_filter_pop_cxt, partial_filter_combine do
-	---@alias partial_filter_context { [1]: integer, [2]: path_type, [3]: number[], [4]: number, [5]: mode_fill, [6]: number, [7]: number, [8]: boolean, [9]: number, [10]: number, [11]: number, [12]: number, [13]: integer, [14]: integer, [15]: number, [16]: number, [17]: string } # パス部分フィルタσ で後続フィルタに伝達できる形でパスやフィルタ元の状態の情報を保持するテーブル．
+	---@alias partial_filter_context { [1]: integer, [2]: path_type, [3]: number[], [4]: number, [5]: mode_fill, [6]: number, [7]: noise_setting, [8]: boolean, [9]: number, [10]: number, [11]: number, [12]: number, [13]: integer, [14]: integer, [15]: number, [16]: number, [17]: string } # パス部分フィルタσ で後続フィルタに伝達できる形でパスやフィルタ元の状態の情報を保持するテーブル．
 	local key_name_stack, key_name_cxt do
 		local g_key_stack, g_key_cxt = "path_s/part/cxt_stack#", "path_s/part/cxt#";
 		function key_name_stack(id) return g_key_stack..id end
@@ -908,7 +948,15 @@ local partial_filter_make_cxt, partial_filter_push_cxt, partial_filter_pop_cxt, 
 		-- inflation
 		if type(t[6]) ~= "number" or t[6] < 0 then return false end
 		-- antialias
-		if type(t[7]) ~= "number" or t[7] < 1 / 1024 then return false end
+		if type(t[7]) ~= "table" then return false;
+		else
+			local width, intensity, seed, cx, cy, size = t[7].width, t[7].intensity, t[7].seed, t[7].cx, t[7].cy, t[7].size;
+			if type(width) ~= "number" or type(intensity) ~= "number" or type(seed) ~= "number" then return false;
+			elseif type(cx) ~= "number" or type(cy) ~= "number" or type(size) ~= "number" then return false;
+			elseif width < 1 / 1024 then return false;
+			elseif intensity < 0 or intensity > 1 then return false;
+			elseif size < 1 then return false end
+		end
 		-- invert
 		if type(t[8]) ~= "boolean" then return false end
 		-- X
@@ -938,7 +986,7 @@ local partial_filter_make_cxt, partial_filter_push_cxt, partial_filter_pop_cxt, 
 	---@param precision number # 曲線精度．
 	---@param mode_fill mode_fill # 範囲．
 	---@param inflation number # 追加幅．
-	---@param antialias number # ぼかし幅．
+	---@param antialias antialias # ぼかし幅．
 	---@param invert boolean # 反転．
 	---@param X number # 移動X．
 	---@param Y number # 移動Y．
@@ -953,13 +1001,13 @@ local partial_filter_make_cxt, partial_filter_push_cxt, partial_filter_pop_cxt, 
 		assert(obj.copybuffer(cache_name, "object"));
 		return {
 			num_points, path_type, points, precision,
-			mode_fill, inflation, antialias, invert,
+			mode_fill, inflation, wrap_antialias(antialias), invert,
 			X, Y, zoom, rotate,
 			obj.w, obj.h, obj.cx, obj.cy, cache_name,
 		};
 	end
 	---パス部分フィルタσ で後続フィルタに伝達する情報のテーブルを `global` に登録する．`obj.effect()` 経由で後続フィルタからも参照できる．
-	---@param cxt partial_filter_context? 登録情報のテーブル．
+	---@param cxt partial_filter_context 登録情報のテーブル．
 	function partial_filter_push_cxt(cxt)
 		local g_key_stack = key_name_stack(obj.id);
 		local stack do
@@ -1039,7 +1087,8 @@ local partial_filter_make_cxt, partial_filter_push_cxt, partial_filter_pop_cxt, 
 		local cache_name_mask, cache_name_tmp =
 			"cache:path_s/part/mask", "cache:path_s/part/tmp";
 		obj.clearbuffer(cache_name_mask, w, h, 0x000000);
-		obj.cx, obj.cy  = cx, cy;
+		obj.cx, obj.cy = cx, cy;
+		antialias.cx, antialias.cy = antialias.cx + (w - w0) / 2 + (cx - cx0), antialias.cy + (h - h0) / 2 + (cy - cy0);
 		path_mask_area(
 			invert and 1 or 0, invert and 0 or 1, mode_fill, inflation, antialias,
 			path_type, points, num_points, precision,
