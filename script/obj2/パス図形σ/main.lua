@@ -83,6 +83,21 @@ local dash_pos = 0
 ---三角 = 3
 local dash_end_shape = 0
 
+--group:ライン境界設定,false
+---$track:ぼかし幅, min = 0, max = 1000, step = 0.01, scale = 0.2
+local antialias = 1
+
+---$track:ノイズ強さ, min = 0, max = 100, step = 0.01
+local noise_intensity = 0
+
+---$tips:0 以上だと同じシードでも別オブジェクトだと別の乱数．
+---     :負だと同じシードなら別オブジェクトでも同じ乱数．
+---$track:ノイズシード, min = -65536, max = 65535, step = 1
+local noise_seed = 10000
+
+---$track:noise::ドットサイズ, min = 100, max = 6400, step = 0.01, scale = 0.0625
+local noise_size = 100
+
 --group:塗り設定,false
 ---$track:塗り追加幅, min = 0, max = 1000, step = 0.01, scale = 0.2
 local inflation = 0
@@ -94,6 +109,21 @@ local alpha_fill = 0
 ---内側 = 0
 ---奇偶 = 1
 local mode_fill = 0
+
+--group:塗り境界設定,false
+---$track:fill::ぼかし幅, min = 0, max = 1000, step = 0.01, scale = 0.2
+local fill_antialias = 1
+
+---$track:fill::ノイズ強さ, min = 0, max = 100, step = 0.01
+local fill_noise_intensity = 0
+
+---$tips:0 以上だと同じシードでも別オブジェクトだと別の乱数．
+---     :負だと同じシードなら別オブジェクトでも同じ乱数．
+---$track:fill::ノイズシード, min = -65536, max = 65535, step = 1
+local fill_noise_seed = 20000
+
+---$track:fill::noise::ドットサイズ, min = 100, max = 6400, step = 0.01, scale = 0.0625
+local fill_noise_size = 100
 
 --group:ランダム変化,false
 ---$tips:パスの描画方向に沿ったランダム変動の周期，ピクセル単位
@@ -109,16 +139,10 @@ local rand_amplify = 0
 local rand_fix_end = true
 
 --hide@rand_fix_end:loop==1
----$tips:正だと同じシードでも別オブジェクトだと別の乱数．\n負だと同じシードなら別オブジェクトでも同じ乱数．
+---$tips:0 以上だと同じシードでも別オブジェクトだと別の乱数．
+---     :負だと同じシードなら別オブジェクトでも同じ乱数．
 ---$track:ランダムシード, min = -65536, max = 65535, step = 1
 local rand_seed = 10000
-
---group:境界設定,false
----$track:ぼかし幅, min = 0, max = 1000, step = 0.01, scale = 0.2
-local antialias = 1
-
----$track:noise::ノイズ強さ, min = 0, max = 100, step = 0.01
-local noise_intensity = 0
 
 --group:その他,false
 ---$nolang: name
@@ -141,15 +165,21 @@ local noise_intensity = 0
 ---     :  dash_adj: boolean|number|nil,
 ---     :  dash_pos: number?,
 ---     :  dash_end_shape: string?,
+---     :  antialias: number?,
+---     :  noise_intensity: number?,
+---     :  noise_seed: number?,
+---     :  noise_size: number?,
 ---     :  inflation: number?,
 ---     :  alpha_fill: number?,
 ---     :  mode_fill: string?,
+---     :  fill_antialias: number?,
+---     :  fill_noise_intensity: number?,
+---     :  fill_noise_seed: number?,
+---     :  fill_noise_size: number?,
 ---     :  rand_period: number?,
 ---     :  rand_amplify: number?,
 ---     :  rand_fix_end: boolean|number|nil,
 ---     :  rand_seed: number?,
----     :  antialias: number?,
----     :  noise_intensity: number?,
 ---     :}
 ---$value:PI
 local PI = {}
@@ -191,6 +221,10 @@ if type(PI.dash_pat) == "table" then dash_pat = PI.dash_pat end
 dash_adj = path_s.PI.as_bool(PI.dash_adj, dash_adj);
 dash_pos = tonumber(PI.dash_pos) or dash_pos;
 dash_end_shape = path_s.PI.end_shape(PI.dash_end_shape, dash_end_shape);
+antialias = tonumber(PI.antialias) or antialias;
+noise_intensity = tonumber(PI.noise_intensity) or noise_intensity;
+noise_seed = tonumber(PI.noise_seed) or noise_seed;
+noise_size = tonumber(PI.noise_size) or noise_size;
 inflation = tonumber(PI.inflation) or inflation;
 alpha_fill = tonumber(PI.alpha_fill) or alpha_fill;
 if type(PI.mode_fill) == "string" then
@@ -199,12 +233,14 @@ if type(PI.mode_fill) == "string" then
 	};
 	mode_fill = name2num[PI.mode_fill] or mode_fill;
 end
+fill_antialias = tonumber(PI.fill_antialias) or fill_antialias;
+fill_noise_intensity = tonumber(PI.fill_noise_intensity) or fill_noise_intensity;
+fill_noise_seed = tonumber(PI.fill_noise_seed) or fill_noise_seed;
+fill_noise_size = tonumber(PI.fill_noise_size) or fill_noise_size;
 rand_period = tonumber(PI.rand_period) or rand_period;
 rand_amplify = tonumber(PI.rand_amplify) or rand_amplify;
 rand_fix_end = path_s.PI.as_bool(PI.rand_fix_end, rand_fix_end);
 rand_seed = tonumber(PI.rand_seed) or rand_seed;
-antialias = tonumber(PI.antialias) or antialias;
-noise_intensity = tonumber(PI.noise_intensity) or noise_intensity;
 
 -- normalize parameters.
 line = math.max(line, 0);
@@ -217,14 +253,28 @@ alpha_line = math.min(math.max(1 - alpha_line / 100, 0), 1);
 start_pos = start_pos / 100;
 end_pos = end_pos / 100;
 miter_limit = math.max(miter_limit / 100, 1);
+antialias = math.max(antialias, 0);
+noise_intensity = math.min(math.max(noise_intensity / 100, 0), 1);
+noise_seed = math.floor(0.5 + noise_seed);
+if noise_seed >= 0 then
+	noise_seed = noise_seed + 2525 * (obj.id % 2 ^ 20);
+end
+noise_seed = noise_seed % 2 ^ 20;
+noise_size = math.max(noise_size / 100, 1);
 inflation = math.max(inflation, 0);
 alpha_fill = math.min(math.max(1 - alpha_fill / 100, 0), 1);
 mode_fill = math.min(math.max(math.floor(0.5 + mode_fill), 0), 1);
+fill_antialias = math.max(fill_antialias, 0);
+fill_noise_intensity = math.min(math.max(fill_noise_intensity / 100, 0), 1);
+fill_noise_seed = math.floor(0.5 + fill_noise_seed);
+if fill_noise_seed >= 0 then
+	fill_noise_seed = fill_noise_seed + 2525 * (obj.id % 2 ^ 20);
+end
+fill_noise_seed = fill_noise_seed % 2 ^ 20;
+fill_noise_size = math.max(fill_noise_size / 100, 1);
 rand_period = math.max(rand_period, 4);
 rand_amplify = math.max(rand_amplify, 0);
 rand_seed = math.min(math.max(math.floor(0.5 + rand_seed), -2 ^ 16), 2 ^ 16 - 1);
-antialias = math.max(antialias, 0);
-noise_intensity = math.min(math.max(noise_intensity / 100, 0), 1);
 
 --#endregion PI / normalize parameters.
 
@@ -266,17 +316,15 @@ if has_fill or has_chrome then
 	end
 	path_s.send(points, num_points, -L, -T, cache_name);
 
-	local noise_setting = {
-		width = antialias, intensity = noise_intensity,
-		seed = 12345,
-		cx = obj.cx + obj.w / 2, cy = obj.cy + obj.h / 2, size = 1
-	};
-
 	-- draw the shape of the filling part.
 	if has_fill then
 		obj.clearbuffer(has_chrome and "tempbuffer" or "object", color_fill);
 		path_s.path_mask_area_buffered(
-			0, alpha_fill, mode_fill, inflation, noise_setting,
+			0, alpha_fill, mode_fill, inflation, {
+				width = fill_antialias, intensity = fill_noise_intensity,
+				seed = fill_noise_seed,
+				cx = obj.cx + obj.w / 2, cy = obj.cy + obj.h / 2, size = fill_noise_size,
+			},
 			cache_name, num_points,
 			has_chrome and { name = "tempbuffer", w = obj.w, h = obj.h } or nil);
 	end
@@ -285,7 +333,11 @@ if has_fill or has_chrome then
 	if has_chrome then
 		obj.clearbuffer("object", color_line);
 		path_s.path_mask_line_buffered(
-			0, alpha_line, line, noise_setting,
+			0, alpha_line, line, {
+				width = antialias, intensity = noise_intensity,
+				seed = noise_seed,
+				cx = obj.cx + obj.w / 2, cy = obj.cy + obj.h / 2, size = noise_size,
+			},
 			cache_name, num_segments, len, loop,
 			start_pos, end_pos, end_shape, join_shape, miter_limit,
 			dash_pat, dash_pos, dash_adj, dash_end_shape);

@@ -82,7 +82,7 @@ local noise_intensity = 0
 
 ---$tips:0 以上だと同じシードでも別オブジェクトだと別の乱数．
 ---     :負だと同じシードなら別オブジェクトでも同じ乱数．
----$track:noise::シード, min = -65536, max = 65535, step = 1
+---$track:ノイズシード, min = -65536, max = 65535, step = 1
 local noise_seed = 10000
 
 ---$track:noise::ドットサイズ, min = 100, max = 6400, step = 0.01, scale = 0.0625
@@ -130,7 +130,8 @@ local rand_amplify = 0
 ---$checksection:ランダム固定端
 local rand_fix_end = true
 
----$tips:正だと同じシードでも別オブジェクトだと別の乱数．\n負だと同じシードなら別オブジェクトでも同じ乱数．
+---$tips:0 以上だと同じシードでも別オブジェクトだと別の乱数．
+---     :負だと同じシードなら別オブジェクトでも同じ乱数．
 ---$track:ランダムシード, min = -65536, max = 65535, step = 1
 local rand_seed = 10000
 
