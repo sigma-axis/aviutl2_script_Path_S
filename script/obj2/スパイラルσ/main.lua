@@ -92,10 +92,14 @@ local rand_fix_end = false
 ---$track:ランダムシード, min = -65536, max = 65535, step = 1
 local rand_seed = 10000
 
---group:その他,false
+--group:境界設定,false
 ---$track:ぼかし幅, min = 0, max = 1000, step = 0.01, scale = 0.2
 local antialias = 1
 
+---$track:noise::ノイズ強さ, min = 0, max = 100, step = 0.01
+local noise_intensity = 0
+
+--group:その他,false
 ---$nolang: name
 ---$tips:PI = {
 ---     :  start_X, start_Y: number?,
@@ -119,6 +123,7 @@ local antialias = 1
 ---     :  rand_fix_end: boolean|number|nil,
 ---     :  rand_seed: number?,
 ---     :  antialias: number?,
+---     :  noise_intensity: number?,
 ---     :}
 ---$value:PI
 local PI = {}
@@ -164,6 +169,7 @@ rand_amplify = tonumber(PI.rand_amplify) or rand_amplify;
 rand_fix_end = path_s.PI.as_bool(PI.rand_fix_end, rand_fix_end);
 rand_seed = tonumber(PI.rand_seed) or rand_seed;
 antialias = tonumber(PI.antialias) or antialias;
+noise_intensity = tonumber(PI.noise_intensity) or noise_intensity;
 
 -- normalize parameters.
 start_radius = math.max(start_radius, 0);
@@ -179,6 +185,7 @@ rand_period = math.max(rand_period, 4);
 rand_amplify = math.max(rand_amplify, 0);
 rand_seed = math.min(math.max(math.floor(0.5 + rand_seed), -2 ^ 16), 2 ^ 16 - 1);
 antialias = math.max(antialias, 0);
+noise_intensity = math.min(math.max(noise_intensity / 100, 0), 1);
 
 --#endregion PI / normalize parameters.
 
@@ -246,7 +253,11 @@ obj.clearbuffer("object", R - L, B - T, color);
 
 -- draw the path.
 path_s.path_mask_line(
-	0, 1, line, antialias,
+	0, 1, line, {
+		width = antialias, intensity = noise_intensity,
+		seed = 12345,
+		cx = obj.cx + obj.w / 2, cy = obj.cy + obj.h / 2, size = 1
+	},
 	nil, pts, n_pts - 1, false, 1,
 	start_pos, end_pos, end_shape, 0, 1,
 	dash_pat, dash_pos, false, dash_end_shape,

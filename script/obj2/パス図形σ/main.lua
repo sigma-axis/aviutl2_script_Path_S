@@ -113,10 +113,14 @@ local rand_fix_end = true
 ---$track:ランダムシード, min = -65536, max = 65535, step = 1
 local rand_seed = 10000
 
---group:その他,false
+--group:境界設定,false
 ---$track:ぼかし幅, min = 0, max = 1000, step = 0.01, scale = 0.2
 local antialias = 1
 
+---$track:noise::ノイズ強さ, min = 0, max = 100, step = 0.01
+local noise_intensity = 0
+
+--group:その他,false
 ---$nolang: name
 ---$tips:PI = {
 ---     :  line: number?,
@@ -145,6 +149,7 @@ local antialias = 1
 ---     :  rand_fix_end: boolean|number|nil,
 ---     :  rand_seed: number?,
 ---     :  antialias: number?,
+---     :  noise_intensity: number?,
 ---     :}
 ---$value:PI
 local PI = {}
@@ -199,6 +204,7 @@ rand_amplify = tonumber(PI.rand_amplify) or rand_amplify;
 rand_fix_end = path_s.PI.as_bool(PI.rand_fix_end, rand_fix_end);
 rand_seed = tonumber(PI.rand_seed) or rand_seed;
 antialias = tonumber(PI.antialias) or antialias;
+noise_intensity = tonumber(PI.noise_intensity) or noise_intensity;
 
 -- normalize parameters.
 line = math.max(line, 0);
@@ -218,6 +224,7 @@ rand_period = math.max(rand_period, 4);
 rand_amplify = math.max(rand_amplify, 0);
 rand_seed = math.min(math.max(math.floor(0.5 + rand_seed), -2 ^ 16), 2 ^ 16 - 1);
 antialias = math.max(antialias, 0);
+noise_intensity = math.min(math.max(noise_intensity / 100, 0), 1);
 
 --#endregion PI / normalize parameters.
 
@@ -259,11 +266,17 @@ if has_fill or has_chrome then
 	end
 	path_s.send(points, num_points, -L, -T, cache_name);
 
+	local noise_setting = {
+		width = antialias, intensity = noise_intensity,
+		seed = 12345,
+		cx = obj.cx + obj.w / 2, cy = obj.cy + obj.h / 2, size = 1
+	};
+
 	-- draw the shape of the filling part.
 	if has_fill then
 		obj.clearbuffer(has_chrome and "tempbuffer" or "object", color_fill);
 		path_s.path_mask_area_buffered(
-			0, alpha_fill, mode_fill, inflation, antialias,
+			0, alpha_fill, mode_fill, inflation, noise_setting,
 			cache_name, num_points,
 			has_chrome and { name = "tempbuffer", w = obj.w, h = obj.h } or nil);
 	end
@@ -272,7 +285,7 @@ if has_fill or has_chrome then
 	if has_chrome then
 		obj.clearbuffer("object", color_line);
 		path_s.path_mask_line_buffered(
-			0, alpha_line, line, antialias,
+			0, alpha_line, line, noise_setting,
 			cache_name, num_segments, len, loop,
 			start_pos, end_pos, end_shape, join_shape, miter_limit,
 			dash_pat, dash_pos, dash_adj, dash_end_shape);

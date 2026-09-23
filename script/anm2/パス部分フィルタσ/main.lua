@@ -75,11 +75,15 @@ local extra_filter = 0
 ---$text:追加スクリプト
 local extra_script = 'obj.effect("グラデーション",\n  "形状","凸形",\n  "角度",30,\n  "開始色",0x00ff00) -- グラデーション適用\nobj.cx=obj.cx+100 -- 位置もずらせる\n'
 
---hide@extra_script:extra_filter~=1
---group:その他,false
+--group:境界設定,false
 ---$track:ぼかし幅, min = 0, max = 1000, step = 0.01, scale = 0.2
 local antialias = 1
 
+---$track:noise::ノイズ強さ, min = 0, max = 100, step = 0.01
+local noise_intensity = 0
+
+--hide@extra_script:extra_filter~=1
+--group:その他,false
 ---$nolang: name
 ---$tips:PI = {
 ---     :  invert: boolean|number|nil,
@@ -95,6 +99,7 @@ local antialias = 1
 ---     :  rotate: number?,
 ---     :  extra_filter: string?,
 ---     :  antialias: number?,
+---     :  noise_intensity: number?,
 ---     :}
 ---$value:PI
 local PI = {}
@@ -140,6 +145,7 @@ if type(PI.extra_filter) == "string" then
 	extra_filter = name2num[PI.extra_filter] or extra_filter;
 end
 antialias = tonumber(PI.antialias) or antialias;
+noise_intensity = tonumber(PI.noise_intensity) or noise_intensity;
 
 -- normalize parameters.
 num_points = math.max(math.floor(0.5 + num_points), 3);
@@ -153,15 +159,19 @@ zoom = math.min(math.max(zoom / 100, 0), 50);
 rotate = math.pi / 180 * (rotate % 360);
 extra_filter = math.min(math.max(math.floor(0.5 + extra_filter), 0), 1);
 antialias = math.max(antialias, 1 / 1024);
+noise_intensity = math.min(math.max(noise_intensity / 100, 0), 1);
 if extra_filter == 1 and extra_script:match("^%s*(.-)%s*$") == "" then return end
 
 --#endregion PI / normalize parameters.
 
 -- save the current context.
----@type partial_filter_context?
-local cxt = path_s.partial_filter.make_cxt(
+local cxt; cxt = path_s.partial_filter.make_cxt(
 	num_points, path_type, points, precision,
-	mode_fill, inflation, antialias, invert,
+	mode_fill, inflation, {
+		width = antialias, intensity = noise_intensity,
+		seed = 12345,
+		cx = X + obj.w / 2, cy = Y + obj.h / 2, size = 1
+	}, invert,
 	X, Y, zoom, rotate);
 
 -- apply following filters.

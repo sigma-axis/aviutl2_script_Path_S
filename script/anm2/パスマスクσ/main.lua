@@ -92,7 +92,7 @@ local noise_intensity = 0
 ---     :  zoom: number?,
 ---     :  rotate: number?,
 ---     :  antialias: number?,
----     :  noise_intensity, number?,
+---     :  noise_intensity: number?,
 ---     :}
 ---$value:PI
 local PI = {}
