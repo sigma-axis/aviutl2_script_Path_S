@@ -73,6 +73,21 @@ local dash_pos = 0
 ---三角 = 3
 local dash_end_shape = 0
 
+--group:ライン境界設定,false
+---$track:ぼかし幅, min = 0, max = 1000, step = 0.01, scale = 0.2
+local antialias = 1
+
+---$track:ノイズ強さ, min = 0, max = 100, step = 0.01
+local noise_intensity = 0
+
+---$tips:0 以上だと同じシードでも別オブジェクトだと別の乱数．
+---     :負だと同じシードなら別オブジェクトでも同じ乱数．
+---$track:noise::シード, min = -65536, max = 65535, step = 1
+local noise_seed = 10000
+
+---$track:noise::ドットサイズ, min = 100, max = 6400, step = 0.01, scale = 0.0625
+local noise_size = 100
+
 --group:矢じり設定,false
 ---$select:矢じり配置
 ---なし = 0
@@ -119,13 +134,6 @@ local rand_fix_end = true
 ---$track:ランダムシード, min = -65536, max = 65535, step = 1
 local rand_seed = 10000
 
---group:境界設定,false
----$track:ぼかし幅, min = 0, max = 1000, step = 0.01, scale = 0.2
-local antialias = 1
-
----$track:noise::ノイズ強さ, min = 0, max = 100, step = 0.01
-local noise_intensity = 0
-
 --group:その他,false
 ---$nolang: name
 ---$tips:PI = {
@@ -144,6 +152,10 @@ local noise_intensity = 0
 ---     :  dash_pat: table?,
 ---     :  dash_pos: number?,
 ---     :  dash_end_shape: string?,
+---     :  antialias: number?,
+---     :  noise_intensity: number?,
+---     :  noise_seed: number?,
+---     :  noise_size: number?,
 ---     :  head_type: string?,
 ---     :  head_fig: string?,
 ---     :  head_width: number?,
@@ -154,8 +166,6 @@ local noise_intensity = 0
 ---     :  rand_amplify: number?,
 ---     :  rand_fix_end: boolean|number|nil,
 ---     :  rand_seed: number?,
----     :  antialias: number?,
----     :  noise_intensity: number?,
 ---     :}
 ---$value:PI
 local PI = {}
@@ -189,6 +199,10 @@ miter_limit = tonumber(PI.miter_limit) or miter_limit;
 dash_pat = type(PI.dash_pat) == "table" and PI.dash_pat or dash_pat;
 dash_pos = tonumber(PI.dash_pos) or dash_pos;
 dash_end_shape = path_s.PI.end_shape(PI.dash_end_shape, dash_end_shape);
+antialias = tonumber(PI.antialias) or antialias;
+noise_intensity = tonumber(PI.noise_intensity) or noise_intensity;
+noise_seed = tonumber(PI.noise_seed) or noise_seed;
+noise_size = tonumber(PI.noise_size) or noise_size;
 if type(PI.head_type) == "string" then
 	local name2num = {
 		["なし"] = 0, ["終点"] = 1, ["両方"] = 2, ["双方向"] = 3,
@@ -204,8 +218,6 @@ rand_period = tonumber(PI.rand_period) or rand_period;
 rand_amplify = tonumber(PI.rand_amplify) or rand_amplify;
 rand_fix_end = path_s.PI.as_bool(PI.rand_fix_end, rand_fix_end);
 rand_seed = tonumber(PI.rand_seed) or rand_seed;
-antialias = tonumber(PI.antialias) or antialias;
-noise_intensity = tonumber(PI.noise_intensity) or noise_intensity;
 
 -- normalize parameters.
 line = math.max(line, 0);
@@ -216,6 +228,14 @@ precision = math.max(precision, 1);
 start_pos = math.min(math.max(start_pos / 100, 0), 1);
 end_pos = math.min(math.max(end_pos / 100, 0), 1);
 miter_limit = math.max(miter_limit / 100, 1);
+antialias = math.max(antialias, 1 / 1024);
+noise_intensity = math.min(math.max(noise_intensity / 100, 0), 1);
+noise_seed = math.floor(0.5 + noise_seed);
+if noise_seed >= 0 then
+	noise_seed = noise_seed + 2525 * (obj.id % 2 ^ 20);
+end
+noise_seed = noise_seed % 2 ^ 20;
+noise_size = math.max(noise_size / 100, 1);
 head_type = math.min(math.max(math.floor(0.5 + head_type), 0), 3);
 head_width = math.max(head_width / 100, 0);
 head_center = head_center / 100;
@@ -224,8 +244,6 @@ head_pos = math.min(math.max(head_pos / 100, -1), 1);
 rand_period = math.max(rand_period, 4);
 rand_amplify = math.max(rand_amplify, 0);
 rand_seed = math.min(math.max(math.floor(0.5 + rand_seed), -2 ^ 16), 2 ^ 16 - 1);
-antialias = math.max(antialias, 0);
-noise_intensity = math.min(math.max(noise_intensity / 100, 0), 1);
 if start_pos > end_pos then return end
 
 --#endregion PI / normalize parameters.
@@ -258,10 +276,9 @@ if rand_amplify > 0 then
 	end
 end
 local L, R, T, B = path_s.measure(points, num_points);
-local th = line * math.max(
+local th = (line / 2 + antialias) * math.max(
 	end_shape == 1 and 2 ^ 0.5 or 1,
-	join_shape == 2 and miter_limit or 1) / 2
-	+ antialias;
+	join_shape == 2 and miter_limit or 1);
 if head_type ~= 0 then
 	-- take the arrow heads into account.
 	th = math.max(th, head_size / 2 * ((math.abs(head_center) + 1) ^ 2 + head_width ^ 2) ^ 0.5);
@@ -334,8 +351,8 @@ obj.clearbuffer(head_vertices and "tempbuffer" or "object", W, H, color);
 path_s.path_mask_line(
 	0, 1, line, {
 		width = antialias, intensity = noise_intensity,
-		seed = 12345,
-		cx = cx + obj.w / 2, cy = cy + obj.h / 2, size = 1
+		seed = noise_seed,
+		cx = cx + obj.w / 2, cy = cy + obj.h / 2, size = noise_size,
 	},
 	nil, points, num_points - 1, false, 1,
 	start_pos, end_pos, end_shape, join_shape, miter_limit,

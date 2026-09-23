@@ -191,7 +191,7 @@ local cxt; cxt = path_s.partial_filter.make_cxt(
 	mode_fill, inflation, {
 		width = antialias, intensity = noise_intensity,
 		seed = noise_seed,
-		cx = X + obj.w / 2, cy = Y + obj.h / 2, size = noise_size
+		cx = X + obj.w / 2, cy = Y + obj.h / 2, size = noise_size,
 	}, invert,
 	X, Y, zoom, rotate);
 

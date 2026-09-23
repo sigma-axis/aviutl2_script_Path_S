@@ -87,6 +87,21 @@ local dash_pos = 0
 ---三角 = 3
 local dash_end_shape = 0
 
+--group:ライン境界設定,false
+---$track:ぼかし幅, min = 0, max = 1000, step = 0.01, scale = 0.2
+local antialias = 1
+
+---$track:ノイズ強さ, min = 0, max = 100, step = 0.01
+local noise_intensity = 0
+
+---$tips:0 以上だと同じシードでも別オブジェクトだと別の乱数．
+---     :負だと同じシードなら別オブジェクトでも同じ乱数．
+---$track:noise::シード, min = -65536, max = 65535, step = 1
+local noise_seed = 10000
+
+---$track:noise::ドットサイズ, min = 100, max = 6400, step = 0.01, scale = 0.0625
+local noise_size = 100
+
 --group:ランダム変化,false
 ---$tips:パスの描画方向に沿ったランダム変動の周期，ピクセル単位
 ---$track:ランダム周期, min = 4, max = 1024, step = 0.01, scale = 0.25
@@ -103,13 +118,6 @@ local rand_fix_end = true
 ---$tips:正だと同じシードでも別オブジェクトだと別の乱数．\n負だと同じシードなら別オブジェクトでも同じ乱数．
 ---$track:ランダムシード, min = -65536, max = 65535, step = 1
 local rand_seed = 10000
-
---group:境界設定,false
----$track:ぼかし幅, min = 0, max = 1000, step = 0.01, scale = 0.2
-local antialias = 1
-
----$track:noise::ノイズ強さ, min = 0, max = 100, step = 0.01
-local noise_intensity = 0
 
 --group:その他,false
 ---$nolang: name
@@ -130,12 +138,14 @@ local noise_intensity = 0
 ---     :  dash_pat: table?,
 ---     :  dash_pos: number?,
 ---     :  dash_end_shape: string?,
+---     :  antialias: number?,
+---     :  noise_intensity: number?,
+---     :  noise_seed: number?,
+---     :  noise_size: number?,
 ---     :  rand_period: number?,
 ---     :  rand_amplify: number?,
 ---     :  rand_fix_end: boolean|number|nil,
 ---     :  rand_seed: number?,
----     :  antialias: number?,
----     :  noise_intensity: number?,
 ---     :}
 ---$value:PI
 local PI = {}
@@ -176,12 +186,14 @@ miter_limit = tonumber(PI.miter_limit) or miter_limit;
 dash_pat = type(PI.dash_pat) == "table" and PI.dash_pat or dash_pat;
 dash_pos = tonumber(PI.dash_pos) or dash_pos;
 dash_end_shape = path_s.PI.end_shape(PI.dash_end_shape, dash_end_shape);
+antialias = tonumber(PI.antialias) or antialias;
+noise_intensity = tonumber(PI.noise_intensity) or noise_intensity;
+noise_seed = tonumber(PI.noise_seed) or noise_seed;
+noise_size = tonumber(PI.noise_size) or noise_size;
 rand_period = tonumber(PI.rand_period) or rand_period;
 rand_amplify = tonumber(PI.rand_amplify) or rand_amplify;
 rand_fix_end = path_s.PI.as_bool(PI.rand_fix_end, rand_fix_end);
 rand_seed = tonumber(PI.rand_seed) or rand_seed;
-antialias = tonumber(PI.antialias) or antialias;
-noise_intensity = tonumber(PI.noise_intensity) or noise_intensity;
 
 -- normalize parameters.
 line = math.max(line, 0);
@@ -192,11 +204,17 @@ line_amplify = math.max(line_amplify, 0);
 start_pos = math.min(math.max(start_pos / 100, 0), 1);
 end_pos = math.min(math.max(end_pos / 100, 0), 1);
 miter_limit = math.max(miter_limit / 100, 1);
+antialias = math.max(antialias, 1 / 1024);
+noise_intensity = math.min(math.max(noise_intensity / 100, 0), 1);
+noise_seed = math.floor(0.5 + noise_seed);
+if noise_seed >= 0 then
+	noise_seed = noise_seed + 2525 * (obj.id % 2 ^ 20);
+end
+noise_seed = noise_seed % 2 ^ 20;
+noise_size = math.max(noise_size / 100, 1);
 rand_period = math.max(rand_period, 4);
 rand_amplify = math.max(rand_amplify, 0);
 rand_seed = math.min(math.max(math.floor(0.5 + rand_seed), -2 ^ 16), 2 ^ 16 - 1);
-antialias = math.max(antialias, 0);
-noise_intensity = math.min(math.max(noise_intensity / 100, 0), 1);
 
 --#endregion PI / normalize parameters.
 
@@ -303,10 +321,9 @@ end
 -- measure and move the path.
 path_s.transform(pts, n_pts, 1, math.atan2(end_Y - start_Y, end_X - start_X), start_X, start_Y);
 local L, R, T, B = path_s.measure(pts, n_pts);
-local th = math.ceil(line * math.max(
+local th = math.ceil((line / 2 + antialias) * math.max(
 	end_shape == 1 and 2 ^ 0.5 or 1,
-	join_shape == 2 and miter_limit or 1) / 2
-	+ antialias);
+	join_shape == 2 and miter_limit or 1));
 L, T = math.floor(L - th), math.floor(T - th);
 R, B = math.max(math.ceil(R + th), L + 1), math.max(math.ceil(B + th), T + 1);
 
@@ -318,8 +335,8 @@ obj.clearbuffer("object", R - L, B - T, color);
 path_s.path_mask_line(
 	0, 1, line, {
 		width = antialias, intensity = noise_intensity,
-		seed = 12345,
-		cx = obj.cx + obj.w / 2, cy = obj.cy + obj.h / 2, size = 1
+		seed = noise_seed,
+		cx = obj.cx + obj.w / 2, cy = obj.cy + obj.h / 2, size = noise_size,
 	},
 	nil, pts, n_pts - 1, false, 1,
 	start_pos, end_pos, end_shape, join_shape, miter_limit,

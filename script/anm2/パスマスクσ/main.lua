@@ -196,7 +196,7 @@ else
 		inflation, {
 			width = antialias, intensity = noise_intensity,
 			seed = noise_seed,
-			cx = X + obj.w / 2, cy = Y + obj.h / 2, size = noise_size
+			cx = X + obj.w / 2, cy = Y + obj.h / 2, size = noise_size,
 		},
 		path_type, points, num_points, precision,
 		zoom, rotate, X, Y);
