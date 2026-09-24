@@ -142,6 +142,59 @@ local PI_choose_join_shape do
 	end
 end
 
+local line_inflation do
+	---端の形状による影響を考慮して，ラインの領域サイズの上下左右拡張幅を計算．
+	---@param end_shape end_shape 端の形状．
+	---@param line_width number ライン幅
+	---@param antialias number ぼかし幅．
+	---@return number # 上下左右方向の拡大幅．
+	local function end_inflation(end_shape, line_width, antialias)
+		if end_shape == 1 then -- 四角
+			return 2 ^ 0.5 * (line_width / 2 + antialias);
+		elseif end_shape == 2 then -- 平坦
+			return ((line_width / 2 + antialias) ^ 2 + antialias ^ 2) ^ 0.5;
+		else -- 円 / 三角
+			return line_width / 2 + antialias;
+		end
+	end
+	---線結合の形状による影響を考慮して，ラインの領域サイズの上下左右拡張幅を計算．
+	---@param join_shape join_shape 端の形状．
+	---@param line_width number ライン幅
+	---@param antialias number ぼかし幅．
+	---@param miter_limit number マイター限界．
+	---@return number # 上下左右方向の拡大幅．
+	local function join_inflation(join_shape, line_width, antialias, miter_limit)
+		if join_shape == 2 then -- マイター
+			return miter_limit * (line_width / 2 + antialias);
+		else -- ラウンド / ベベル / ブランク
+			return line_width / 2 + antialias;
+		end
+	end
+
+	---端の形状や線結合の形状による影響を考慮して，ラインの領域サイズの上下左右拡張幅を計算．
+	---@param end_shape end_shape 端の形状．
+	---@param dash_end_shape end_shape 破線の端の形状．
+	---@param join_shape join_shape 線結合の形状．
+	---@param line_width number ライン幅．
+	---@param antialias number ぼかし幅．
+	---@param miter_limit number マイター限界．
+	---@param dash_pat number[]? 破線パターン．`dash_end_shape` を考慮に入れるか決定する．省略時は常に考慮に入れる．
+	---@return number # 上下左右方向の拡大幅．
+	function line_inflation(end_shape, dash_end_shape, join_shape, line_width, antialias, miter_limit, dash_pat)
+		local m = math.max(
+			end_inflation(end_shape, line_width, antialias),
+			join_inflation(join_shape, line_width, antialias, miter_limit));
+		if dash_pat then
+			for i = 2, #dash_pat, 2 do
+				if dash_pat[i] > 0 then goto has_dash end
+			end
+		end
+		do return m end
+		::has_dash::
+		return math.max(m, end_inflation(dash_end_shape, line_width, antialias));
+	end
+end
+
 ---@alias dither_pattern # ディザパターン
 ---| 0 # なし
 ---| 1 # Checker
@@ -933,7 +986,8 @@ local function path_mask_line(
 	-- apply translation / scaling / rotation.
 	transform(points, num_points, scale, rotate, dx, dy);
 	local L, R, T, B, len = measure(points, num_points);
-	local th = line_width / 2 + antialias.width;
+	local th =line_inflation(end_shape, dash_end_shape, join_shape,
+		line_width, antialias.width, miter_limit, dash_pat);
 	L, R, T, B = L - th, R + th, T - th, B + th;
 
 	-- check if the path overlaps this object.
@@ -1170,6 +1224,7 @@ return {
 	anchor = anchor,
 	poll = poll,
 	measure = measure,
+	line_inflation = line_inflation,
 	find_index = find_index,
 	transform = transform,
 	randomize = randomize,

@@ -282,7 +282,8 @@ end
 
 -- measure and move the path.
 local L, R, T, B, len = path_s.measure(pts, n_pts);
-local th = math.ceil((line / 2 + antialias) * (end_shape == 1 and 2 ^ 0.5 or 1));
+local th = path_s.line_inflation(end_shape, dash_end_shape, 0,
+	line, antialias, 1, dash_pat);
 L, T = math.floor(L - th), math.floor(T - th);
 R, B = math.max(math.ceil(R + th), L + 1), math.max(math.ceil(B + th), T + 1);
 

@@ -330,10 +330,8 @@ if rand_amplify > 0 then
 		loop and 2 or rand_fix_end and 1 or 0, rand_seed);
 end
 local L, R, T, B, len = path_s.measure(points, num_points);
-local th = math.max((line / 2 + antialias) * math.max(
-	end_shape == 1 and 2 ^ 0.5 or 1,
-	join_shape == 2 and miter_limit or 1),
-	inflation + antialias);
+local th = path_s.line_inflation(end_shape, dash_end_shape, join_shape,
+	line, antialias, miter_limit, dash_pat);
 L, T = math.floor(L - th), math.floor(T - th);
 R, B = math.max(math.ceil(R + th), L + 1), math.max(math.ceil(B + th), T + 1);
 

@@ -392,8 +392,8 @@ end
 
 -- measure the path.
 local L, R, T, B, len = path_s.measure(pts, n_pts);
-local th = math.max((line / 2 + antialias) * (
-	end_shape == 1 and 2 ^ 0.5 or 1), inflation);
+local th = path_s.line_inflation(end_shape, dash_end_shape, join_shape,
+	line, antialias, 1, dash_pat);
 L, R, T, B = -- align to pixel at the specified center.
 	L + align_x * width / 2, R + align_x * width / 2,
 	T + align_y * height / 2, B + align_y * height / 2;

@@ -297,9 +297,8 @@ if rand_amplify > 0 then
 	end
 end
 local L, R, T, B = path_s.measure(points, num_points);
-local th = (line / 2 + antialias) * math.max(
-	end_shape == 1 and 2 ^ 0.5 or 1,
-	join_shape == 2 and miter_limit or 1);
+local th = path_s.line_inflation(end_shape, dash_end_shape, join_shape,
+	line, antialias, miter_limit, dash_pat);
 if head_type ~= 0 then
 	-- take the arrow heads into account.
 	th = math.max(th, head_size / 2 * ((math.abs(head_center) + 1) ^ 2 + head_width ^ 2) ^ 0.5);
