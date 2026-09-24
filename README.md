@@ -979,37 +979,6 @@ Although, usage documentations for this script / plugin in languages other than 
 
 ```lua
 {
----     :  width: number?,
----     :  height: number?,
----     :  line: number?,
----     :  color_line: number?,
----     :  color_fill: number?,
----     :  radii: table|number|nil,
----     :  fixed_aspect: boolean|number|nil,
----     :  align_x: number?,
----     :  align_y: number?,
----     :  alpha_line: number?,
----     :  start_pos: number?,
----     :  end_pos: number?,
----     :  end_shape: string?,
----     :  join_shape: string?,
----     :  dash_pat: table?,
----     :  dash_pos: number?,
----     :  dash_end_shape: string?,
----     :  antialias: number?,
----     :  noise_intensity: number?,
----     :  noise_seed: number?,
----     :  noise_size: number?,
----     :  inflation: number?,
----     :  alpha_fill: number?,
----     :  fill_antialias: number?,
----     :  fill_noise_intensity: number?,
----     :  fill_noise_seed: number?,
----     :  fill_noise_size: number?,
----     :  rand_period: number?,
----     :  rand_amplify: number?,
----     :  rand_seed: number?,
-
   width = num,                  -- number 型で "幅" を上書き，または nil.
   height = num,                 -- number 型で "高さ" を上書き，または nil.
   line = num,                   -- number 型で "ライン幅" の項目を上書き，または nil.
@@ -1086,9 +1055,10 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
   inflation = num,        -- number 型で "追加幅" の項目を上書き，または nil.
   mode_fill = num,        -- string 型で "範囲" の項目を上書き，または nil.
   antialias = num,        -- number 型で "ぼかし幅" の項目を上書き，または nil.
-  noise_intensity = num,  -- number 型で "ノイズ強さ" の項目を上書き，または nil.
-  noise_seed = num,       -- number 型で "ノイズシード" の項目を上書き，または nil.
-  noise_size = num,       -- number 型で "noise::ドットサイズ" の項目を上書き，または nil.
+  dither_pattern = str,   -- string 型で "dither::パターン" の項目を上書き，または nil.
+  dither_seed = num,      -- number 型で "dither::ノイズシード" の項目を上書き，または nil.
+  dither_rate = num,      -- number 型で "ディザ強さ" の項目を上書き，または nil.
+  dither_size = num,      -- number 型で "dither::ドットサイズ" の項目を上書き，また
   X = num, Y = num,       -- number 型で "移動X", "移動Y" の項目を上書き，または nil.
   zoom = num,             -- number 型で "拡大率" の項目を上書き，または nil.
   rotate = num,           -- number 型で "回転" の項目を上書き，または nil.

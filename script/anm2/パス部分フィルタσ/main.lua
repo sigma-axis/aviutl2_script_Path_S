@@ -189,7 +189,7 @@ if extra_filter == 1 and extra_script:match("^%s*(.-)%s*$") == "" then return en
 local cxt; cxt = path_s.partial_filter.make_cxt(
 	num_points, path_type, points, precision,
 	mode_fill, inflation, {
-		width = antialias, intensity = noise_intensity,
+		width = antialias, rate = noise_intensity,
 		seed = noise_seed,
 		cx = X + obj.w / 2, cy = Y + obj.h / 2, size = noise_size,
 	}, invert,

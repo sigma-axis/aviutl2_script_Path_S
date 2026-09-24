@@ -263,7 +263,7 @@ if pt_buff then
 else
 	path_s.path_mask_line(
 		alpha_outer, alpha_inner, line, {
-			width = antialias, intensity = noise_intensity,
+			width = antialias, rate = noise_intensity,
 			seed = noise_seed,
 			cx = X + obj.w / 2, cy = Y + obj.h / 2, size = noise_size,
 		},

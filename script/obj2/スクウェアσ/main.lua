@@ -378,7 +378,7 @@ if has_fill or has_chrome then
 		obj.clearbuffer(has_chrome and "tempbuffer" or "object", color_fill);
 		path_s.path_mask_area_buffered(
 			0, alpha_fill, 0, inflation, {
-				width = fill_antialias, intensity = fill_noise_intensity,
+				width = fill_antialias, rate = fill_noise_intensity,
 				seed = fill_noise_seed,
 				cx = obj.cx + obj.w / 2, cy = obj.cy + obj.h / 2, size = fill_noise_size,
 			},
@@ -391,7 +391,7 @@ if has_fill or has_chrome then
 		obj.clearbuffer("object", color_line);
 		path_s.path_mask_line_buffered(
 			0, alpha_line, line, {
-				width = antialias, intensity = noise_intensity,
+				width = antialias, rate = noise_intensity,
 				seed = noise_seed,
 				cx = obj.cx + obj.w / 2, cy = obj.cy + obj.h / 2, size = noise_size,
 			},

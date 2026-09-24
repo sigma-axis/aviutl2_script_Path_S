@@ -2,8 +2,8 @@ cbuffer constant0 : register(b0) {
 	float2 alpha_map;
 	float N_f, mode_fill_f,
 		padding, aa_thick;
-	float2 noise_offset;
-	float inv_noise_size, noise_buff, noise_seed, noise_type;
+	float2 dither_offset;
+	float inv_dither_size, dither_buff, noise_seed, dither_pattern;
 };
 
 uint quadrant(float2 v)
@@ -46,8 +46,8 @@ float4 carve(float4 pos : SV_Position) : SV_Target
 
 	float a = 1 - (is_inner(cycles) ? 0 : sqrt(sq_dist) - padding) / aa_thick;
 	const float noise = noise_func(
-		inv_noise_size * (pos.xy - noise_offset) + (1 << 16),
-		uint2(noise_seed, 101), noise_type);
-	a = (a - (1 - noise_buff) * noise) / noise_buff;
+		inv_dither_size * (pos.xy - dither_offset) + (1 << 16),
+		uint2(noise_seed, 101), dither_pattern);
+	a = (a - (1 - dither_buff) * noise) / dither_buff;
 	return float4(0, 0, 0, dot(alpha_map, float2(saturate(a), 1)));
 }

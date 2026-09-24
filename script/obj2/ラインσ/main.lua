@@ -335,7 +335,7 @@ obj.clearbuffer("object", R - L, B - T, color);
 -- draw the line.
 path_s.path_mask_line(
 	0, 1, line, {
-		width = antialias, intensity = noise_intensity,
+		width = antialias, rate = noise_intensity,
 		seed = noise_seed,
 		cx = obj.cx + obj.w / 2, cy = obj.cy + obj.h / 2, size = noise_size,
 	},
