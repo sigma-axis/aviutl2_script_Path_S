@@ -53,7 +53,6 @@ local PI_choose_mode_anchor_base do
 	local name2num = {
 		["回転中心"] = 0, ["左上"] = 1, ["上"] = 2, ["右上"] = 3, ["左"] = 4, ["中央"] = 5, ["右"] = 6, ["左下"] = 7, ["下"] = 8, ["右下"] = 9,
 	};
-
 	---PI で「アンカー基準」指定を適用する．
 	---このパラメタは次の形式で指定されているものとする:
 	---
@@ -143,6 +142,33 @@ local PI_choose_join_shape do
 	end
 end
 
+---@alias noise_type # ノイズの種類
+---| 0 # White Noise
+---| 1 # Bayer 2x2
+---| 2 # Bayer 4x4
+---| 3 # Bayer 256x256
+---| 4 # Checker
+---| 5 # Normal Checker
+---| 6 # IGN
+local PI_choose_noise_type do
+	local name2num = {
+		["White Noise"] = 0, ["Bayer 2x2"] = 1, ["Bayer 4x4"] = 2, ["Bayer 256x256"] = 3, ["Checker"] = 4, ["Normal Checker"] = 5, ["IGN"] = 6,
+	};
+	---PI で「ノイズの種類」指定を適用する．
+	---このパラメタは次の形式で指定されているものとする:
+	---
+	---`--select@noise_type:ノイズの種類=0,White Noise=0,Bayer 2x2=1,Bayer 4x4=2,Bayer 256x256=3,Checker=4,Normal Checker=5,IGN=6`
+	---@param pi_value any
+	---@param gui_value noise_type
+	---@return noise_type
+	function PI_choose_noise_type(pi_value, gui_value)
+		if type(pi_value) == "string" then
+			gui_value = name2num[pi_value] or gui_value;
+		end
+		return math.min(math.max(math.floor(0.5 + gui_value), 0), 6);
+	end
+end
+
 ---@class noise_setting ノイズの設定．
 ---@field width number ノイズを描画する幅．ピクセル単位．0.0 以上．
 ---@field intensity number ノイズの強さ．0.0 -- 1.0.
@@ -150,6 +176,7 @@ end
 ---@field cx number ノイズの原点の X 座標．バッファ左上からのピクセル単位の相対座標．
 ---@field cy number ノイズの原点の Y 座標．バッファ左上からのピクセル単位の相対座標．
 ---@field size number ノイズのドットサイズ．1.0 以上の実数.
+---@field type noise_type ノイズの種類．
 
 ---@alias antialias # アンチエイリアス幅，またはノイズの設定．
 ---| number # アンチエイリアス幅．ピクセル単位．0.0 以上．
@@ -165,6 +192,7 @@ local function wrap_antialias(antialias)
 			intensity = 0,
 			seed = 0,
 			cx = 0, cy = 0, size = 1,
+			type = 0,
 		};
 	end
 	return antialias;
@@ -645,7 +673,7 @@ local function path_mask_area_buffered(
 		num_points, mode_fill, inflation;
 		math.max(antialias.width, 1 / 1024);
 		antialias.cx, antialias.cy; 1 / antialias.size;
-		math.max(1 - antialias.intensity, 1 / 1024), antialias.seed;
+		math.max(1 - antialias.intensity, 1 / 1024), antialias.seed; antialias.type;
 	}, "mask");
 end
 
@@ -950,9 +978,9 @@ local partial_filter_make_cxt, partial_filter_push_cxt, partial_filter_pop_cxt, 
 		-- antialias
 		if type(t[7]) ~= "table" then return false;
 		else
-			local width, intensity, seed, cx, cy, size = t[7].width, t[7].intensity, t[7].seed, t[7].cx, t[7].cy, t[7].size;
+			local width, intensity, seed, cx, cy, size, n_type = t[7].width, t[7].intensity, t[7].seed, t[7].cx, t[7].cy, t[7].size, t[7].noise_type;
 			if type(width) ~= "number" or type(intensity) ~= "number" or type(seed) ~= "number" then return false;
-			elseif type(cx) ~= "number" or type(cy) ~= "number" or type(size) ~= "number" then return false;
+			elseif type(cx) ~= "number" or type(cy) ~= "number" or type(size) ~= "number" or type(n_type) ~= "number" then return false;
 			elseif width < 0 then return false;
 			elseif intensity < 0 or intensity > 1 then return false;
 			elseif size < 1 then return false end
@@ -1136,6 +1164,7 @@ return {
 		mode_fill = PI_choose_mode_fill,
 		end_shape = PI_choose_end_shape,
 		join_shape = PI_choose_join_shape,
+		noise_type = PI_choose_noise_type,
 	},
 
 	anchor_offset = anchor_offset,

@@ -58,11 +58,26 @@ local antialias = 1
 ---$track:ノイズ強さ, min = 0, max = 100, step = 0.01
 local noise_intensity = 0
 
+---$select:ノイズの種類
+---White Noise = 0
+---Bayer 2x2 = 1
+---Bayer 4x4 = 2
+---Bayer 256x256 = 3
+---Checker = 4
+---Normal Checker = 5
+---IGN = 6
+local noise_type = 0
+
 ---$tips:0 以上だと同じシードでも別オブジェクトだと別の乱数．
 ---     :負だと同じシードなら別オブジェクトでも同じ乱数．
 ---$track:ノイズシード, min = -65536, max = 65535, step = 1
 local noise_seed = 10000
 
+--hide@noise_seed:noise_type==1
+--hide@noise_seed:noise_type==2
+--hide@noise_seed:noise_type==3
+--hide@noise_seed:noise_type==4
+--hide@noise_seed:noise_type==5
 ---$track:noise::ドットサイズ, min = 100, max = 6400, step = 0.01, scale = 0.0625
 local noise_size = 100
 
@@ -98,6 +113,7 @@ local toggle_gui = false
 ---     :  mode_fill: string?,
 ---     :  antialias: number?,
 ---     :  noise_intensity: number?,
+---     :  noise_type: string?,
 ---     :  noise_seed: number?,
 ---     :  noise_size: number?,
 ---     :  X, Y: number?,
@@ -113,6 +129,7 @@ local PI = {}
 --[[pixelshader@carve:
 ---$include "../../path_coord_header.hlsl"
 ---$include "../../ibukihash.hlsl"
+---$include "../../noise_func.hlsl"
 ---$include "carve.hlsl"
 ]]
 local path_s = require("Path_S");
@@ -149,6 +166,7 @@ inflation = tonumber(PI.inflation) or inflation;
 mode_fill = path_s.PI.mode_fill(PI.mode_fill, mode_fill);
 antialias = tonumber(PI.antialias) or antialias;
 noise_intensity = tonumber(PI.noise_intensity) or noise_intensity;
+noise_type = path_s.PI.noise_type(PI.noise_type, noise_type);
 noise_seed = tonumber(PI.noise_seed) or noise_seed;
 noise_size = tonumber(PI.noise_size) or noise_size;
 X = tonumber(PI.X) or X;
@@ -197,6 +215,7 @@ else
 			width = antialias, intensity = noise_intensity,
 			seed = noise_seed,
 			cx = X + obj.w / 2, cy = Y + obj.h / 2, size = noise_size,
+			type = noise_type,
 		},
 		path_type, points, num_points, precision,
 		zoom, rotate, X, Y);

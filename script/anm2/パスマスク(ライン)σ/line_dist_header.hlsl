@@ -5,15 +5,14 @@ float sq_dist_func_end(float2 pt, float2 d, uint shape, float padding)
 	if (l < 0) return (1 << 30);
 
 	const float L = abs(dot(flip * d.yx, pt));
-	float D = max(abs(l) + padding, L);
+	float D = l;
 	switch (shape) {
 	case 0: default: return dot(pt, pt);
-	case 1: D = max(abs(l), L); break;
-	case 2: break;
-	case 3:
-		D = max(dot(c, float2(L + abs(l), padding)), L);
-		break;
+	case 1: break;
+	case 2: D = l + padding; break;
+	case 3: D = dot(c, float2(L + l, padding)); break;
 	}
+	D = max(D, L);
 	return D * D;
 }
 float sq_dist_func_join(float2 pt, float2 d0, float2 d1, uint shape, float padding, float dot_lim)
