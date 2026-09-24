@@ -51,17 +51,35 @@ local mode_fill = 0
 ---$track:ぼかし幅, min = 0, max = 1000, step = 0.01, scale = 0.2
 local antialias = 1
 
----$track:ノイズ強さ, min = 0, max = 100, step = 0.01
-local noise_intensity = 0
+---$nolang: option: Checker, option: Bayer 2x2, option: Bayer 4x4, option: Bayer 256x256, option: IGN, option: White Noise
+---$select:dither::パターン
+---なし = 0
+---Checker = 1
+---Bayer 2x2 = 2
+---Bayer 4x4 = 3
+---Bayer 256x256 = 4
+---IGN = 5
+---White Noise = 6
+local dither_pattern = 0
 
 ---$tips:0 以上だと同じシードでも別オブジェクトだと別の乱数．
 ---     :負だと同じシードなら別オブジェクトでも同じ乱数．
----$track:ノイズシード, min = -65536, max = 65535, step = 1
-local noise_seed = 10000
+---$track:dither::ノイズシード, min = -65536, max = 65535, step = 1
+local dither_seed = 10000
 
----$track:noise::ドットサイズ, min = 100, max = 6400, step = 0.01, scale = 0.0625
-local noise_size = 100
+--hide@dither_seed:dither_pattern==0
+--hide@dither_seed:dither_pattern==1
+--hide@dither_seed:dither_pattern==2
+--hide@dither_seed:dither_pattern==3
+--hide@dither_seed:dither_pattern==4
+---$track:ディザ強さ, min = 0, max = 100, step = 0.01
+local dither_rate = 100
 
+--hide@dither_rate:dither_pattern==0
+---$track:dither::ドットサイズ, min = 100, max = 6400, step = 0.01, scale = 0.0625
+local dither_size = 100
+
+--hide@dither_size:dither_pattern==0
 --group:配置,false
 ---$track:移動X, min = -4000, max = 4000, step = 0.01, scale = 0.25
 local X = 0
@@ -103,9 +121,10 @@ local extra_script = 'obj.effect("グラデーション",\n  "形状","凸形",\
 ---     :  inflation: number?,
 ---     :  mode_fill: string?,
 ---     :  antialias: number?,
----     :  noise_intensity: number?,
----     :  noise_seed: number?,
----     :  noise_size: number?,
+---     :  dither_pattern: string?,
+---     :  dither_seed: number?,
+---     :  dither_rate: number?,
+---     :  dither_size: number?,
 ---     :  X, Y: number?,
 ---     :  zoom: number?,
 ---     :  rotate: number?,
@@ -145,9 +164,10 @@ precision = tonumber(PI.precision) or precision;
 inflation = tonumber(PI.inflation) or inflation;
 mode_fill = path_s.PI.mode_fill(PI.mode_fill, mode_fill);
 antialias = tonumber(PI.antialias) or antialias;
-noise_intensity = tonumber(PI.noise_intensity) or noise_intensity;
-noise_seed = tonumber(PI.noise_seed) or noise_seed;
-noise_size = tonumber(PI.noise_size) or noise_size;
+dither_pattern = path_s.PI.dither_pattern(PI.dither_pattern, dither_pattern);
+dither_seed = tonumber(PI.dither_seed) or dither_seed;
+dither_rate = tonumber(PI.dither_rate) or dither_rate;
+dither_size = tonumber(PI.dither_size) or dither_size;
 X = tonumber(PI.X) or X;
 Y = tonumber(PI.Y) or Y;
 zoom = tonumber(PI.zoom) or zoom;
@@ -164,16 +184,16 @@ num_points = math.max(math.floor(0.5 + num_points), 3);
 precision = math.max(precision, 1);
 inflation = math.max(inflation, 0);
 antialias = math.max(antialias, 1 / 1024);
-noise_intensity = math.min(math.max(noise_intensity / 100, 0), 1);
-noise_seed = math.floor(0.5 + noise_seed);
-if noise_seed >= 0 then
-	noise_seed = noise_seed
+dither_seed = math.floor(0.5 + dither_seed);
+if dither_seed >= 0 then
+	dither_seed = dither_seed
 		+  2525 * (obj.id % 2 ^ 20)
 		+ 13579 * (obj.effect_id % 2 ^ 20)
 		+ 54321 * (obj.index % 2 ^ 20);
 end
-noise_seed = noise_seed % 2 ^ 20;
-noise_size = math.max(noise_size / 100, 1);
+dither_seed = dither_seed % 2 ^ 20;
+dither_rate = math.min(math.max(dither_rate / 100, 0), 1);
+dither_size = math.max(dither_size / 100, 1);
 do
 	local cx, cy = path_s.anchor_offset(mode_anchor_base);
 	X, Y = X + cx, Y + cy;
@@ -189,9 +209,10 @@ if extra_filter == 1 and extra_script:match("^%s*(.-)%s*$") == "" then return en
 local cxt; cxt = path_s.partial_filter.make_cxt(
 	num_points, path_type, points, precision,
 	mode_fill, inflation, {
-		width = antialias, rate = noise_intensity,
-		seed = noise_seed,
-		cx = X + obj.w / 2, cy = Y + obj.h / 2, size = noise_size,
+			width = antialias,
+			pattern = dither_pattern, seed = dither_seed,
+			rate = dither_rate,
+		cx = X + obj.w / 2, cy = Y + obj.h / 2, size = dither_size,
 	}, invert,
 	X, Y, zoom, rotate);
 

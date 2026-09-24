@@ -1,8 +1,8 @@
 cbuffer constant0 : register(b0) {
 	float2 alpha_map;
 	float N_f, padding, aa_thick;
-	float2 noise_offset;
-	float inv_noise_size, noise_buff, noise_seed;
+	float2 dither_offset;
+	float inv_dither_size, dither_buff, noise_seed, dither_pattern;
 	float M_f, len_period0, idx_period0;
 	float end_shape_f, join_shape_f, dash_shape_f, loop_f, dot_lim;
 	float4 phase_whole;
@@ -86,8 +86,10 @@ float4 carve_dash(float4 pos : SV_Position) : SV_Target
 	else if (was_stroke_whole && was_stroke_period)
 		sq_dist = min(sq_dist, sq_dist_func_end(pt0, d0, end_shape, padding));
 
-	float a = 1 - (sqrt(sq_dist) - padding) / aa_thick,
-		noise = ibuki(float4(inv_noise_size * (pos.xy - noise_offset) + (1 << 16), noise_seed, 101));
-	a = (a - (1 - noise_buff) * noise) / noise_buff;
+	float a = 1 - (sqrt(sq_dist) - padding) / aa_thick;
+	const float noise = noise_func(
+		inv_dither_size * (pos.xy - dither_offset) + (1 << 16),
+		uint2(noise_seed, 101), dither_pattern);
+	a = (a - (1 - dither_buff) * noise) / dither_buff;
 	return float4(0, 0, 0, dot(alpha_map, float2(saturate(a), 1)));
 }

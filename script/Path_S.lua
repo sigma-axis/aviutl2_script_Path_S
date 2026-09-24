@@ -165,7 +165,7 @@ local PI_choose_dither_pattern do
 		if type(pi_value) == "string" then
 			gui_value = name2num[pi_value] or gui_value;
 		end
-		return math.min(math.max(math.floor(0.5 + gui_value), 0), 5);
+		return math.min(math.max(math.floor(0.5 + gui_value), 0), 6);
 	end
 end
 
@@ -856,7 +856,7 @@ local function path_mask_line_buffered(
 			num_points, math.max(line_width - 1, 0) / 2, math.max(antialias.width, 1 / 1024);
 
 			antialias.cx, antialias.cy; 1 / antialias.size;
-			math.max(1 - antialias.rate, 1 / 1024); antialias.seed;
+			math.max(1 - antialias.rate, 1 / 1024); antialias.seed; antialias.pattern;
 
 			end_shape; join_shape;
 			loop and 1 or 0; 1 - 2 / miter_limit ^ 2;
@@ -868,12 +868,12 @@ local function path_mask_line_buffered(
 			num_points, math.max(line_width - 1, 0) / 2, math.max(antialias.width, 1 / 1024);
 
 			antialias.cx, antialias.cy; 1 / antialias.size;
-			math.max(1 - antialias.rate, 1 / 1024); antialias.seed;
+			math.max(1 - antialias.rate, 1 / 1024); antialias.seed; antialias.pattern;
 
 			#dash_pat, dash_len0, dash_idx0 - 1;
 
 			end_shape; join_shape; dash_end_shape;
-			loop and 1 or 0; 1 - 2 / miter_limit ^ 2; 0, 0;
+			loop and 1 or 0; 1 - 2 / miter_limit ^ 2; 0;
 
 			len_path * phase_whole0, len_path * phase_whole1, len_path * phase_whole2, len_path * 2;
 			unpack(dash_pat)
