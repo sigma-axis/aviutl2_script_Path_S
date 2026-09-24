@@ -1,6 +1,6 @@
 float sq_dist_func_end(float2 pt, float2 d, uint shape, float padding)
 {
-	static const float2 flip = { 1, -1 }, c = { sqrt(0.5), 1 - sqrt(0.5) };
+	static const float2 flip = { 1, -1 };
 	const float l = -dot(d, pt);
 	if (l < 0) return (1 << 30);
 
@@ -10,7 +10,7 @@ float sq_dist_func_end(float2 pt, float2 d, uint shape, float padding)
 	case 0: default: return dot(pt, pt);
 	case 1: break;
 	case 2: D = l + padding; break;
-	case 3: D = dot(c, float2(L + l, padding)); break;
+	case 3: D = L + l; break;
 	}
 	D = max(D, L);
 	return D * D;
