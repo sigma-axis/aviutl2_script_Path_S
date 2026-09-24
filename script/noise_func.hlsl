@@ -1,12 +1,12 @@
 float checker(uint2 p)
 {
-	float2 m = float2(1, 0);
-	if ((dot(p, 1) & 1) != 0) { p += uint2(7, 8); m = float2(-1, 1); }
-	p = firstbitlow(16 | p);
-	uint v = 2 * (4 - min(p.x, p.y));
+	float b = 0;
+	if ((dot(p, 1) & 1) != 0) { p += uint2(127, 128); b = 1; }
+	p = firstbitlow(256 | p);
+	uint v = 2 * (8 - min(p.x, p.y));
 	if (p.x == p.y && v > 0) v -= 1;
-	static const float v0 = pow(0.5, 1.0 / 3) / 256;
-	return dot(float2(v0 * (1 << v), 1), m);
+	static const float V = 0.4 / (1 << 15);
+	return abs(V * (1 << v) - b);
 }
 uint bayer_88(uint2 p)
 {
