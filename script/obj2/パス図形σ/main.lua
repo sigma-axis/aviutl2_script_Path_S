@@ -87,17 +87,35 @@ local dash_end_shape = 0
 ---$track:ぼかし幅, min = 0, max = 1000, step = 0.01, scale = 0.2
 local antialias = 1
 
----$track:ノイズ強さ, min = 0, max = 100, step = 0.01
-local noise_intensity = 0
+---$nolang: option: Checker, option: Bayer 2x2, option: Bayer 4x4, option: Bayer 256x256, option: IGN, option: White Noise
+---$select:dither::パターン
+---なし = 0
+---Checker = 1
+---Bayer 2x2 = 2
+---Bayer 4x4 = 3
+---Bayer 256x256 = 4
+---IGN = 5
+---White Noise = 6
+local dither_pattern = 0
 
 ---$tips:0 以上だと同じシードでも別オブジェクトだと別の乱数．
 ---     :負だと同じシードなら別オブジェクトでも同じ乱数．
----$track:ノイズシード, min = -65536, max = 65535, step = 1
-local noise_seed = 10000
+---$track:dither::ノイズシード, min = -65536, max = 65535, step = 1
+local dither_seed = 10000
 
----$track:noise::ドットサイズ, min = 100, max = 6400, step = 0.01, scale = 0.0625
-local noise_size = 100
+--hide@dither_seed:dither_pattern==0
+--hide@dither_seed:dither_pattern==1
+--hide@dither_seed:dither_pattern==2
+--hide@dither_seed:dither_pattern==3
+--hide@dither_seed:dither_pattern==4
+---$track:ディザ強さ, min = 0, max = 100, step = 0.01
+local dither_rate = 100
 
+--hide@dither_rate:dither_pattern==0
+---$track:dither::ドットサイズ, min = 100, max = 6400, step = 0.01, scale = 0.0625
+local dither_size = 100
+
+--hide@dither_size:dither_pattern==0
 --group:塗り設定,false
 ---$track:塗り追加幅, min = 0, max = 1000, step = 0.01, scale = 0.2
 local inflation = 0
@@ -114,17 +132,35 @@ local mode_fill = 0
 ---$track:fill::ぼかし幅, min = 0, max = 1000, step = 0.01, scale = 0.2
 local fill_antialias = 1
 
----$track:fill::ノイズ強さ, min = 0, max = 100, step = 0.01
-local fill_noise_intensity = 0
+---$nolang: option: Checker, option: Bayer 2x2, option: Bayer 4x4, option: Bayer 256x256, option: IGN, option: White Noise
+---$select:fill::dither::パターン
+---なし = 0
+---Checker = 1
+---Bayer 2x2 = 2
+---Bayer 4x4 = 3
+---Bayer 256x256 = 4
+---IGN = 5
+---White Noise = 6
+local fill_dither_pattern = 0
 
 ---$tips:0 以上だと同じシードでも別オブジェクトだと別の乱数．
 ---     :負だと同じシードなら別オブジェクトでも同じ乱数．
----$track:fill::ノイズシード, min = -65536, max = 65535, step = 1
-local fill_noise_seed = 20000
+---$track:fill::dither::ノイズシード, min = -65536, max = 65535, step = 1
+local fill_dither_seed = 20000
 
----$track:fill::noise::ドットサイズ, min = 100, max = 6400, step = 0.01, scale = 0.0625
-local fill_noise_size = 100
+--hide@fill_dither_seed:fill_dither_pattern==0
+--hide@fill_dither_seed:fill_dither_pattern==1
+--hide@fill_dither_seed:fill_dither_pattern==2
+--hide@fill_dither_seed:fill_dither_pattern==3
+--hide@fill_dither_seed:fill_dither_pattern==4
+---$track:fill::ディザ強さ, min = 0, max = 100, step = 0.01
+local fill_dither_rate = 100
 
+--hide@fill_dither_rate:fill_dither_pattern==0
+---$track:fill::dither::ドットサイズ, min = 100, max = 6400, step = 0.01, scale = 0.0625
+local fill_dither_size = 100
+
+--hide@fill_dither_size:fill_dither_pattern==0
 --group:ランダム変化,false
 ---$tips:パスの描画方向に沿ったランダム変動の周期，ピクセル単位
 ---$track:ランダム周期, min = 4, max = 1024, step = 0.001, scale = 0.25
@@ -166,16 +202,18 @@ local rand_seed = 10000
 ---     :  dash_pos: number?,
 ---     :  dash_end_shape: string?,
 ---     :  antialias: number?,
----     :  noise_intensity: number?,
----     :  noise_seed: number?,
----     :  noise_size: number?,
+---     :  dither_pattern: string?,
+---     :  dither_seed: number?,
+---     :  dither_rate: number?,
+---     :  dither_size: number?,
 ---     :  inflation: number?,
 ---     :  alpha_fill: number?,
 ---     :  mode_fill: string?,
 ---     :  fill_antialias: number?,
----     :  fill_noise_intensity: number?,
----     :  fill_noise_seed: number?,
----     :  fill_noise_size: number?,
+---     :  fill_dither_pattern: string?,
+---     :  fill_dither_seed: number?,
+---     :  fill_dither_rate: number?,
+---     :  fill_dither_size: number?,
 ---     :  rand_period: number?,
 ---     :  rand_amplify: number?,
 ---     :  rand_fix_end: boolean|number|nil,
@@ -222,9 +260,10 @@ dash_adj = path_s.PI.as_bool(PI.dash_adj, dash_adj);
 dash_pos = tonumber(PI.dash_pos) or dash_pos;
 dash_end_shape = path_s.PI.end_shape(PI.dash_end_shape, dash_end_shape);
 antialias = tonumber(PI.antialias) or antialias;
-noise_intensity = tonumber(PI.noise_intensity) or noise_intensity;
-noise_seed = tonumber(PI.noise_seed) or noise_seed;
-noise_size = tonumber(PI.noise_size) or noise_size;
+dither_pattern = path_s.PI.dither_pattern(PI.dither_pattern, dither_pattern);
+dither_seed = tonumber(PI.dither_seed) or dither_seed;
+dither_rate = tonumber(PI.dither_rate) or dither_rate;
+dither_size = tonumber(PI.dither_size) or dither_size;
 inflation = tonumber(PI.inflation) or inflation;
 alpha_fill = tonumber(PI.alpha_fill) or alpha_fill;
 if type(PI.mode_fill) == "string" then
@@ -234,9 +273,10 @@ if type(PI.mode_fill) == "string" then
 	mode_fill = name2num[PI.mode_fill] or mode_fill;
 end
 fill_antialias = tonumber(PI.fill_antialias) or fill_antialias;
-fill_noise_intensity = tonumber(PI.fill_noise_intensity) or fill_noise_intensity;
-fill_noise_seed = tonumber(PI.fill_noise_seed) or fill_noise_seed;
-fill_noise_size = tonumber(PI.fill_noise_size) or fill_noise_size;
+fill_dither_pattern = path_s.PI.dither_pattern(PI.fill_dither_pattern, fill_dither_pattern);
+fill_dither_seed = tonumber(PI.fill_dither_seed) or fill_dither_seed;
+fill_dither_rate = tonumber(PI.fill_dither_rate) or fill_dither_rate;
+fill_dither_size = tonumber(PI.fill_dither_size) or fill_dither_size;
 rand_period = tonumber(PI.rand_period) or rand_period;
 rand_amplify = tonumber(PI.rand_amplify) or rand_amplify;
 rand_fix_end = path_s.PI.as_bool(PI.rand_fix_end, rand_fix_end);
@@ -254,24 +294,24 @@ start_pos = start_pos / 100;
 end_pos = end_pos / 100;
 miter_limit = math.max(miter_limit / 100, 1);
 antialias = math.max(antialias, 0);
-noise_intensity = math.min(math.max(noise_intensity / 100, 0), 1);
-noise_seed = math.floor(0.5 + noise_seed);
-if noise_seed >= 0 then
-	noise_seed = noise_seed + 2525 * (obj.id % 2 ^ 20);
+dither_seed = math.floor(0.5 + dither_seed);
+if dither_seed >= 0 then
+	dither_seed = dither_seed +  2525 * (obj.id % 2 ^ 20);
 end
-noise_seed = noise_seed % 2 ^ 20;
-noise_size = math.max(noise_size / 100, 1);
+dither_seed = dither_seed % 2 ^ 20;
+dither_rate = math.min(math.max(dither_rate / 100, 0), 1);
+dither_size = math.max(dither_size / 100, 1);
 inflation = math.max(inflation, 0);
 alpha_fill = math.min(math.max(1 - alpha_fill / 100, 0), 1);
 mode_fill = math.min(math.max(math.floor(0.5 + mode_fill), 0), 1);
 fill_antialias = math.max(fill_antialias, 0);
-fill_noise_intensity = math.min(math.max(fill_noise_intensity / 100, 0), 1);
-fill_noise_seed = math.floor(0.5 + fill_noise_seed);
-if fill_noise_seed >= 0 then
-	fill_noise_seed = fill_noise_seed + 2525 * (obj.id % 2 ^ 20);
+fill_dither_seed = math.floor(0.5 + fill_dither_seed);
+if fill_dither_seed >= 0 then
+	fill_dither_seed = fill_dither_seed +  2525 * (obj.id % 2 ^ 20);
 end
-fill_noise_seed = fill_noise_seed % 2 ^ 20;
-fill_noise_size = math.max(fill_noise_size / 100, 1);
+fill_dither_seed = fill_dither_seed % 2 ^ 20;
+fill_dither_rate = math.min(math.max(fill_dither_rate / 100, 0), 1);
+fill_dither_size = math.max(fill_dither_size / 100, 1);
 rand_period = math.max(rand_period, 4);
 rand_amplify = math.max(rand_amplify, 0);
 rand_seed = math.min(math.max(math.floor(0.5 + rand_seed), -2 ^ 16), 2 ^ 16 - 1);
@@ -321,9 +361,10 @@ if has_fill or has_chrome then
 		obj.clearbuffer(has_chrome and "tempbuffer" or "object", color_fill);
 		path_s.path_mask_area_buffered(
 			0, alpha_fill, mode_fill, inflation, {
-				width = fill_antialias, rate = fill_noise_intensity,
-				seed = fill_noise_seed,
-				cx = obj.cx + obj.w / 2, cy = obj.cy + obj.h / 2, size = fill_noise_size,
+				width = fill_antialias,
+				pattern = fill_dither_pattern, seed = fill_dither_seed,
+				rate = fill_dither_rate,
+				cx = obj.cx + obj.w / 2, cy = obj.cy + obj.h / 2, size = fill_dither_size,
 			},
 			cache_name, num_points,
 			has_chrome and { name = "tempbuffer", w = obj.w, h = obj.h } or nil);
@@ -334,9 +375,10 @@ if has_fill or has_chrome then
 		obj.clearbuffer("object", color_line);
 		path_s.path_mask_line_buffered(
 			0, alpha_line, line, {
-				width = antialias, rate = noise_intensity,
-				seed = noise_seed,
-				cx = obj.cx + obj.w / 2, cy = obj.cy + obj.h / 2, size = noise_size,
+				width = antialias,
+				pattern = dither_pattern, seed = dither_seed,
+				rate = dither_rate,
+				cx = obj.cx + obj.w / 2, cy = obj.cy + obj.h / 2, size = dither_size,
 			},
 			cache_name, num_segments, len, loop,
 			start_pos, end_pos, end_shape, join_shape, miter_limit,

@@ -77,17 +77,35 @@ local dash_end_shape = 0
 ---$track:ぼかし幅, min = 0, max = 1000, step = 0.01, scale = 0.2
 local antialias = 1
 
----$track:ノイズ強さ, min = 0, max = 100, step = 0.01
-local noise_intensity = 0
+---$nolang: option: Checker, option: Bayer 2x2, option: Bayer 4x4, option: Bayer 256x256, option: IGN, option: White Noise
+---$select:dither::パターン
+---なし = 0
+---Checker = 1
+---Bayer 2x2 = 2
+---Bayer 4x4 = 3
+---Bayer 256x256 = 4
+---IGN = 5
+---White Noise = 6
+local dither_pattern = 0
 
 ---$tips:0 以上だと同じシードでも別オブジェクトだと別の乱数．
 ---     :負だと同じシードなら別オブジェクトでも同じ乱数．
----$track:ノイズシード, min = -65536, max = 65535, step = 1
-local noise_seed = 10000
+---$track:dither::ノイズシード, min = -65536, max = 65535, step = 1
+local dither_seed = 10000
 
----$track:noise::ドットサイズ, min = 100, max = 6400, step = 0.01, scale = 0.0625
-local noise_size = 100
+--hide@dither_seed:dither_pattern==0
+--hide@dither_seed:dither_pattern==1
+--hide@dither_seed:dither_pattern==2
+--hide@dither_seed:dither_pattern==3
+--hide@dither_seed:dither_pattern==4
+---$track:ディザ強さ, min = 0, max = 100, step = 0.01
+local dither_rate = 100
 
+--hide@dither_rate:dither_pattern==0
+---$track:dither::ドットサイズ, min = 100, max = 6400, step = 0.01, scale = 0.0625
+local dither_size = 100
+
+--hide@dither_size:dither_pattern==0
 --group:矢じり設定,false
 ---$select:矢じり配置
 ---なし = 0
@@ -154,9 +172,10 @@ local rand_seed = 10000
 ---     :  dash_pos: number?,
 ---     :  dash_end_shape: string?,
 ---     :  antialias: number?,
----     :  noise_intensity: number?,
----     :  noise_seed: number?,
----     :  noise_size: number?,
+---     :  dither_pattern: string?,
+---     :  dither_seed: number?,
+---     :  dither_rate: number?,
+---     :  dither_size: number?,
 ---     :  head_type: string?,
 ---     :  head_fig: string?,
 ---     :  head_width: number?,
@@ -201,9 +220,10 @@ dash_pat = type(PI.dash_pat) == "table" and PI.dash_pat or dash_pat;
 dash_pos = tonumber(PI.dash_pos) or dash_pos;
 dash_end_shape = path_s.PI.end_shape(PI.dash_end_shape, dash_end_shape);
 antialias = tonumber(PI.antialias) or antialias;
-noise_intensity = tonumber(PI.noise_intensity) or noise_intensity;
-noise_seed = tonumber(PI.noise_seed) or noise_seed;
-noise_size = tonumber(PI.noise_size) or noise_size;
+dither_pattern = path_s.PI.dither_pattern(PI.dither_pattern, dither_pattern);
+dither_seed = tonumber(PI.dither_seed) or dither_seed;
+dither_rate = tonumber(PI.dither_rate) or dither_rate;
+dither_size = tonumber(PI.dither_size) or dither_size;
 if type(PI.head_type) == "string" then
 	local name2num = {
 		["なし"] = 0, ["終点"] = 1, ["両方"] = 2, ["双方向"] = 3,
@@ -229,14 +249,14 @@ precision = math.max(precision, 1);
 start_pos = math.min(math.max(start_pos / 100, 0), 1);
 end_pos = math.min(math.max(end_pos / 100, 0), 1);
 miter_limit = math.max(miter_limit / 100, 1);
-antialias = math.max(antialias, 1 / 1024);
-noise_intensity = math.min(math.max(noise_intensity / 100, 0), 1);
-noise_seed = math.floor(0.5 + noise_seed);
-if noise_seed >= 0 then
-	noise_seed = noise_seed + 2525 * (obj.id % 2 ^ 20);
+antialias = math.max(antialias, 0);
+dither_seed = math.floor(0.5 + dither_seed);
+if dither_seed >= 0 then
+	dither_seed = dither_seed + 2525 * (obj.id % 2 ^ 20);
 end
-noise_seed = noise_seed % 2 ^ 20;
-noise_size = math.max(noise_size / 100, 1);
+dither_seed = dither_seed % 2 ^ 20;
+dither_rate = math.min(math.max(dither_rate / 100, 0), 1);
+dither_size = math.max(dither_size / 100, 1);
 head_type = math.min(math.max(math.floor(0.5 + head_type), 0), 3);
 head_width = math.max(head_width / 100, 0);
 head_center = head_center / 100;
@@ -351,9 +371,10 @@ end
 obj.clearbuffer(head_vertices and "tempbuffer" or "object", W, H, color);
 path_s.path_mask_line(
 	0, 1, line, {
-		width = antialias, rate = noise_intensity,
-		seed = noise_seed,
-		cx = cx + obj.w / 2, cy = cy + obj.h / 2, size = noise_size,
+		width = antialias,
+		pattern = dither_pattern, seed = dither_seed,
+		rate = dither_rate,
+		cx = cx + obj.w / 2, cy = cy + obj.h / 2, size = dither_size,
 	},
 	nil, points, num_points - 1, false, 1,
 	start_pos, end_pos, end_shape, join_shape, miter_limit,
