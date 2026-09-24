@@ -226,34 +226,50 @@ Although, usage documentations for this script / plugin in languages other than 
 
 最小値は 1, 最大値は 128, 初期値は 8.
 
-####  ぼかし幅 / ノイズ強さ / ノイズシード / ドットサイズ
+####  ぼかし幅 / パターン / ノイズシード / ディザ強さ / ドットサイズ
 
 パスで囲った領域や，ライン部分のアンチエイリアスやディザリングに関する設定です．スクリプトによってはライン部分と塗り部分の 2 か所に設定があります．
 
 - **ぼかし幅**
-  
+
   アンチエイリアスの幅をピクセル単位で指定します．
 
   最小値は 0, 最大値は 1000, 初期値は 1.
 
-- **ノイズ強さ**
-  
-  アンチエイリアス幅の範囲にノイズでディザリングします．ノイズによる影響の強さを % 単位で指定します．
+- **パターン**
 
-  最小値は 0, 最大値は 100, 初期値は 0.
+  ディザリングのパターン模様を選びます．次の選択肢があります:
+
+  | パターン | 例 |
+  |:---:|:---|
+  | `なし` | TODO: image |
+  | `Checker` | TODO: image |
+  | `Bayer 2x2` | TODO: image |
+  | `Bayer 4x4` | TODO: image |
+  | `Bayer 256x256` | TODO: image |
+  | `IGN` | TODO: image |
+  | `White Noise` | TODO: image |
+
+  初期値は `なし`
 
 - **ノイズシード**
 
-  ノイズのパターンを決定する乱数のシードを指定します．
+  パターンの一部にはランダムなノイズを生成するものがあります．そのランダムさを決定する乱数のシードを指定します．
 
   - 0 以上のシードだと同じシードでも別オブジェクトだと別の乱数．
   - 負のシードだと，同じシードなら別オブジェクトでも同じ乱数．
 
-  最小値は -65536, 最大値は 65535, 初期値は 10000.
+  最小値は -65536, 最大値は 65535, 初期値は 10000 (一部 20000 のことも).
+
+- **ディザ強さ**
+
+  ディザリングの影響の強さを調整します．0 だとディザリングなし，100 だとディザリングありで，その間をスムーズにつなぎます．
+
+  最小値は 0, 最大値は 100, 初期値は 100.
 
 - **ドットサイズ**
 
-  ノイズのパターン模様の拡大率を % 単位で指定します．
+  パターン模様の拡大率を % 単位で指定します．
 
   最小値は 100, 最大値は 6400, 初期値は 100.
 
@@ -586,7 +602,7 @@ Although, usage documentations for this script / plugin in languages other than 
 - **矢じりサイズ**
 
   全体の大きさをピクセル単位で指定します．特に矢じりの長さはこの値そのものになります．
-  
+
   最小値は 0, 最大値は 1024, 初期値は 32.
 
 - **矢じり幅**
@@ -602,7 +618,7 @@ Although, usage documentations for this script / plugin in languages other than 
 - **矢じり中心**
 
   矢じりを描画する基準位置を，元図形の縦方向の位置から % 単位で指定します．ここが「矢じり角度」での回転の回転中心になります．
-  
+
   0% で中央, -100% で図形の最下端，+100% で再上端の指定です．
 
   最小値は -100, 最大値は 100, 初期値は -50.
@@ -724,7 +740,7 @@ Although, usage documentations for this script / plugin in languages other than 
 - **移動X / 移動Y**
 
   平行移動の量をピクセル単位で指定します．
-  
+
   最小値は -4000, 最大値は 4000, 初期値は 0.
 
 - **拡大率**
@@ -732,7 +748,7 @@ Although, usage documentations for this script / plugin in languages other than 
   % 単位で指定，最小値は 0, 最大値は 5000, 初期値は 100.
 
 - **回転**
-  
+
   時計回りの度数単位で指定，最小値は -3600, 最大値は 3600, 初期値は 0.
 
 ####  アンカー切り替え
@@ -837,39 +853,41 @@ Although, usage documentations for this script / plugin in languages other than 
 
 ```lua
 {
-  line = num,                 -- number 型で "ライン幅" の項目を上書き，または nil.
-  color_line = num,           -- number 型で "ライン色" の項目を上書き，または nil.
-  color_fill = num,           -- number 型で "塗り色" の項目を上書き，または nil.
-  num_points = num,           -- number 型で "頂点数" の項目を上書き，または nil.
-  path_type = str,            -- string 型で "線タイプ" の項目を上書き，または nil.
-  points = tab,               -- table 型で "点リスト" の項目を上書き，または nil.
-  loop = bool,                -- boolean 型で "ループ" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
-  precision = num,            -- number 型で "曲線精度" の項目を上書き，または nil.
-  alpha_line = num,           -- number 型で "ライン透明度" の項目を上書き，または nil.
-  start_pos = num,            -- number 型で "開始位置" の項目を上書き，または nil.
-  end_pos = num,              -- number 型で "終了位置" の項目を上書き，または nil.
-  end_shape = str,            -- string 型で "端の形状" の項目を上書き，または nil.
-  join_shape = str,           -- string 型で "線結合の形状" の項目を上書き，または nil.
-  miter_limit = num,          -- number 型で "マイター限界" の項目を上書き，または nil.
-  dash_pat = tbl,             -- table 型で "破線パターン" の項目を上書き，または nil.
-  dash_adj = bool,            -- boolean 型で "破線周期補正" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
-  dash_pos = num,             -- number 型で "破線位置" の項目を上書き，または nil.
-  dash_end_shape = str,       -- string 型で "dash::端の形状" の項目を上書き，または nil.
-  antialias = num,            -- number 型で "ぼかし幅" の項目を上書き，または nil.
-  noise_intensity = num,      -- number 型で "ノイズ強さ" の項目を上書き，または nil.
-  noise_seed = num,           -- number 型で "ノイズシード" の項目を上書き，または nil.
-  noise_size = num,           -- number 型で "noise::ドットサイズ" の項目を上書き，または nil.
-  inflation = num,            -- number 型で "塗り追加幅" の項目を上書き，または nil.
-  alpha_fill = num,           -- number 型で "塗り透明度" の項目を上書き，または nil.
-  mode_fill = str,            -- string 型で "塗り範囲" の項目を上書き，または nil.
-  fill_antialias = num,       -- number 型で "fill::ぼかし幅" の項目を上書き，または nil.
-  fill_noise_intensity = num, -- number 型で "fill::ノイズ強さ" の項目を上書き，または nil.
-  fill_noise_seed = num,      -- number 型で "fill::ノイズシード" の項目を上書き，または nil.
-  fill_noise_size = num,      -- number 型で "fill::noise::ドットサイズ" の項目を上書き，または nil.
-  rand_period = num,          -- number 型で "ランダム周期" の項目を上書き，または nil.
-  rand_amplify = num,         -- number 型で "ランダム振幅" の項目を上書き，または nil.
-  rand_fix_end = bool,        -- boolean 型で "ランダム固定端" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
-  rand_seed = num,            -- number 型で "ランダムシード" の項目を上書き，または nil.
+  line = num,                -- number 型で "ライン幅" の項目を上書き，または nil.
+  color_line = num,          -- number 型で "ライン色" の項目を上書き，または nil.
+  color_fill = num,          -- number 型で "塗り色" の項目を上書き，または nil.
+  num_points = num,          -- number 型で "頂点数" の項目を上書き，または nil.
+  path_type = str,           -- string 型で "線タイプ" の項目を上書き，または nil.
+  points = tab,              -- table 型で "点リスト" の項目を上書き，または nil.
+  loop = bool,               -- boolean 型で "ループ" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
+  precision = num,           -- number 型で "曲線精度" の項目を上書き，または nil.
+  alpha_line = num,          -- number 型で "ライン透明度" の項目を上書き，または nil.
+  start_pos = num,           -- number 型で "開始位置" の項目を上書き，または nil.
+  end_pos = num,             -- number 型で "終了位置" の項目を上書き，または nil.
+  end_shape = str,           -- string 型で "端の形状" の項目を上書き，または nil.
+  join_shape = str,          -- string 型で "線結合の形状" の項目を上書き，または nil.
+  miter_limit = num,         -- number 型で "マイター限界" の項目を上書き，または nil.
+  dash_pat = tbl,            -- table 型で "破線パターン" の項目を上書き，または nil.
+  dash_adj = bool,           -- boolean 型で "破線周期補正" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
+  dash_pos = num,            -- number 型で "破線位置" の項目を上書き，または nil.
+  dash_end_shape = str,      -- string 型で "dash::端の形状" の項目を上書き，または nil.
+  antialias = num,           -- number 型で "ぼかし幅" の項目を上書き，または nil.
+  dither_pattern = str,      -- string 型で "dither::パターン" の項目を上書き，または nil.
+  dither_seed = num,         -- number 型で "dither::ノイズシード" の項目を上書き，または nil.
+  dither_rate = num,         -- number 型で "ディザ強さ" の項目を上書き，または nil.
+  dither_size = num,         -- number 型で "dither::ドットサイズ" の項目を上書き，また
+  inflation = num,           -- number 型で "塗り追加幅" の項目を上書き，または nil.
+  alpha_fill = num,          -- number 型で "塗り透明度" の項目を上書き，または nil.
+  mode_fill = str,           -- string 型で "塗り範囲" の項目を上書き，または nil.
+  fill_antialias = num,      -- number 型で "fill::ぼかし幅" の項目を上書き，または nil.
+  fill_dither_pattern = str, -- string 型で "fill::dither::パターン" の項目を上書き，または nil.
+  fill_dither_seed = num,    -- number 型で "fill::dither::ノイズシード" の項目を上書き，または nil.
+  fill_dither_rate = num,    -- number 型で "fill::ディザ強さ" の項目を上書き，または nil.
+  fill_dither_size = num,    -- number 型で "fill::dither::ドットサイズ" の項目を上書き，また
+  rand_period = num,         -- number 型で "ランダム周期" の項目を上書き，または nil.
+  rand_amplify = num,        -- number 型で "ランダム振幅" の項目を上書き，または nil.
+  rand_fix_end = bool,       -- boolean 型で "ランダム固定端" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
+  rand_seed = num,           -- number 型で "ランダムシード" の項目を上書き，または nil.
 }
 ```
 
@@ -877,32 +895,33 @@ Although, usage documentations for this script / plugin in languages other than 
 
 ```lua
 {
-  start_X = num,         -- number 型で "始点X" の項目を上書き，または nil.
-  start_Y = num,         -- number 型で "始点Y" の項目を上書き，または nil.
-  end_X = num,           -- number 型で "終点X" の項目を上書き，または nil.
-  end_Y = num,           -- number 型で "終点Y" の項目を上書き，または nil.
-  line = num,            -- number 型で "ライン幅" の項目を上書き，または nil.
-  color = num,           -- number 型で "色" の項目を上書き，または nil.
-  line_shape = str,      -- string 型で "形状" の項目を上書き，または nil.
-  line_period = num,     -- number 型で "周期" の項目を上書き，または nil.
-  line_phase = num,      -- number 型で "周期位置" の項目を上書き，または nil.
-  line_amplify = num,    -- number 型で "振幅" の項目を上書き，または nil.
-  start_pos = num,       -- number 型で "開始位置" の項目を上書き，または nil.
-  end_pos = num,         -- number 型で "終了位置" の項目を上書き，または nil.
-  end_shape = str,       -- string 型で "端の形状" の項目を上書き，または nil.
-  join_shape = str,      -- string 型で "線結合の形状" の項目を上書き，または nil.
-  miter_limit = num,     -- number 型で "マイター限界" の項目を上書き，または nil.
-  dash_pat = tab,        -- table 型で "破線パターン" の項目を上書き，または nil.
-  dash_pos = num,        -- number 型で "破線位置" の項目を上書き，または nil.
-  dash_end_shape = str,  -- string 型で "dash::端の形状" の項目を上書き，または nil.
-  antialias = num,       -- number 型で "ぼかし幅" の項目を上書き，または nil.
-  noise_intensity = num, -- number 型で "ノイズ強さ" の項目を上書き，または nil.
-  noise_seed = num,      -- number 型で "ノイズシード" の項目を上書き，または nil.
-  noise_size = num,      -- number 型で "noise::ドットサイズ" の項目を上書き，または nil.
-  rand_period = num,     -- number 型で "ランダム周期" の項目を上書き，または nil.
-  rand_amplify = num,    -- number 型で "ランダム振幅" の項目を上書き，または nil.
-  rand_fix_end = bool,   -- boolean 型で "ランダム固定端" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
-  rand_seed = num,       -- number 型で "ランダムシード" の項目を上書き，または nil.
+  start_X = num,        -- number 型で "始点X" の項目を上書き，または nil.
+  start_Y = num,        -- number 型で "始点Y" の項目を上書き，または nil.
+  end_X = num,          -- number 型で "終点X" の項目を上書き，または nil.
+  end_Y = num,          -- number 型で "終点Y" の項目を上書き，または nil.
+  line = num,           -- number 型で "ライン幅" の項目を上書き，または nil.
+  color = num,          -- number 型で "色" の項目を上書き，または nil.
+  line_shape = str,     -- string 型で "形状" の項目を上書き，または nil.
+  line_period = num,    -- number 型で "周期" の項目を上書き，または nil.
+  line_phase = num,     -- number 型で "周期位置" の項目を上書き，または nil.
+  line_amplify = num,   -- number 型で "振幅" の項目を上書き，または nil.
+  start_pos = num,      -- number 型で "開始位置" の項目を上書き，または nil.
+  end_pos = num,        -- number 型で "終了位置" の項目を上書き，または nil.
+  end_shape = str,      -- string 型で "端の形状" の項目を上書き，または nil.
+  join_shape = str,     -- string 型で "線結合の形状" の項目を上書き，または nil.
+  miter_limit = num,    -- number 型で "マイター限界" の項目を上書き，または nil.
+  dash_pat = tab,       -- table 型で "破線パターン" の項目を上書き，または nil.
+  dash_pos = num,       -- number 型で "破線位置" の項目を上書き，または nil.
+  dash_end_shape = str, -- string 型で "dash::端の形状" の項目を上書き，または nil.
+  antialias = num,      -- number 型で "ぼかし幅" の項目を上書き，または nil.
+  dither_pattern = str, -- string 型で "dither::パターン" の項目を上書き，または nil.
+  dither_seed = num,    -- number 型で "dither::ノイズシード" の項目を上書き，または nil.
+  dither_rate = num,    -- number 型で "ディザ強さ" の項目を上書き，または nil.
+  dither_size = num,    -- number 型で "dither::ドットサイズ" の項目を上書き，また
+  rand_period = num,    -- number 型で "ランダム周期" の項目を上書き，または nil.
+  rand_amplify = num,   -- number 型で "ランダム振幅" の項目を上書き，または nil.
+  rand_fix_end = bool,  -- boolean 型で "ランダム固定端" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
+  rand_seed = num,      -- number 型で "ランダムシード" の項目を上書き，または nil.
 }
 ```
 
@@ -910,32 +929,33 @@ Although, usage documentations for this script / plugin in languages other than 
 
 ```lua
 {
-  start_X = num,         -- number 型で "始点X" の項目を上書き，または nil.
-  start_Y = num,         -- number 型で "始点Y" の項目を上書き，または nil.
-  end_X = num,           -- number 型で "終点X" の項目を上書き，または nil.
-  end_Y = num,           -- number 型で "終点Y" の項目を上書き，または nil.
-  start_radius = num,    -- number 型で "開始半径" の項目を上書き，または nil.
-  end_radius = num,      -- number 型で "終了半径" の項目を上書き，または nil.
-  line = num,            -- number 型で "ライン幅" の項目を上書き，または nil.
-  color = num,           -- number 型で "色" の項目を上書き，または nil.
-  line_shape = str,      -- string 型で "形状" の項目を上書き，または nil.
-  slope = num,           -- number 型で "傾き" の項目を上書き，または nil.
-  rotate = num,          -- number 型で "回転" の項目を上書き，または nil.
-  start_pos = num,       -- number 型で "開始位置" の項目を上書き，または nil.
-  end_pos = num,         -- number 型で "終了位置" の項目を上書き，または nil.
-  end_shape = str,       -- string 型で "端の形状" の項目を上書き，または nil.
-  precision = num,       -- number 型で "曲線精度" の項目を上書き，または nil.
-  dash_pat = tab,        -- table 型で "破線パターン" の項目を上書き，または nil.
-  dash_pos = num,        -- number 型で "破線位置" の項目を上書き，または nil.
-  dash_end_shape = str,  -- string 型で "dash::端の形状" の項目を上書き，または nil.
-  antialias = num,       -- number 型で "ぼかし幅" の項目を上書き，または nil.
-  noise_intensity = num, -- number 型で "ノイズ強さ" の項目を上書き，または nil.
-  noise_seed = num,      -- number 型で "ノイズシード" の項目を上書き，または nil.
-  noise_size = num,      -- number 型で "noise::ドットサイズ" の項目を上書き，または nil.
-  rand_period = num,     -- number 型で "ランダム周期" の項目を上書き，または nil.
-  rand_amplify = num,    -- number 型で "ランダム振幅" の項目を上書き，または nil.
-  rand_fix_end = bool,   -- boolean 型で "ランダム固定端" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
-  rand_seed = num,       -- number 型で "ランダムシード" の項目を上書き，または nil.
+  start_X = num,        -- number 型で "始点X" の項目を上書き，または nil.
+  start_Y = num,        -- number 型で "始点Y" の項目を上書き，または nil.
+  end_X = num,          -- number 型で "終点X" の項目を上書き，または nil.
+  end_Y = num,          -- number 型で "終点Y" の項目を上書き，または nil.
+  start_radius = num,   -- number 型で "開始半径" の項目を上書き，または nil.
+  end_radius = num,     -- number 型で "終了半径" の項目を上書き，または nil.
+  line = num,           -- number 型で "ライン幅" の項目を上書き，または nil.
+  color = num,          -- number 型で "色" の項目を上書き，または nil.
+  line_shape = str,     -- string 型で "形状" の項目を上書き，または nil.
+  slope = num,          -- number 型で "傾き" の項目を上書き，または nil.
+  rotate = num,         -- number 型で "回転" の項目を上書き，または nil.
+  start_pos = num,      -- number 型で "開始位置" の項目を上書き，または nil.
+  end_pos = num,        -- number 型で "終了位置" の項目を上書き，または nil.
+  end_shape = str,      -- string 型で "端の形状" の項目を上書き，または nil.
+  precision = num,      -- number 型で "曲線精度" の項目を上書き，または nil.
+  dash_pat = tab,       -- table 型で "破線パターン" の項目を上書き，または nil.
+  dash_pos = num,       -- number 型で "破線位置" の項目を上書き，または nil.
+  dash_end_shape = str, -- string 型で "dash::端の形状" の項目を上書き，または nil.
+  antialias = num,      -- number 型で "ぼかし幅" の項目を上書き，または nil.
+  dither_pattern = str, -- string 型で "dither::パターン" の項目を上書き，または nil.
+  dither_seed = num,    -- number 型で "dither::ノイズシード" の項目を上書き，または nil.
+  dither_rate = num,    -- number 型で "ディザ強さ" の項目を上書き，または nil.
+  dither_size = num,    -- number 型で "dither::ドットサイズ" の項目を上書き，また
+  rand_period = num,    -- number 型で "ランダム周期" の項目を上書き，または nil.
+  rand_amplify = num,   -- number 型で "ランダム振幅" の項目を上書き，または nil.
+  rand_fix_end = bool,  -- boolean 型で "ランダム固定端" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
+  rand_seed = num,      -- number 型で "ランダムシード" の項目を上書き，または nil.
 }
 ```
 
@@ -943,35 +963,36 @@ Although, usage documentations for this script / plugin in languages other than 
 
 ```lua
 {
-  line = num,            -- number 型で "ライン幅" の項目を上書き，または nil.
-  head_size = num,       -- number 型で "矢じりサイズ" の項目を上書き，または nil.
-  color = num,           -- number 型で "色" の項目を上書き，または nil.
-  num_points = num,      -- number 型で "頂点数" の項目を上書き，または nil.
-  path_type = str,       -- string 型で "線タイプ" の項目を上書き，または nil.
-  points = tab,          -- table 型で "点リスト" の項目を上書き，または nil.
-  precision = num,       -- number 型で "曲線精度" の項目を上書き，または nil.
-  start_pos = num,       -- number 型で "開始位置" の項目を上書き，または nil.
-  end_pos = num,         -- number 型で "終了位置" の項目を上書き，または nil.
-  end_shape = str,       -- string 型で "端の形状" の項目を上書き，または nil.
-  join_shape = str,      -- string 型で "線結合の形状" の項目を上書き，または nil.
-  miter_limit = num,     -- number 型で "マイター限界" の項目を上書き，または nil.
-  dash_pat = tab,        -- table 型で "破線パターン" の項目を上書き，または nil.
-  dash_pos = num,        -- number 型で "破線位置" の項目を上書き，または nil.
-  dash_end_shape = str,  -- string 型で "dash::端の形状" の項目を上書き，または nil.
-  antialias = num,       -- number 型で "ぼかし幅" の項目を上書き，または nil.
-  noise_intensity = num, -- number 型で "ノイズ強さ" の項目を上書き，または nil.
-  noise_seed = num,      -- number 型で "ノイズシード" の項目を上書き，または nil.
-  noise_size = num,      -- number 型で "noise::ドットサイズ" の項目を上書き，または nil.
-  head_type = str,       -- string 型で "矢じり配置" の項目を上書き，または nil.
-  head_fig = str,        -- string 型で "矢じり図形" の項目を上書き，または nil.
-  head_width = num,      -- number 型で "矢じり幅" の項目を上書き，または nil.
-  head_center = num,     -- number 型で "矢じり中心" の項目を上書き，または nil.
-  head_rot = num,        -- number 型で "矢じり角度" の項目を上書き，または nil.
-  head_pos = num,        -- number 型で "矢じり位置" の項目を上書き，または nil.
-  rand_period = num,     -- number 型で "ランダム周期" の項目を上書き，または nil.
-  rand_amplify = num,    -- number 型で "ランダム振幅" の項目を上書き，または nil.
-  rand_fix_end = bool,   -- boolean 型で "ランダム固定端" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
-  rand_seed = num,       -- number 型で "ランダムシード" の項目を上書き，または nil.
+  line = num,           -- number 型で "ライン幅" の項目を上書き，または nil.
+  head_size = num,      -- number 型で "矢じりサイズ" の項目を上書き，または nil.
+  color = num,          -- number 型で "色" の項目を上書き，または nil.
+  num_points = num,     -- number 型で "頂点数" の項目を上書き，または nil.
+  path_type = str,      -- string 型で "線タイプ" の項目を上書き，または nil.
+  points = tab,         -- table 型で "点リスト" の項目を上書き，または nil.
+  precision = num,      -- number 型で "曲線精度" の項目を上書き，または nil.
+  start_pos = num,      -- number 型で "開始位置" の項目を上書き，または nil.
+  end_pos = num,        -- number 型で "終了位置" の項目を上書き，または nil.
+  end_shape = str,      -- string 型で "端の形状" の項目を上書き，または nil.
+  join_shape = str,     -- string 型で "線結合の形状" の項目を上書き，または nil.
+  miter_limit = num,    -- number 型で "マイター限界" の項目を上書き，または nil.
+  dash_pat = tab,       -- table 型で "破線パターン" の項目を上書き，または nil.
+  dash_pos = num,       -- number 型で "破線位置" の項目を上書き，または nil.
+  dash_end_shape = str, -- string 型で "dash::端の形状" の項目を上書き，または nil.
+  antialias = num,      -- number 型で "ぼかし幅" の項目を上書き，または nil.
+  dither_pattern = str, -- string 型で "dither::パターン" の項目を上書き，または nil.
+  dither_seed = num,    -- number 型で "dither::ノイズシード" の項目を上書き，または nil.
+  dither_rate = num,    -- number 型で "ディザ強さ" の項目を上書き，または nil.
+  dither_size = num,    -- number 型で "dither::ドットサイズ" の項目を上書き，また
+  head_type = str,      -- string 型で "矢じり配置" の項目を上書き，または nil.
+  head_fig = str,       -- string 型で "矢じり図形" の項目を上書き，または nil.
+  head_width = num,     -- number 型で "矢じり幅" の項目を上書き，または nil.
+  head_center = num,    -- number 型で "矢じり中心" の項目を上書き，または nil.
+  head_rot = num,       -- number 型で "矢じり角度" の項目を上書き，または nil.
+  head_pos = num,       -- number 型で "矢じり位置" の項目を上書き，または nil.
+  rand_period = num,    -- number 型で "ランダム周期" の項目を上書き，または nil.
+  rand_amplify = num,   -- number 型で "ランダム振幅" の項目を上書き，または nil.
+  rand_fix_end = bool,  -- boolean 型で "ランダム固定端" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
+  rand_seed = num,      -- number 型で "ランダムシード" の項目を上書き，または nil.
 }
 ```
 
@@ -979,36 +1000,37 @@ Although, usage documentations for this script / plugin in languages other than 
 
 ```lua
 {
-  width = num,                  -- number 型で "幅" を上書き，または nil.
-  height = num,                 -- number 型で "高さ" を上書き，または nil.
-  line = num,                   -- number 型で "ライン幅" の項目を上書き，または nil.
-  color_line = num,             -- number 型で "ライン色" の項目を上書き，または nil.
-  color_fill = num,             -- number 型で "塗り色" の項目を上書き，または nil.
-  radii = tab_num,              -- table 型や number 型で "角半径" や "丸角縦横比" などを上書き，または nil. 詳細は後述．
-  fixed_aspect = bool,          -- boolean 型で "丸角縦横比固定" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
-  align_x = num,                -- number 型で "水平揃え" を上書き，または nil.
-  align_y = num,                -- number 型で "垂直揃え" を上書き，または nil.
-  alpha_line = num,             -- number 型で "ライン透明度" の項目を上書き，または nil.
-  start_pos = num,              -- number 型で "開始位置" の項目を上書き，または nil.
-  end_pos = num,                -- number 型で "終了位置" の項目を上書き，または nil.
-  end_shape = str,              -- string 型で "端の形状" の項目を上書き，または nil.
-  join_shape = str,             -- string 型で "線結合の形状" の項目を上書き，または nil.
-  dash_pat = tbl,               -- table 型で "破線パターン" の項目を上書き，または nil.
-  dash_pos = num,               -- number 型で "破線位置" の項目を上書き，または nil.
-  dash_end_shape = str,         -- string 型で "dash::端の形状" の項目を上書き，または nil.
-  antialias = num,              -- number 型で "ぼかし幅" の項目を上書き，または nil.
-  noise_intensity = num,        -- number 型で "ノイズ強さ" の項目を上書き，または nil.
-  noise_seed = num,             -- number 型で "ノイズシード" の項目を上書き，または nil.
-  noise_size = num,             -- number 型で "noise::ドットサイズ" の項目を上書き，または nil.
-  inflation = num,              -- number 型で "塗り追加幅" の項目を上書き，または nil.
-  alpha_fill = num,             -- number 型で "塗り透明度" の項目を上書き，または nil.
-  fill_antialias = num,         -- number 型で "fill::ぼかし幅" の項目を上書き，または nil.
-  fill_noise_intensity = num,   -- number 型で "fill::ノイズ強さ" の項目を上書き，または nil.
-  fill_noise_seed = num,        -- number 型で "fill::ノイズシード" の項目を上書き，または nil.
-  fill_noise_size = num,        -- number 型で "fill::noise::ドットサイズ" の項目を上書き，または nil.
-  rand_period = num,            -- number 型で "ランダム周期" の項目を上書き，または nil.
-  rand_amplify = num,           -- number 型で "ランダム振幅" の項目を上書き，または nil.
-  rand_seed = num,              -- number 型で "ランダムシード" の項目を上書き，または nil.
+  width = num,               -- number 型で "幅" を上書き，または nil.
+  height = num,              -- number 型で "高さ" を上書き，または nil.
+  line = num,                -- number 型で "ライン幅" の項目を上書き，または nil.
+  color_line = num,          -- number 型で "ライン色" の項目を上書き，または nil.
+  color_fill = num,          -- number 型で "塗り色" の項目を上書き，または nil.
+  radii = tab_num,           -- table 型や number 型で "角半径" や "丸角縦横比" などを上書き，または nil. 詳細は後述．
+  fixed_aspect = bool,       -- boolean 型で "丸角縦横比固定" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
+  align_x = num,             -- number 型で "水平揃え" を上書き，または nil.
+  align_y = num,             -- number 型で "垂直揃え" を上書き，または nil.
+  alpha_line = num,          -- number 型で "ライン透明度" の項目を上書き，または nil.
+  start_pos = num,           -- number 型で "開始位置" の項目を上書き，または nil.
+  end_pos = num,             -- number 型で "終了位置" の項目を上書き，または nil.
+  end_shape = str,           -- string 型で "端の形状" の項目を上書き，または nil.
+  join_shape = str,          -- string 型で "線結合の形状" の項目を上書き，または nil.
+  dash_pat = tbl,            -- table 型で "破線パターン" の項目を上書き，または nil.
+  dash_pos = num,            -- number 型で "破線位置" の項目を上書き，または nil.
+  dash_end_shape = str,      -- string 型で "dash::端の形状" の項目を上書き，または nil.
+  antialias = num,           -- number 型で "ぼかし幅" の項目を上書き，または nil.
+  dither_pattern = str,      -- string 型で "dither::パターン" の項目を上書き，または nil.
+  dither_seed = num,         -- number 型で "dither::ノイズシード" の項目を上書き，または nil.
+  dither_rate = num,         -- number 型で "ディザ強さ" の項目を上書き，または nil.
+  dither_size = num,         -- number 型で "dither::ドットサイズ" の項目を上書き，また
+  inflation = num,           -- number 型で "塗り追加幅" の項目を上書き，または nil.
+  alpha_fill = num,          -- number 型で "塗り透明度" の項目を上書き，または nil.
+  fill_dither_pattern = str, -- string 型で "fill::dither::パターン" の項目を上書き，または nil.
+  fill_dither_seed = num,    -- number 型で "fill::dither::ノイズシード" の項目を上書き，または nil.
+  fill_dither_rate = num,    -- number 型で "fill::ディザ強さ" の項目を上書き，または nil.
+  fill_dither_size = num,    -- number 型で "fill::dither::ドットサイズ" の項目を上書き，また
+  rand_period = num,         -- number 型で "ランダム周期" の項目を上書き，または nil.
+  rand_amplify = num,        -- number 型で "ランダム振幅" の項目を上書き，または nil.
+  rand_seed = num,           -- number 型で "ランダムシード" の項目を上書き，または nil.
 }
 ```
 
@@ -1106,9 +1128,10 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
   dash_pos = num,         -- number 型で "破線位置" の項目を上書き，または nil.
   dash_end_shape = str,   -- string 型で "dash::端の形状" の項目を上書き，または nil.
   antialias = num,        -- number 型で "ぼかし幅" の項目を上書き，または nil.
-  noise_intensity = num,  -- number 型で "ノイズ強さ" の項目を上書き，または nil.
-  noise_seed = num,       -- number 型で "ノイズシード" の項目を上書き，または nil.
-  noise_size = num,       -- number 型で "noise::ドットサイズ" の項目を上書き，または nil.
+  dither_pattern = str,   -- string 型で "dither::パターン" の項目を上書き，または nil.
+  dither_seed = num,      -- number 型で "dither::ノイズシード" の項目を上書き，または nil.
+  dither_rate = num,      -- number 型で "ディザ強さ" の項目を上書き，または nil.
+  dither_size = num,      -- number 型で "dither::ドットサイズ" の項目を上書き，また
   X = num, Y = num,       -- number 型で "移動X", "移動Y" の項目を上書き，または nil.
   zoom = num,             -- number 型で "拡大率" の項目を上書き，または nil.
   rotate = num,           -- number 型で "回転" の項目を上書き，または nil.
@@ -1165,9 +1188,10 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
   inflation = num,        -- number 型で "追加幅" の項目を上書き，または nil.
   mode_fill = num,        -- string 型で "範囲" の項目を上書き，または nil.
   antialias = num,        -- number 型で "ぼかし幅" の項目を上書き，または nil.
-  noise_intensity = num,  -- number 型で "ノイズ強さ" の項目を上書き，または nil.
-  noise_seed = num,       -- number 型で "ノイズシード" の項目を上書き，または nil.
-  noise_size = num,       -- number 型で "noise::ドットサイズ" の項目を上書き，または nil.
+  dither_pattern = str,   -- string 型で "dither::パターン" の項目を上書き，または nil.
+  dither_seed = num,      -- number 型で "dither::ノイズシード" の項目を上書き，または nil.
+  dither_rate = num,      -- number 型で "ディザ強さ" の項目を上書き，または nil.
+  dither_size = num,      -- number 型で "dither::ドットサイズ" の項目を上書き，また
   X = num, Y = num,       -- number 型で "移動X", "移動Y" の項目を上書き，または nil.
   zoom = num,             -- number 型で "拡大率" の項目を上書き，または nil.
   rotate = num,           -- number 型で "回転" の項目を上書き，または nil.
@@ -1213,9 +1237,9 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
 
 - **v2.30** (2026-??-??)
 
-  - ラインや塗りの輪郭部分をノイズ模様にできる設定項目を追加．
+  - ラインや塗りの輪郭部分をディザリングできる設定項目を追加．
   - ラインと塗りの両方を持つオブジェクト系スクリプトで，「ぼかし幅」をライン部分と塗り部分で個別に指定するように (**破壊的変更**).
-    - ノイズ機能の追加に伴って分離．
+    - ディザリング機能の追加に伴って分離．
   - ライン系スクリプトで「ぼかし幅」が大きいときに，アーティファクトが出ることがあったのを修正．
   - 「スクウェアσ」の描画結果の位置と回転中心をサブピクセル単位で微調整．
     - 「水平揃え」「垂直揃え」を変更しても，サブピクセルのずれが起こらないように．
@@ -1247,7 +1271,7 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
 - **v2.12** (2026-08-27)
 
   - 一部，無効な UI 項目の非表示設定をしていたのをコメントアウト．
-  
+
     残しても問題なく動作するのは確認していますが，念のため．
 
 - **v2.11** (2026-08-26)
