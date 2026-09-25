@@ -228,7 +228,11 @@ Although, usage documentations for this script / plugin in languages other than 
 
 ####  ぼかし幅 / ディザリング / ノイズシード / ディザ強さ / ドットサイズ
 
-パスで囲った領域や，ライン部分のアンチエイリアスやディザリングに関する設定です．スクリプトによってはライン部分と塗り部分の 2 か所に設定があります．
+パスで囲った領域や，ライン部分のアンチエイリアスやディザリングに関する設定です．
+
+![ディザリングの例](https://github.com/user-attachments/assets/cc3dce69-7439-45a3-97ee-b8005013d3e2)
+
+スクリプトによってはライン部分と塗り部分の 2 か所に設定があります．
 
 - **ぼかし幅**
 
@@ -240,15 +244,19 @@ Although, usage documentations for this script / plugin in languages other than 
 
   ディザリングのパターン模様を選びます．次の選択肢があります:
 
-  | パターン | 例 |
+  | パターン | サンプル |
   |:---:|:---|
-  | `なし` | TODO: image |
-  | `Checker` | TODO: image |
-  | `Bayer 2x2` | TODO: image |
-  | `Bayer 4x4` | TODO: image |
-  | `Bayer 256x256` | TODO: image |
-  | `IGN` | TODO: image |
-  | `White Noise` | TODO: image |
+  | `なし` | ![ディザリングなし](https://github.com/user-attachments/assets/6ca13b21-b652-4e06-9701-dec46a7fc33a) |
+  | `Checker` | ![Checker でのディザリング](https://github.com/user-attachments/assets/51ae3815-f4f0-4f88-ac7f-9139c991606d) |
+  | `Bayer 2x2` | ![Bayer 2x2 でのディザリング](https://github.com/user-attachments/assets/90105ade-c77a-4017-8011-4879c9f52be6) |
+  | `Bayer 4x4` | ![Bayer 4x4 でのディザリング](https://github.com/user-attachments/assets/ab653d91-fa7e-4fe8-8daf-4fbe7867ed3a) |
+  | `Bayer 256x256` | ![Bayer 256x256 でのディザリング](https://github.com/user-attachments/assets/ea018a2e-1d1a-404a-a779-55769243a867) |
+  | `IGN` | ![Interleaved Gradient Noise でのディザリング](https://github.com/user-attachments/assets/e04bd74f-719e-4bfa-b1e6-870116ee8e1e) |
+  | `White Noise` | ![White Noise でのディザリング](https://github.com/user-attachments/assets/3a588a5c-e36b-4749-b837-ff78d950648f) |
+
+  - `IGN` は “Interleaved Gradient Noise” の略．
+
+    https://www.iryoku.com/next-generation-post-processing-in-call-of-duty-advanced-warfare
 
   初期値は `なし`
 
@@ -259,7 +267,7 @@ Although, usage documentations for this script / plugin in languages other than 
   - 0 以上のシードだと同じシードでも別オブジェクトだと別の乱数．
   - 負のシードだと，同じシードなら別オブジェクトでも同じ乱数．
 
-  最小値は -65536, 最大値は 65535, 初期値は 10000 (一部 20000 のことも).
+  最小値は -65536, 最大値は 65535, 初期値は 10000 (一部 20000 のものも).
 
 - **ディザ強さ**
 
@@ -310,7 +318,7 @@ Although, usage documentations for this script / plugin in languages other than 
 | `四角` | ![「四角」の端の形状のサンプル](https://github.com/user-attachments/assets/6a092fdd-fefe-482d-b1fd-38834a8c8fe0) |
 | `平坦` | ![「平坦」の端の形状のサンプル](https://github.com/user-attachments/assets/d80725cc-20c6-4e46-a3fd-ac6ada038289) |
 | `三角` | ![「三角」の端の形状のサンプル](https://github.com/user-attachments/assets/703097e8-ba9b-486d-b347-7c3a29be7a2d) |
-| `リボン` | TODO: 「リボン」の端の形状のサンプル |
+| `リボン` | ![「リボン」の端の形状のサンプル](https://github.com/user-attachments/assets/00e08ba6-516a-421e-8fa5-ec95963ec60e) |
 
 初期値は `円`.
 
