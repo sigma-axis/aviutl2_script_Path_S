@@ -226,7 +226,7 @@ Although, usage documentations for this script / plugin in languages other than 
 
 最小値は 1, 最大値は 128, 初期値は 8.
 
-####  ぼかし幅 / パターン / ノイズシード / ディザ強さ / ドットサイズ
+####  ぼかし幅 / ディザリング / ノイズシード / ディザ強さ / ドットサイズ
 
 パスで囲った領域や，ライン部分のアンチエイリアスやディザリングに関する設定です．スクリプトによってはライン部分と塗り部分の 2 か所に設定があります．
 
@@ -236,7 +236,7 @@ Although, usage documentations for this script / plugin in languages other than 
 
   最小値は 0, 最大値は 1000, 初期値は 1.
 
-- **パターン**
+- **ディザリング**
 
   ディザリングのパターン模様を選びます．次の選択肢があります:
 
@@ -872,7 +872,7 @@ Although, usage documentations for this script / plugin in languages other than 
   dash_pos = num,            -- number 型で "破線位置" の項目を上書き，または nil.
   dash_end_shape = str,      -- string 型で "dash::端の形状" の項目を上書き，または nil.
   antialias = num,           -- number 型で "ぼかし幅" の項目を上書き，または nil.
-  dither_pattern = str,      -- string 型で "dither::パターン" の項目を上書き，または nil.
+  dither_pattern = str,      -- string 型で "ディザリング" の項目を上書き，または nil.
   dither_seed = num,         -- number 型で "dither::ノイズシード" の項目を上書き，または nil.
   dither_rate = num,         -- number 型で "ディザ強さ" の項目を上書き，または nil.
   dither_size = num,         -- number 型で "dither::ドットサイズ" の項目を上書き，また
@@ -880,7 +880,7 @@ Although, usage documentations for this script / plugin in languages other than 
   alpha_fill = num,          -- number 型で "塗り透明度" の項目を上書き，または nil.
   mode_fill = str,           -- string 型で "塗り範囲" の項目を上書き，または nil.
   fill_antialias = num,      -- number 型で "fill::ぼかし幅" の項目を上書き，または nil.
-  fill_dither_pattern = str, -- string 型で "fill::dither::パターン" の項目を上書き，または nil.
+  fill_dither_pattern = str, -- string 型で "fill::ディザリング" の項目を上書き，または nil.
   fill_dither_seed = num,    -- number 型で "fill::dither::ノイズシード" の項目を上書き，または nil.
   fill_dither_rate = num,    -- number 型で "fill::ディザ強さ" の項目を上書き，または nil.
   fill_dither_size = num,    -- number 型で "fill::dither::ドットサイズ" の項目を上書き，また
@@ -914,7 +914,7 @@ Although, usage documentations for this script / plugin in languages other than 
   dash_pos = num,       -- number 型で "破線位置" の項目を上書き，または nil.
   dash_end_shape = str, -- string 型で "dash::端の形状" の項目を上書き，または nil.
   antialias = num,      -- number 型で "ぼかし幅" の項目を上書き，または nil.
-  dither_pattern = str, -- string 型で "dither::パターン" の項目を上書き，または nil.
+  dither_pattern = str, -- string 型で "ディザリング" の項目を上書き，または nil.
   dither_seed = num,    -- number 型で "dither::ノイズシード" の項目を上書き，または nil.
   dither_rate = num,    -- number 型で "ディザ強さ" の項目を上書き，または nil.
   dither_size = num,    -- number 型で "dither::ドットサイズ" の項目を上書き，また
@@ -948,7 +948,7 @@ Although, usage documentations for this script / plugin in languages other than 
   dash_pos = num,       -- number 型で "破線位置" の項目を上書き，または nil.
   dash_end_shape = str, -- string 型で "dash::端の形状" の項目を上書き，または nil.
   antialias = num,      -- number 型で "ぼかし幅" の項目を上書き，または nil.
-  dither_pattern = str, -- string 型で "dither::パターン" の項目を上書き，または nil.
+  dither_pattern = str, -- string 型で "ディザリング" の項目を上書き，または nil.
   dither_seed = num,    -- number 型で "dither::ノイズシード" の項目を上書き，または nil.
   dither_rate = num,    -- number 型で "ディザ強さ" の項目を上書き，または nil.
   dither_size = num,    -- number 型で "dither::ドットサイズ" の項目を上書き，また
@@ -979,7 +979,7 @@ Although, usage documentations for this script / plugin in languages other than 
   dash_pos = num,       -- number 型で "破線位置" の項目を上書き，または nil.
   dash_end_shape = str, -- string 型で "dash::端の形状" の項目を上書き，または nil.
   antialias = num,      -- number 型で "ぼかし幅" の項目を上書き，または nil.
-  dither_pattern = str, -- string 型で "dither::パターン" の項目を上書き，または nil.
+  dither_pattern = str, -- string 型で "ディザリング" の項目を上書き，または nil.
   dither_seed = num,    -- number 型で "dither::ノイズシード" の項目を上書き，または nil.
   dither_rate = num,    -- number 型で "ディザ強さ" の項目を上書き，または nil.
   dither_size = num,    -- number 型で "dither::ドットサイズ" の項目を上書き，また
@@ -1018,13 +1018,13 @@ Although, usage documentations for this script / plugin in languages other than 
   dash_pos = num,            -- number 型で "破線位置" の項目を上書き，または nil.
   dash_end_shape = str,      -- string 型で "dash::端の形状" の項目を上書き，または nil.
   antialias = num,           -- number 型で "ぼかし幅" の項目を上書き，または nil.
-  dither_pattern = str,      -- string 型で "dither::パターン" の項目を上書き，または nil.
+  dither_pattern = str,      -- string 型で "ディザリング" の項目を上書き，または nil.
   dither_seed = num,         -- number 型で "dither::ノイズシード" の項目を上書き，または nil.
   dither_rate = num,         -- number 型で "ディザ強さ" の項目を上書き，または nil.
   dither_size = num,         -- number 型で "dither::ドットサイズ" の項目を上書き，また
   inflation = num,           -- number 型で "塗り追加幅" の項目を上書き，または nil.
   alpha_fill = num,          -- number 型で "塗り透明度" の項目を上書き，または nil.
-  fill_dither_pattern = str, -- string 型で "fill::dither::パターン" の項目を上書き，または nil.
+  fill_dither_pattern = str, -- string 型で "fill::ディザリング" の項目を上書き，または nil.
   fill_dither_seed = num,    -- number 型で "fill::dither::ノイズシード" の項目を上書き，または nil.
   fill_dither_rate = num,    -- number 型で "fill::ディザ強さ" の項目を上書き，または nil.
   fill_dither_size = num,    -- number 型で "fill::dither::ドットサイズ" の項目を上書き，また
@@ -1077,7 +1077,7 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
   inflation = num,        -- number 型で "追加幅" の項目を上書き，または nil.
   mode_fill = num,        -- string 型で "範囲" の項目を上書き，または nil.
   antialias = num,        -- number 型で "ぼかし幅" の項目を上書き，または nil.
-  dither_pattern = str,   -- string 型で "dither::パターン" の項目を上書き，または nil.
+  dither_pattern = str,   -- string 型で "ディザリング" の項目を上書き，または nil.
   dither_seed = num,      -- number 型で "dither::ノイズシード" の項目を上書き，または nil.
   dither_rate = num,      -- number 型で "ディザ強さ" の項目を上書き，または nil.
   dither_size = num,      -- number 型で "dither::ドットサイズ" の項目を上書き，また
@@ -1128,7 +1128,7 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
   dash_pos = num,         -- number 型で "破線位置" の項目を上書き，または nil.
   dash_end_shape = str,   -- string 型で "dash::端の形状" の項目を上書き，または nil.
   antialias = num,        -- number 型で "ぼかし幅" の項目を上書き，または nil.
-  dither_pattern = str,   -- string 型で "dither::パターン" の項目を上書き，または nil.
+  dither_pattern = str,   -- string 型で "ディザリング" の項目を上書き，または nil.
   dither_seed = num,      -- number 型で "dither::ノイズシード" の項目を上書き，または nil.
   dither_rate = num,      -- number 型で "ディザ強さ" の項目を上書き，または nil.
   dither_size = num,      -- number 型で "dither::ドットサイズ" の項目を上書き，また
@@ -1188,7 +1188,7 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
   inflation = num,        -- number 型で "追加幅" の項目を上書き，または nil.
   mode_fill = num,        -- string 型で "範囲" の項目を上書き，または nil.
   antialias = num,        -- number 型で "ぼかし幅" の項目を上書き，または nil.
-  dither_pattern = str,   -- string 型で "dither::パターン" の項目を上書き，または nil.
+  dither_pattern = str,   -- string 型で "ディザリング" の項目を上書き，または nil.
   dither_seed = num,      -- number 型で "dither::ノイズシード" の項目を上書き，または nil.
   dither_rate = num,      -- number 型で "ディザ強さ" の項目を上書き，または nil.
   dither_size = num,      -- number 型で "dither::ドットサイズ" の項目を上書き，また

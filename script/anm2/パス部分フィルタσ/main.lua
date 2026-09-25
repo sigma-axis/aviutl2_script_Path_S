@@ -52,7 +52,7 @@ local mode_fill = 0
 local antialias = 1
 
 ---$nolang: option: Checker, option: Bayer 2x2, option: Bayer 4x4, option: Bayer 256x256, option: IGN, option: White Noise
----$select:dither::パターン
+---$select:ディザリング
 ---なし = 0
 ---Checker = 1
 ---Bayer 2x2 = 2

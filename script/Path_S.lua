@@ -164,7 +164,9 @@ local line_inflation do
 	local function join_inflation(join_shape, line_width, antialias, miter_limit)
 		if join_shape == 2 then -- マイター
 			return miter_limit * (line_width / 2 + antialias);
+		elseif join_shape == 1 or join_shape == 5 then -- ベベル
 			return ((line_width / 2 + antialias) ^ 2 + antialias ^ 2) ^ 0.5;
+		else -- ラウンド / ブランク
 			return line_width / 2 + antialias;
 		end
 	end
@@ -193,7 +195,7 @@ local line_inflation do
 	end
 end
 
----@alias dither_pattern # ディザパターン
+---@alias dither_pattern # ディザリング
 ---| 0 # なし
 ---| 1 # Checker
 ---| 2 # Bayer 2x2
@@ -205,10 +207,10 @@ local PI_choose_dither_pattern do
 	local name2num = {
 		["なし"] = 0, ["Checker"] = 1, ["Bayer 2x2"] = 2, ["Bayer 4x4"] = 3, ["Bayer 256x256"] = 4, ["IGN"] = 5, ["White Noise"] = 6,
 	};
-	---PI でディザリングの「パターン」指定を適用する．
+	---PI で「ディザリング」指定を適用する．
 	---このパラメタは次の形式で指定されているものとする:
 	---
-	---`--select@dither_pattern:dither::パターン=0,なし=0,Checker=1,Bayer 2x2=2,Bayer 4x4=3,Bayer 256x256=4,IGN=5,White Noise=6`
+	---`--select@dither_pattern:ディザリング=0,なし=0,Checker=1,Bayer 2x2=2,Bayer 4x4=3,Bayer 256x256=4,IGN=5,White Noise=6`
 	---@param pi_value any
 	---@param gui_value dither_pattern
 	---@return dither_pattern
