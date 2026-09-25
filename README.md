@@ -245,7 +245,7 @@ Although, usage documentations for this script / plugin in languages other than 
   ディザリングのパターン模様を選びます．次の選択肢があります:
 
   | パターン | サンプル |
-  |:---:|:---|
+  |:---:|:---:|
   | `なし` | ![ディザリングなし](https://github.com/user-attachments/assets/6ca13b21-b652-4e06-9701-dec46a7fc33a) |
   | `Checker` | ![Checker でのディザリング](https://github.com/user-attachments/assets/51ae3815-f4f0-4f88-ac7f-9139c991606d) |
   | `Bayer 2x2` | ![Bayer 2x2 でのディザリング](https://github.com/user-attachments/assets/90105ade-c77a-4017-8011-4879c9f52be6) |
@@ -312,7 +312,7 @@ Although, usage documentations for this script / plugin in languages other than 
 
 ラインの端点の形状を指定します．[「破線パターン」](#破線パターン--破線周期補正--破線位置)の途切れ目と，ラインの両端 (ある場合) で独立に指定します．
 
-| 端の形状 | 例 |
+| 端の形状 | サンプル |
 |:---:|:---:|
 | `円` | ![「円」の端の形状のサンプル](https://github.com/user-attachments/assets/64e6ef8c-ac9a-4887-99ad-d125dc167f7d) |
 | `四角` | ![「四角」の端の形状のサンプル](https://github.com/user-attachments/assets/6a092fdd-fefe-482d-b1fd-38834a8c8fe0) |
