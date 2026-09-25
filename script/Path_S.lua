@@ -151,9 +151,7 @@ local line_inflation do
 	local function end_inflation(end_shape, line_width, antialias)
 		if end_shape == 1 then -- 四角
 			return 2 ^ 0.5 * (line_width / 2 + antialias);
-		elseif end_shape == 2 then -- 平坦
-			return ((line_width / 2 + antialias) ^ 2 + antialias ^ 2) ^ 0.5;
-		else -- 円 / 三角
+		else -- 円 / 平坦 / 三角
 			return line_width / 2 + antialias;
 		end
 	end
@@ -166,7 +164,7 @@ local line_inflation do
 	local function join_inflation(join_shape, line_width, antialias, miter_limit)
 		if join_shape == 2 then -- マイター
 			return miter_limit * (line_width / 2 + antialias);
-		else -- ラウンド / ベベル / ブランク
+			return ((line_width / 2 + antialias) ^ 2 + antialias ^ 2) ^ 0.5;
 			return line_width / 2 + antialias;
 		end
 	end
@@ -188,8 +186,8 @@ local line_inflation do
 			for i = 2, #dash_pat, 2 do
 				if dash_pat[i] > 0 then goto has_dash end
 			end
+			return m;
 		end
-		do return m end
 		::has_dash::
 		return math.max(m, end_inflation(dash_end_shape, line_width, antialias));
 	end
