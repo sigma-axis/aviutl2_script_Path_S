@@ -28,26 +28,20 @@ float noise_func(float2 pos, uint2 seed, uint noise_type)
 {
 	[branch] switch (noise_type) {
 	default: return 0;
-	case 1:
-		// checker
+	case 1: // checker
 		return checker(uint2(pos));
-	case 2:
-		// bayer 2x2
+	case 2: // bayer 2x2
 		return ((bayer_88(uint2(pos)) & 0xc000) + 0x2000) / float(1 << 16);
-	case 3:
-		// bayer 4x4
+	case 3: // bayer 4x4
 		return ((bayer_88(uint2(pos)) & 0xf000) + 0x0800) / float(1 << 16);
-	case 4:
-		// bayer 256x256
+	case 4: // bayer 256x256
 		return (bayer_88(uint2(pos)) + 0.5) / float(1 << 16);
-	case 5: {
+	case 5: { // Interleaved Gradient Noise
 		uint2 s = uint2(106033, 92681) * seed;
 		s ^= s >> 14; s &= 0x3fff;
-		// Interleaved Gradient Noise
 		return ign(floor(pos) + s);
 	}
-	case 6:
-		// white noise
+	case 6: // white noise
 		return ibuki(float4(pos, seed));
 	}
 }
