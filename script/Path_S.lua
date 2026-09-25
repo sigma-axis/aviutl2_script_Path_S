@@ -97,14 +97,15 @@ end
 ---| 1 # 四角
 ---| 2 # 平坦
 ---| 3 # 三角
+---| 4 # リボン
 local PI_choose_end_shape do
 	local name2num = {
-		["円"] = 0, ["四角"] = 1, ["平坦"] = 2, ["三角"] = 3,
+		["円"] = 0, ["四角"] = 1, ["平坦"] = 2, ["三角"] = 3, ["リボン"] = 4,
 	};
 	---PI で塗りつぶしの「範囲」指定を適用する．
 	---このパラメタは次の形式で指定されているものとする:
 	---
-	---`--select@end_shape:端の形状=0,円=0,四角=1,平坦=2`
+	---`--select@end_shape:端の形状=0,円=0,四角=1,平坦=2,三角=3,リボン=4`
 	---@param pi_value any
 	---@param gui_value end_shape
 	---@return end_shape
@@ -112,7 +113,7 @@ local PI_choose_end_shape do
 		if type(pi_value) == "string" then
 			gui_value = name2num[pi_value] or gui_value;
 		end
-		return math.min(math.max(math.floor(0.5 + gui_value), 0), 3);
+		return math.min(math.max(math.floor(0.5 + gui_value), 0), 4);
 	end
 end
 
@@ -151,6 +152,8 @@ local line_inflation do
 	local function end_inflation(end_shape, line_width, antialias)
 		if end_shape == 1 then -- 四角
 			return 2 ^ 0.5 * (line_width / 2 + antialias);
+		elseif end_shape == 4 then -- リボン
+			return 2 ^ 0.5 * line_width / 2 + antialias;
 		else -- 円 / 平坦 / 三角
 			return line_width / 2 + antialias;
 		end

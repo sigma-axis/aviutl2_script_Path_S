@@ -310,6 +310,7 @@ Although, usage documentations for this script / plugin in languages other than 
 | `四角` | ![「四角」の端の形状のサンプル](https://github.com/user-attachments/assets/6a092fdd-fefe-482d-b1fd-38834a8c8fe0) |
 | `平坦` | ![「平坦」の端の形状のサンプル](https://github.com/user-attachments/assets/d80725cc-20c6-4e46-a3fd-ac6ada038289) |
 | `三角` | ![「三角」の端の形状のサンプル](https://github.com/user-attachments/assets/703097e8-ba9b-486d-b347-7c3a29be7a2d) |
+| `リボン` | TODO: 「リボン」の端の形状のサンプル |
 
 初期値は `円`.
 
@@ -1241,6 +1242,7 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
   - ラインと塗りの両方を持つオブジェクト系スクリプトで，「ぼかし幅」をライン部分と塗り部分で個別に指定するように (**破壊的変更**).
     - ディザリング機能の追加に伴って分離．
     - 以前の設定はライン部分に継承され，塗り部分の設定は新規項目の扱い．
+  - 「端の形状」に「リボン」を追加．
   - ライン系スクリプトで「ぼかし幅」が大きいときに，アーティファクトが出ることがあったのを修正．
   - 「スクウェアσ」の描画結果の位置と回転中心をサブピクセル単位で微調整．
     - 「水平揃え」「垂直揃え」を変更しても，サブピクセルのずれが起こらないように．

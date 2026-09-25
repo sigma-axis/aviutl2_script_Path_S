@@ -57,7 +57,7 @@ float4 carve_dash(float4 pos : SV_Position) : SV_Target
 			if (is_stroke_whole && is_stroke_period &&
 				dot(d1, pt0) < 0 && dot(d1, ptm) >= 0)
 				sq_dist = min(sq_dist, side * side);
-			if ((was_stroke_whole && was_stroke_period) != (is_stroke_whole && is_stroke_period)) {
+			[branch] if ((was_stroke_whole && was_stroke_period) != (is_stroke_whole && is_stroke_period)) {
 				sq_dist = min(sq_dist, sq_dist_func_end(pt0,
 					(was_stroke_whole && was_stroke_period) ? d1 : -d1,
 					(was_stroke_whole != is_stroke_whole) ? end_shape : dash_shape, padding));
@@ -70,7 +70,7 @@ float4 carve_dash(float4 pos : SV_Position) : SV_Target
 		d0 = d1;
 	}
 
-	if (loop) {
+	[branch] if (loop) {
 		float2 d1 = get_point(1) - pos.xy - pt0;
 		d1 = length(d1) == 0 ? float2(1, 0) : normalize(d1);
 		const bool is_stroke_whole = phase_whole[0] <= 0,

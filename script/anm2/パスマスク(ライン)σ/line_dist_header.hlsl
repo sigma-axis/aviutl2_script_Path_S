@@ -8,17 +8,23 @@ float sq_dist_func_end(float2 pt, float2 d, uint shape, float padding)
 		[branch] switch (shape) {
 		case 0: default: return dot(pt, pt);
 		case 1: {
-			float D = max(l, L);
+			const float D = max(l, L);
 			return D * D;
 		}
 		case 2: {
-			float D = l * l;
-			if (L > padding) D += (L - padding) * (L - padding);
-			D = sqrt(D) + padding;
+			float D = max(L - padding, 0);
+			D = sqrt(l * l + D * D) + padding;
 			return D * D;
 		}
 		case 3: {
-			float D = l + L;
+			const float D = l + L;
+			return D * D;
+		}
+		case 4: {
+			float D;
+			[branch] if (l > padding && l + L > 2 * padding)
+				D = length(float2(l, L) - padding) + padding;
+			else D = max(sqrt(0.5) * (l - L) + padding, L);
 			return D * D;
 		}
 		}
@@ -36,9 +42,7 @@ float sq_dist_func_join(float2 pt, float2 d0, float2 d1, uint shape, float paddi
 			if (shape == 2) return L * L;
 		}
 		else if (shape >= 3) {
-			float D = min(abs(l0), abs(l1)); D *= D;
-			if (L > padding) D += (L - padding) * (L - padding);
-			D = sqrt(D) + padding;
+			const float D = length(float2(min(abs(l0), abs(l1)), max(L - padding, 0))) + padding;
 			return D * D;
 		}
 

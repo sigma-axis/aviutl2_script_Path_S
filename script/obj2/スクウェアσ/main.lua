@@ -70,6 +70,7 @@ local end_pos = 100
 ---四角 = 1
 ---平坦 = 2
 ---三角 = 3
+---リボン = 4
 local end_shape = 0
 
 ---$select:線結合の形状
@@ -93,6 +94,7 @@ local dash_pos = 0
 ---四角 = 1
 ---平坦 = 2
 ---三角 = 3
+---リボン = 4
 local dash_end_shape = 0
 
 --group:ライン境界設定,false
@@ -139,7 +141,7 @@ local alpha_fill = 0
 ---$track:fill::ぼかし幅, min = 0, max = 1000, step = 0.01, scale = 0.2
 local fill_antialias = 1
 
----$nolang: option: Checker, option: Bayer 2x2, option: Bayer 4x4, option: Bayer 256x256, option: IGN, option: White Noise
+---$nolang: option:Checker, option:Bayer 2x2, option:Bayer 4x4, option:Bayer 256x256, option:IGN, option:White Noise
 ---$select:fill::ディザリング
 ---なし = 0
 ---Checker = 1
@@ -392,8 +394,8 @@ end
 
 -- measure the path.
 local L, R, T, B, len = path_s.measure(pts, n_pts);
-local th = path_s.line_inflation(end_shape, dash_end_shape, 0,
-	line, antialias, 1, dash_pat);
+local th = math.max(path_s.line_inflation(end_shape, dash_end_shape, 0,
+	line, antialias, 1, dash_pat), fill_antialias);
 L, R, T, B = -- align to pixel at the specified center.
 	L + align_x * width / 2, R + align_x * width / 2,
 	T + align_y * height / 2, B + align_y * height / 2;

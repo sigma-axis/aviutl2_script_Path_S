@@ -60,6 +60,7 @@ local end_pos = 100
 ---四角 = 1
 ---平坦 = 2
 ---三角 = 3
+---リボン = 4
 local end_shape = 0
 
 ---$select:線結合の形状
@@ -92,6 +93,7 @@ local dash_pos = 0
 ---四角 = 1
 ---平坦 = 2
 ---三角 = 3
+---リボン = 4
 local dash_end_shape = 0
 
 --group:ライン境界設定,false
