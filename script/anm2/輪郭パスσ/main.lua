@@ -238,8 +238,9 @@ if rand_amplify > 0 then
 	-- randomize the path.
 	for i = 1, #paths do
 		local p = paths[i];
-		p.points, p.num_segments = path_s.randomize(p.points, p.num_segments,
+		local pts, n_pts = path_s.randomize(p.points, p.num_segments + 1,
 			rand_period, rand_amplify, 2, rand_seed);
+		p.points, p.num_segments = pts, n_pts - 1;
 	end
 end
 
