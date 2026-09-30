@@ -1211,6 +1211,207 @@ local function print_script_error(err_mes, source)
 	print("@warn", err_mes); -- raw message.
 end
 
+local find_boundaries, find_all_boundaries do
+	local tau, math_min, math_max, math_ceil, math_atan, math_atan2 = 2 * math.pi, math.min, math.max, math.ceil, math.atan, math.atan2;
+	local bit_rshift, bit_band, bit_bor = bit.rshift, bit.band, bit.bor;
+	local ptr_uint32, arr_uint8 = ffi.typeof("uint32_t*"), ffi.typeof("uint8_t[?]");
+
+	-- `dir` shall mean as, for each opaque pixel,
+	-- a boundary path lies on and goes to the direction as the followings:
+	--       (+1,0)→
+	--   (0,-1)↑□↓(0,+1)
+	--       (-1,0)←
+	-- □ represents a focused opaque pixel,
+	-- arrows represent sections of the path weaving between pixels,
+	-- numbers are the values for the variables `dx` and `dy`.
+
+	local function is_opaque(x, y, buf, w, h, thresh)
+		return 0 <= x and x < w and 0 <= y and y < h and buf[x + y * w] >= thresh;
+	end
+
+	-- boundary-tracking function.
+	local function advance(X, Y, dx, dy, buf, w, h, thresh, conn_corner)
+		local x1, y1, x2, y2 = X + dx, Y + dy, X + (dy + dx), Y + (dy - dx);
+		local X1, Y1, X3, Y3 = X, Y, x2, y2;
+		local dx1, dy1, dx3, dy3 = -dy, dx, dy, -dx;
+		if conn_corner then
+			x1, y1, x2, y2 = x2, y2, x1, y1;
+			X1, Y1, X3, Y3 = X3, Y3, X1, Y1;
+			dx1, dy1, dx3, dy3 = dx3, dy3, dx1, dy1;
+		end
+
+		if is_opaque(x1, y1, buf, w, h, thresh) == conn_corner then return X1, Y1, dx1, dy1 end
+		if is_opaque(x2, y2, buf, w, h, thresh) == conn_corner then return X + dx, Y + dy, dx, dy end
+		return X3, Y3, dx3, dy3;
+	end
+
+	local function pt_cand_anchor(X, Y, dx, dy, buf, w, h, thresh)
+		local x, y = X + dy, Y - dx;
+		local a0, a1 = bit_rshift(buf[X + Y * w], 24), 0;
+		if 0 <= x and x < w and 0 <= y and y < h then
+			a1 = bit_rshift(buf[x + y * w], 24) end
+
+		local t = (thresh - a1) / (a0 - a1);
+		return t * X + (1 - t) * x + 0.5, t * Y + (1 - t) * y + 0.5;
+	end
+
+	---指定したバッファの指定した点に近い境界を囲うパスを生成する．点は複数個指定できる．
+	---@param target string # バッファの名前．
+	---@param points integer[] # 点の配列を，`{ x1, y1, x2, y2, ... }` の形式で指定．
+	---@param num_points integer # `points` に含まれる点の個数．
+	---@param thresh number # 境界を決定するアルファ値のしきい値．0.0 -- 1.0.
+	---@param conn_corner boolean # 角で隣接するかどうか．
+	---@param prec number # パスのラインの許容ぶれ幅．ピクセル単位．
+	---@return { points: number[], num_segments: integer }[] # 生成されたパスの配列．ループ端点は末尾に含まれている．
+	function find_boundaries(target, points, num_points, thresh, conn_corner, prec)
+		local th, th_i =
+			math_min(math_max(255 * thresh, 0.125), 255),
+			math_min(math_max(math_ceil(255 * thresh), 1), 255) * 2 ^ 24;
+		local d, w, h = obj.getpixeldata(target);
+		local buf = ptr_uint32(d);
+
+		local ret, n_paths = {}, 0;
+		for i = 1, num_points do
+			local X, Y = points[2 * i - 1], points[2 * i];
+
+			-- the first pixel must be opaque, and advance left/up/right/down until the boundary.
+			if is_opaque(X, Y, buf, w, h, th_i) then
+				local dx0, dy0 = 0, -1;
+				for j = 1, math_max(w, h) do
+					if not is_opaque(X - j, Y, buf, w, h, th_i) then
+						X, dx0, dy0 = X - j + 1, 0, -1;
+						break;
+					end
+					if not is_opaque(X, Y - j, buf, w, h, th_i) then
+						Y, dx0, dy0 = Y - j + 1, 1, 0;
+						break;
+					end
+					if not is_opaque(X + j, Y, buf, w, h, th_i) then
+						X, dx0, dy0 = X + j - 1, 0, 1;
+						break;
+					end
+					if not is_opaque(X, Y + j, buf, w, h, th_i) then
+						Y, dx0, dy0 = Y + j - 1, -1, 0;
+						break;
+					end
+				end
+
+				-- track the boundary until it closes.
+				local ax, ay = pt_cand_anchor(X, Y, dx0, dy0, buf, w, h, th);
+				local bx, by, t_min, t_max, path, n = ax, ay, -tau, tau, { ax, ay }, 1;
+				local x, y, dx, dy = advance(X, Y, dx0, dy0, buf, w, h, th_i, conn_corner);
+				while x ~= X or y ~= Y or dx ~= dx0 or dy ~= dy0 do
+					local cx, cy = pt_cand_anchor(x, y, dx, dy, buf, w, h, th);
+
+					-- update the valid range of angle.
+					local t, dt =
+						math_atan2(cy - ay, cx - ax),
+						math_atan(0.5 * prec / ((cx - ax) ^ 2 + (cy - ay) ^ 2) ^ 0.5);
+					if t_min > t + dt then t_min, t_max = t_min - tau, t_max - tau;
+					elseif t_max < t - dt then t_min, t_max = t_min + tau, t_max + tau end
+					t_min, t_max = math_max(t_min, t - dt), math_min(t_max, t + dt);
+
+					if t_min > t_max then
+						-- the angle will be invalid if the previous anchor is skipped.
+						path[2 * n + 1], path[2 * n + 2] = bx, by;
+						n = n + 1;
+						t, dt =
+							math_atan2(cy - by, cx - bx),
+							math_atan(prec / ((cx - bx) ^ 2 + (cy - by) ^ 2) ^ 0.5);
+						ax, ay, t_min, t_max = bx, by, t - dt, t + dt;
+					elseif t_min >= tau / 2 then t_min, t_max = t_min - tau, t_max - tau;
+					elseif t_max <= -tau / 2 then t_min, t_max = t_min - tau, t_max - tau end
+
+					bx, by = cx, cy;
+					x, y, dx, dy = advance(x, y, dx, dy, buf, w, h, th_i, conn_corner);
+				end
+
+				-- append the loop end point to the path.
+				path[2 * n + 1], path[2 * n + 2] = path[1], path[2];
+
+				-- append the path.
+				ret[n_paths + 1] = { points = path, num_segments = n };
+				n_paths = n_paths + 1;
+			end
+		end
+
+		return ret;
+	end
+
+	---指定したバッファの境界を囲うパスを，バッファ全体から探して生成する．
+	---@param target string # バッファの名前．
+	---@param thresh number # 境界を決定するアルファ値のしきい値．0.0 -- 1.0.
+	---@param conn_corner boolean # 角で隣接するかどうか．
+	---@param prec number # パスのラインの許容ぶれ幅．ピクセル単位．
+	---@return { points: number[], num_segments: integer}[] # 生成されたパスの配列．ループ端点は末尾に含まれている．
+	function find_all_boundaries(target, thresh, conn_corner, prec)
+		local th, th_i =
+			math_min(math_max(255 * thresh, 0.125), 255),
+			math_min(math_max(math_ceil(255 * thresh), 1), 255) * 2 ^ 24;
+		local d, w, h = obj.getpixeldata(target);
+		local buf, marks = ptr_uint32(d), arr_uint8(w * h);
+
+		local ret, n_paths = {}, 0;
+		for j = 0, h - 1 do
+			local prev_opaque, prev_mark = false, 0;
+			for i = 0, w - 1 do
+				local curr_opaque, curr_mark =
+					is_opaque(i, j, buf, w, h, th_i), marks[i + w * j];
+				if prev_opaque ~= curr_opaque and
+					(prev_opaque and bit_band(prev_mark, 2) or bit_band(curr_mark, 1)) == 0 then
+					local X, Y, dx0, dy0 = i, j, 0, -1;
+					if prev_opaque then X, dy0 = i - 1, 1 end
+					marks[X + w * Y] = bit_bor(marks[X + w * Y], dy0 > 0 and 2 or 1);
+
+					-- track the boundary until it closes.
+					local ax, ay = pt_cand_anchor(X, Y, dx0, dy0, buf, w, h, th);
+					local bx, by, t_min, t_max, path, n = ax, ay, -tau, tau, { ax, ay }, 1;
+					local x, y, dx, dy = advance(X, Y, dx0, dy0, buf, w, h, th_i, conn_corner);
+					while x ~= X or y ~= Y or dx ~= dx0 or dy ~= dy0 do
+						if dx == 0 then
+							marks[x + w * y] = bit_bor(marks[x + w * y], dy > 0 and 2 or 1);
+						end
+						local cx, cy = pt_cand_anchor(x, y, dx, dy, buf, w, h, th);
+
+						-- update the valid range of angle.
+						local t, dt =
+							math_atan2(cy - ay, cx - ax),
+							math_atan(0.5 * prec / ((cx - ax) ^ 2 + (cy - ay) ^ 2) ^ 0.5);
+						if t_min > t + dt then t_min, t_max = t_min - tau, t_max - tau;
+						elseif t_max < t - dt then t_min, t_max = t_min + tau, t_max + tau end
+						t_min, t_max = math_max(t_min, t - dt), math_min(t_max, t + dt);
+
+						if t_min > t_max then
+							-- the angle will be invalid if the previous anchor is skipped.
+							path[2 * n + 1], path[2 * n + 2] = bx, by;
+							n = n + 1;
+							t, dt =
+								math_atan2(cy - by, cx - bx),
+								math_atan(prec / ((cx - bx) ^ 2 + (cy - by) ^ 2) ^ 0.5);
+							ax, ay, t_min, t_max = bx, by, t - dt, t + dt;
+						elseif t_min >= tau / 2 then t_min, t_max = t_min - tau, t_max - tau;
+						elseif t_max <= -tau / 2 then t_min, t_max = t_min - tau, t_max - tau end
+
+						bx, by = cx, cy;
+						x, y, dx, dy = advance(x, y, dx, dy, buf, w, h, th_i, conn_corner);
+					end
+
+					-- append the loop end point to the path.
+					path[2 * n + 1], path[2 * n + 2] = path[1], path[2];
+
+					-- append the path.
+					ret[n_paths + 1] = { points = path, num_segments = n };
+					n_paths = n_paths + 1;
+					curr_mark = marks[i + w * j]; -- update the marker.
+				end
+				prev_opaque, prev_mark = curr_opaque, curr_mark;
+			end
+		end
+
+		return ret;
+	end
+end
+
 -- return the table containing the exported functions.
 return {
 	PI = {
@@ -1247,6 +1448,9 @@ return {
 	},
 
 	print_script_error = print_script_error,
+
+	find_boundaries = find_boundaries,
+	find_all_boundaries = find_all_boundaries,
 
 	VERSION = "${PACKAGE_VERSION}",
 };

@@ -10,7 +10,7 @@ project:
 package:
   id: Path_S
   name: パス描画スクリプト Path_S
-  version: v2.30
+  version: v2.40-wip
   information: "{name} {version} by {AUTHOR}"
   script_sub_dir: ""
   uninstall_sub_folder_file: false
@@ -59,6 +59,8 @@ scripts:
         path: script/anm2/パス部分フィルタσここまで/main.lua
       - label: パスに沿って配置σ
         path: script/anm2/パスに沿って配置σ/main.lua
+      - label: 輪郭パスσ
+        path: script/anm2/輪郭パスσ/main.lua
 
   - name: "@Path_S.obj2"
     sources:
