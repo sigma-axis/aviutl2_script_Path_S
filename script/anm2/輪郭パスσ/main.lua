@@ -138,6 +138,18 @@ local rand_amplify = 0
 ---$track:ランダムシード, min = -65536, max = 65535, step = 1
 local rand_seed = 10000
 
+--group:合成,false
+---$select:モード
+---前方から合成 = 0
+---後方から合成 = 1
+local mode_draw = 0
+
+---$track:ライン透明度, min = 0, max = 100, step = 0.01
+local line_alpha = 0
+
+---$track:元画像透明度, min = 0, max = 100, step = 0.01
+local orig_alpha = 0
+
 --group:その他,false
 ---$nolang: name
 ---$value:PI
@@ -150,7 +162,7 @@ local path_s = require("Path_S");
 local obj, math, tonumber, type = obj, math, tonumber, type;
 
 
--- TODO: 合成法，膨張，追加効果
+-- TODO: 膨張，追加効果
 
 
 if obj.getoption("gui") and mode_targets ~= 2 then
@@ -198,6 +210,9 @@ dither_size = math.max(dither_size / 100, 1);
 rand_period = math.max(rand_period, 4);
 rand_amplify = math.max(rand_amplify, 0);
 rand_seed = math.min(math.max(math.floor(0.5 + rand_seed), -2 ^ 16), 2 ^ 16 - 1);
+mode_draw = math.min(math.max(math.floor(0.5 + mode_draw), 0), 1);
+line_alpha = math.min(math.max(1 - line_alpha / 100, 0), 1);
+orig_alpha = math.min(math.max(1 - orig_alpha / 100, 0), 1);
 
 --#endregion PI / normalize parameters.
 
@@ -241,18 +256,12 @@ L, R = math.floor(L - th), math.ceil(R + th);
 T, B = math.floor(T - th), math.ceil(B + th);
 local W, H, dcx, dcy = R - L, B - T, (w - L - R) / 2, (h - T - B) / 2;
 
--- prepare the canvas.
-if W > w or H > h then
-	obj.setoption("drawtarget", "tempbuffer", W, H);
-	obj.clearbuffer("tempbuffer", W, H);
-	obj.draw(dcx, dcy);
-else
-	assert(obj.copybuffer("tempbuffer", "object"));
-	obj.setoption("drawtarget", "tempbuffer");
-end
-obj.clearbuffer("object", W, H, color);
+-- backup the original image.
+local cache_name = "cache:path_s/track/obj#"..obj.effect_id;
+assert(obj.copybuffer(cache_name, "object"));
 
 -- carve the shape.
+obj.clearbuffer("object", W, H, color);
 for i = 1, #paths do
 	local p = paths[i];
 	path_s.path_mask_line(#paths > 1 and 1 or 0, #paths > 1 and 0 or 1,
@@ -268,7 +277,7 @@ for i = 1, #paths do
 		p.points, p.num_segments, true, 8,
 		start_pos, end_pos, end_shape, 0, 1,
 		dash_pat, dash_pos, true, dash_end_shape,
-		1, 0, dcx - w / 2, dcy - h / 2, nil, "cache:path_s/track/pts");
+		1, 0, dcx - w / 2, dcy - h / 2);
 end
 if #paths > 1 then
 	obj.pixelshader("invert_alpha", "object", "object", {
@@ -282,5 +291,28 @@ end
 obj.cx, obj.cy = obj.cx + dcx, obj.cy + dcy;
 
 -- combine with the original image.
-obj.draw();
+if mode_draw == 0 then
+	local line_cache = "cache:path_s/track/line";
+	assert(obj.copybuffer(line_cache, "object"));
+	if W > w or H > h or orig_alpha < 1 then
+		assert(obj.copybuffer("object", cache_name));
+		obj.setoption("drawtarget", "tempbuffer", W, H);
+		obj.draw(dcx, dcy, 0, 1, orig_alpha);
+	else
+		assert(obj.copybuffer("tempbuffer", cache_name));
+		obj.setoption("drawtarget", "tempbuffer");
+	end
+	assert(obj.copybuffer("object", line_cache));
+	obj.draw(0, 0, 0, 1, line_alpha);
+else
+	if line_alpha < 1 then
+		obj.setoption("drawtarget", "tempbuffer", W, H);
+		obj.draw(0, 0, 0, 1, line_alpha);
+	else
+		assert(obj.copybuffer("tempbuffer", "object"));
+		obj.setoption("drawtarget", "tempbuffer");
+	end
+	assert(obj.copybuffer("object", cache_name));
+	obj.draw(dcx, dcy, 0, 1, orig_alpha);
+end
 assert(obj.copybuffer("object", "tempbuffer"));
