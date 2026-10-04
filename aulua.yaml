@@ -61,6 +61,8 @@ scripts:
         path: script/anm2/パスに沿って配置σ/main.lua
       - label: 輪郭パスσ
         path: script/anm2/輪郭パスσ/main.lua
+      - label: 追加フィルタここまで
+        path: script/anm2/追加フィルタここまで/main.lua
 
   - name: "@Path_S.obj2"
     sources:

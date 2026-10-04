@@ -304,7 +304,7 @@ local cxt; cxt = path_s.post_effect.make_cxt(
 -- apply following filters.
 if extra_filter == 1 then
 	-- push the context so subsequent filter can combine.
-	path_s.post_effect.push_cxt(cxt);
+	path_s.context_manager.push(cxt);
 	obj.effect();
 	-- then pop it off after.
 	cxt = path_s.post_effect.check_cxt(path_s.context_manager.pop(obj.effect_id));
