@@ -3,5 +3,5 @@
 --label:Path_S\加工
 --require:${LEAST_AVIUTL_VERSION}
 local path_s = require("Path_S");
-local cxt = path_s.partial_filter.pop_cxt();
+local cxt = path_s.partial_filter.check_cxt(path_s.context_manager.pop());
 if cxt then path_s.partial_filter.combine(cxt) end

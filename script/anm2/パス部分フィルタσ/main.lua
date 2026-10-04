@@ -219,10 +219,10 @@ local cxt; cxt = path_s.partial_filter.make_cxt(
 -- apply following filters.
 if extra_filter == 0 then
 	-- push the context so subsequent filter can combine.
-	path_s.partial_filter.push_cxt(cxt);
+	path_s.context_manager.push(cxt);
 	obj.effect();
 	-- then pop it off after.
-	cxt = path_s.partial_filter.pop_cxt(obj.effect_id);
+	cxt = path_s.partial_filter.check_cxt(path_s.context_manager.pop(obj.effect_id));
 else
 	local f, c, e;
 	f, e = loadstring(extra_script);

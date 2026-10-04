@@ -307,7 +307,7 @@ if extra_filter == 1 then
 	path_s.post_effect.push_cxt(cxt);
 	obj.effect();
 	-- then pop it off after.
-	cxt = path_s.post_effect.pop_cxt(obj.effect_id);
+	cxt = path_s.post_effect.check_cxt(path_s.context_manager.pop(obj.effect_id));
 elseif extra_filter == 2 then
 	local f, c, e;
 	f, e = loadstring(extra_script);
