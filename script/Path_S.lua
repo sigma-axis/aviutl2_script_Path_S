@@ -1189,6 +1189,146 @@ local partial_filter_make_cxt, partial_filter_push_cxt, partial_filter_pop_cxt, 
 	end
 end
 
+local post_effect_make_cxt, post_effect_push_cxt, post_effect_pop_cxt, post_effect_combine do
+	---@alias post_effect_context { [1]: 0|1, [2]: number, [3]: number, [4]: integer, [5]: integer, [6]: number, [7]: number, [8]: string } # 後続フィルタに伝達できる形で処理の途中状態を保持するテーブル．
+	local key_name_stack, key_name_cxt do
+		local g_key_stack, g_key_cxt = "path_s/boundary/cxt_stack#", "path_s/boundary/cxt#";
+		function key_name_stack(id) return g_key_stack..id end
+		function key_name_cxt(id, effect_id) return g_key_cxt..id.."&"..effect_id end
+	end
+	local function check_cxt(t)
+		-- mode_draw
+		if type(t[1]) ~= "number" or t[1] % 1 > 0 or t[1] < 0 or t[1] > 1 then return false end
+		-- orig_alpha
+		if type(t[2]) ~= "number" or t[2] < 0 or t[2] > 1 then return false end
+		-- ext_alpha
+		if type(t[3]) ~= "number" or t[3] < 0 or t[3] > 1 then return false end
+		-- w0
+		if type(t[4]) ~= "number" or t[4] % 1 > 0 or t[4] < 1 or t[4] >= 2 ^ 14 then return false end
+		-- h0
+		if type(t[5]) ~= "number" or t[5] % 1 > 0 or t[5] < 1 or t[5] >= 2 ^ 14 then return false end
+		-- cx0
+		if type(t[6]) ~= "number" then return false end
+		-- cy0
+		if type(t[7]) ~= "number" then return false end
+		-- cache_name
+		if type(t[8]) ~= "string" or not t[8]:find("^cache:.") then return false end
+		return true;
+	end
+	---輪郭パスσ などで後続フィルタに伝達する情報を登録し，登録情報のテーブルを作成する．`post_effect_push_cxt()` や `post_effect_combine()` で利用する．
+	---@param mode_draw 0|1 # モード (前方から合成 or 後方から合成).
+	---@param orig_alpha number # 元画像のアルファ値．
+	---@param ext_alpha number # 合成画像のアルファ値．
+	---@param w0 integer # 元画像の幅．
+	---@param h0 integer # 元画像の高さ．
+	---@param cx0 number # 元画像の回転中心の X 座標．
+	---@param cy0 number # 元画像の回転中心の Y 座標．
+	---@param cache_name string # 元画像のキャッシュ名．
+	---@return post_effect_context
+	function post_effect_make_cxt(
+		mode_draw, orig_alpha, ext_alpha,
+		w0, h0, cx0, cy0, cache_name)
+		return {
+			mode_draw, orig_alpha, ext_alpha,
+			w0, h0, cx0, cy0, cache_name,
+		};
+	end
+	---輪郭パスσ などで後続フィルタに伝達する情報のテーブルを `global` に登録する．`obj.effect()` 経由で後続フィルタからも参照できる．
+	---@param cxt post_effect_context 登録情報のテーブル．
+	function post_effect_push_cxt(cxt)
+		local g_key_stack = key_name_stack(obj.id);
+		local stack do
+			local str_stack = global[g_key_stack];
+			if str_stack then
+				stack = buffer.decode(str_stack);
+				if type(stack) ~= "table" then stack = {} end
+			else stack = {} end
+		end
+		stack[#stack + 1] = obj.effect_id;
+		local g_key_cxt = key_name_cxt(obj.id, obj.effect_id);
+		global[g_key_cxt] = buffer.encode(cxt);
+		global[g_key_stack] = buffer.encode(stack);
+	end
+	---輪郭パスσ などで登録した情報のテーブルを `global` から抜き出す．
+	---@param effect_id integer? 抜き出す対象の `obj.effect_id`. 省略時は stack top のみを抜き出して，そのテーブルを返す．stack が空の場合は `nil` を返す．指定時はこの id とそれ以降を stack から抜き出して，指定 id のテーブルを返す．id が見つからない場合は `nil` を返す．
+	---@return post_effect_context? cxt 登録情報のテーブル，または nil．
+	function post_effect_pop_cxt(effect_id)
+		local g_key_stack = key_name_stack(obj.id);
+		local stack do
+			local str_stack = global[g_key_stack];
+			if str_stack then
+				stack = buffer.decode(str_stack);
+				if type(stack) ~= "table" then stack = {} end
+			else stack = {} end
+		end
+		local idx = -1 if #stack > 0 then
+			if effect_id then
+				for i = #stack, 1, -1 do
+					if stack[i] == effect_id then idx = i; break end
+				end
+			else idx = #stack end
+		end
+		local cxt = nil if idx >= 0 then
+			for i = #stack, idx + 1, -1 do
+				local g_key_cxt = key_name_cxt(obj.id, stack[i]);
+				stack[i] = nil;
+				global[g_key_cxt] = nil;
+			end
+			local g_key_cxt = key_name_cxt(obj.id, stack[idx]);
+			stack[idx] = nil;
+			local str_cxt = global[g_key_cxt]; global[g_key_cxt] = nil;
+			if str_cxt then cxt = buffer.decode(str_cxt) end
+		end
+		global[g_key_stack] = #stack > 0 and buffer.encode(stack) or nil;
+
+		-- check the restored object.
+		if type(cxt) ~= "table" then return nil end
+		if not check_cxt(cxt) then return nil end
+		return cxt;
+	end
+
+	---登録情報のテーブルをもとにフィルタ加工後と元画像の 2 つを合成する．
+	---@param cxt post_effect_context 登録情報のテーブル．
+	function post_effect_combine(cxt)
+		local mode_draw, orig_alpha, ext_alpha,
+			w0, h0, cx0, cy0, cache_name =
+			cxt[1], cxt[2], cxt[3],
+			cxt[4], cxt[5], cxt[6], cxt[7], cxt[8];
+		local cx1, cy1, L, R, T, B = obj.cx, obj.cy,
+			math.floor(math.min(cx0 - obj.cx + (w0 - obj.w) / 2, 0)),
+			math.ceil(math.max(cx0 - obj.cx + (w0 + obj.w) / 2, w0)),
+			math.floor(math.min(cy0 - obj.cy + (h0 - obj.h) / 2, 0)),
+			math.ceil(math.max(cy0 - obj.cy + (h0 + obj.h) / 2, h0));
+		local W, H = R - L, B - T;
+		obj.cx, obj.cy = cx0 - (L + R - w0) / 2, cy0 - (T + B - h0) / 2;
+		if mode_draw == 0 then
+			local line_cache = "cache:path_s/track/line";
+			assert(obj.copybuffer(line_cache, "object"));
+			if W > w0 or H > h0 or obj.cx ~= cx0 or obj.cy ~= cy0 or orig_alpha < 1 then
+				assert(obj.copybuffer("object", cache_name));
+				obj.setoption("drawtarget", "tempbuffer", W, H);
+				obj.draw(obj.cx - cx0, obj.cy - cy0, 0, 1, orig_alpha);
+			else
+				assert(obj.copybuffer("tempbuffer", cache_name));
+				obj.setoption("drawtarget", "tempbuffer");
+			end
+			assert(obj.copybuffer("object", line_cache));
+			obj.draw(obj.cx - cx1, obj.cy - cy1, 0, 1, ext_alpha);
+		else
+			if W > obj.w or H > obj.h or obj.cx ~= cx1 or obj.cy ~= cy1 or ext_alpha < 1 then
+				obj.setoption("drawtarget", "tempbuffer", W, H);
+				obj.draw(obj.cx - cx1, obj.cy - cy1, 0, 1, ext_alpha);
+			else
+				assert(obj.copybuffer("tempbuffer", "object"));
+				obj.setoption("drawtarget", "tempbuffer");
+			end
+			assert(obj.copybuffer("object", cache_name));
+			obj.draw(obj.cx - cx0, obj.cy - cy0, 0, 1, orig_alpha);
+		end
+		assert(obj.copybuffer("object", "tempbuffer"));
+	end
+end
+
 ---Lua のエラーメッセージを，AviUtl2 が標準で出力する形式を真似て出力する．
 ---@param err_mes string Lua からのエラーメッセージ．
 ---@param source string エラー元となった Lua スクリプトのソースコード．
@@ -1447,10 +1587,19 @@ return {
 		combine = partial_filter_combine,
 	},
 
-	print_script_error = print_script_error,
+	boundary = {
+		find = find_boundaries,
+		find_all = find_all_boundaries,
+	},
 
-	find_boundaries = find_boundaries,
-	find_all_boundaries = find_all_boundaries,
+	post_effect = {
+		make_cxt = post_effect_make_cxt,
+		push_cxt = post_effect_push_cxt,
+		pop_cxt = post_effect_pop_cxt,
+		combine = post_effect_combine,
+	},
+
+	print_script_error = print_script_error,
 
 	VERSION = "${PACKAGE_VERSION}",
 };

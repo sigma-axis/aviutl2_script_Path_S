@@ -150,6 +150,18 @@ local line_alpha = 0
 ---$track:元画像透明度, min = 0, max = 100, step = 0.01
 local orig_alpha = 0
 
+--group:フィルタ設定,false
+-- ---$tips:「後続フィルタ」の範囲は「後続フィルタここまで」で区切ることができます．
+---$select:追加のフィルタ効果
+---なし = 0
+---後続フィルタ = 1
+---スクリプト実行 = 2
+local extra_filter = 0
+
+---$text:追加スクリプト
+local extra_script = 'obj.effect("グラデーション",\n  "形状","凸形",\n  "角度",30,\n  "開始色",0x00ff00) -- グラデーション適用\nobj.cx=obj.cx+100 -- 位置もずらせる\n'
+
+--hide@extra_script:extra_filter~=2
 --group:その他,false
 ---$nolang: name
 ---$value:PI
@@ -160,10 +172,6 @@ local PI = {}
 ]]
 local path_s = require("Path_S");
 local obj, math, tonumber, type = obj, math, tonumber, type;
-
-
--- TODO: 膨張，追加効果
-
 
 if obj.getoption("gui") and mode_targets ~= 2 then
 	local cx, cy = path_s.anchor_offset(mode_anchor_base);
@@ -224,15 +232,13 @@ if mode_targets < 2 then
 		points[2 * i - 1] = math.floor(0.5 + points[2 * i - 1] + cx + obj.w / 2);
 		points[2 * i] = math.floor(0.5 + points[2 * i] + cy + obj.h / 2);
 	end
-	paths = path_s.find_boundaries("object", points, num_points,
+	paths = path_s.boundary.find("object", points, num_points,
 		thresh, conn_corner, prec_track);
 else
 	cx, cy = path_s.anchor_offset(0); -- rotation center.
-	paths = path_s.find_all_boundaries("object", thresh, conn_corner, prec_track);
+	paths = path_s.boundary.find_all("object", thresh, conn_corner, prec_track);
 end
 if #paths == 0 then return end
-
--- TODO: inflation comes here.
 
 if rand_amplify > 0 then
 	-- randomize the path.
@@ -260,8 +266,10 @@ local W, H, dcx, dcy = R - L, B - T, (w - L - R) / 2, (h - T - B) / 2;
 -- backup the original image.
 local cache_name = "cache:path_s/track/obj#"..obj.effect_id;
 assert(obj.copybuffer(cache_name, "object"));
+local cx0, cy0 = obj.cx, obj.cy;
 
 -- carve the shape.
+obj.cx, obj.cy = obj.cx + dcx, obj.cy + dcy;
 obj.clearbuffer("object", W, H, color);
 for i = 1, #paths do
 	local p = paths[i];
@@ -288,32 +296,35 @@ if #paths > 1 then
 	});
 end
 
--- adjust the center.
-obj.cx, obj.cy = obj.cx + dcx, obj.cy + dcy;
+-- save the current context.
+local cxt; cxt = path_s.post_effect.make_cxt(
+	mode_draw, orig_alpha, line_alpha,
+	w, h, cx0, cy0, cache_name);
 
--- combine with the original image.
-if mode_draw == 0 then
-	local line_cache = "cache:path_s/track/line";
-	assert(obj.copybuffer(line_cache, "object"));
-	if W > w or H > h or orig_alpha < 1 then
-		assert(obj.copybuffer("object", cache_name));
-		obj.setoption("drawtarget", "tempbuffer", W, H);
-		obj.draw(dcx, dcy, 0, 1, orig_alpha);
-	else
-		assert(obj.copybuffer("tempbuffer", cache_name));
-		obj.setoption("drawtarget", "tempbuffer");
+-- apply following filters.
+if extra_filter == 1 then
+	-- push the context so subsequent filter can combine.
+	path_s.post_effect.push_cxt(cxt);
+	obj.effect();
+	-- then pop it off after.
+	cxt = path_s.post_effect.pop_cxt(obj.effect_id);
+elseif extra_filter == 2 then
+	local f, c, e;
+	f, e = loadstring(extra_script);
+	if f then c, e = pcall(f) end
+	if not (f and c) then
+		path_s.print_script_error(tostring(e), extra_script);
+		obj.load("text", "");
+		return;
 	end
-	assert(obj.copybuffer("object", line_cache));
-	obj.draw(0, 0, 0, 1, line_alpha);
-else
-	if line_alpha < 1 then
-		obj.setoption("drawtarget", "tempbuffer", W, H);
-		obj.draw(0, 0, 0, 1, line_alpha);
-	else
-		assert(obj.copybuffer("tempbuffer", "object"));
-		obj.setoption("drawtarget", "tempbuffer");
-	end
-	assert(obj.copybuffer("object", cache_name));
-	obj.draw(dcx, dcy, 0, 1, orig_alpha);
 end
-assert(obj.copybuffer("object", "tempbuffer"));
+if obj.w <= 0 or obj.h <= 0 then return end -- subsequent filter already drew.
+
+-- if the context is still alive, combine with the original.
+if cxt then path_s.post_effect.combine(cxt) end
+
+if extra_filter == 1 then
+	-- draw to the framebuffer.
+	obj.setoption("drawtarget", "framebuffer");
+	obj.draw();
+end
