@@ -595,6 +595,36 @@ local function transform(pts, n_pts, scale, rotate, dx, dy)
 	end
 end
 
+local rotation_count do
+	local function quadrant(x, y)
+		if x >= 0 then return y >= 0 and 0 or 3;
+		else return y >= 0 and 1 or 2 end
+	end
+	---ループする点列に対して，回転回数を計算する．時計回りに正．
+	---@param pts number[] ループする点列．`{ x1, y1, x2, y2, ... }` の形式．始点と終点は同じ点である必要がある．
+	---@param n_segs integer `pts` に含まれる線分の個数．3 以上．
+	---@return number # 回転回数．時計回りに正．
+	function rotation_count(pts, n_segs)
+		local x0, y0, x1, y1 = pts[2 * n_segs - 1], pts[2 * n_segs], pts[1], pts[2];
+		local dx0, dy0 = x1 - x0, y1 - y0;
+		local q0 = quadrant(dx0, dy0);
+		local count = 0;
+		for i = 1, n_segs do
+			local x2, y2 = pts[2 * i + 1], pts[2 * i + 2];
+			local dx1, dy1 = x2 - x1, y2 - y1;
+			local q1 = quadrant(dx1, dy1);
+			if dx0 * dy1 - dy0 * dx1 >= 0 then
+				if q1 < q0 then count = count + 1 end
+			else
+				if q1 > q0 then count = count - 1 end
+			end
+			x0, y0, x1, y1 = x1, y1, x2, y2;
+			dx0, dy0, q0 = dx1, dy1, q1;
+		end
+		return count;
+	end
+end
+
 local disk_rand do
 	local setmetatable, tau, cos, sin, rand1 =
 		setmetatable, 2 * math.pi, math.cos, math.sin, obj.rand1;
@@ -1569,6 +1599,7 @@ return {
 	anchor = anchor,
 	poll = poll,
 	measure = measure,
+	rotation_count = rotation_count,
 	line_inflation = line_inflation,
 	find_index = find_index,
 	transform = transform,

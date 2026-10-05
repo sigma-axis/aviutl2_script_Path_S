@@ -55,7 +55,10 @@ local thresh = 50
 local conn_corner = false
 
 ---$track:境界精度, min = 10, max = 200, step = 0.01, scale = 0.5
-local prec_track = 50
+local prec_trace = 50
+
+---$checksection:時計回りに揃える
+local force_clockwise = true
 
 --group:ライン設定,false
 ---$tips:ライン描画範囲の始点，パス全体長からの % 単位
@@ -188,7 +191,8 @@ local extra_script = 'obj.effect("グラデーション",\n  "形状","凸形",\
 ---     :  color: number?,
 ---     :  thresh: number?,
 ---     :  conn_corner: boolean|number|nil,
----     :  prec_track: number?,
+---     :  prec_trace: number?,
+---     :  force_clockwise: boolean|number|nil,
 ---     :  start_pos: number?,
 ---     :  end_pos: number?,
 ---     :  end_shape: string?
@@ -218,8 +222,6 @@ local PI = {}
 local path_s = require("Path_S");
 local obj, math, tonumber, type = obj, math, tonumber, type;
 
--- TODO: 「時計回りに揃える」
-
 if obj.getoption("gui") and mode_targets ~= 2 then
 	local cx, cy = path_s.anchor_offset(mode_anchor_base);
 	num_points = math.floor(0.5 + num_points);
@@ -248,7 +250,8 @@ line = tonumber(PI.line) or line;
 color = tonumber(PI.color) or color;
 thresh = tonumber(PI.thresh) or thresh;
 conn_corner = path_s.PI.as_bool(PI.conn_corner, conn_corner);
-prec_track = tonumber(PI.prec_track) or prec_track;
+prec_trace = tonumber(PI.prec_trace) or prec_trace;
+force_clockwise = path_s.PI.as_bool(PI.force_clockwise, force_clockwise);
 start_pos = tonumber(PI.start_pos) or start_pos;
 end_pos = tonumber(PI.end_pos) or end_pos;
 end_shape = path_s.PI.end_shape(PI.end_shape, end_shape);
@@ -288,7 +291,7 @@ end
 line = math.max(line, 0);
 color = math.floor(0.5 + color) % 2 ^ 24;
 thresh = math.min(math.max(thresh / 100, 0), 1);
-prec_track = math.max(prec_track / 100, 1 / 16);
+prec_trace = math.max(prec_trace / 100, 1 / 16);
 start_pos = start_pos / 100;
 end_pos = end_pos / 100;
 antialias = math.max(antialias, 0);
@@ -320,13 +323,31 @@ if mode_targets < 2 then
 		points[2 * i] = math.floor(0.5 + points[2 * i] + cy + obj.h / 2);
 	end
 	paths = path_s.boundary.find("object", points, num_points,
-		thresh, conn_corner, prec_track);
+		thresh, conn_corner, prec_trace);
 else
 	cx, cy = path_s.anchor_offset(0); -- rotation center.
-	paths = path_s.boundary.find_all("object", thresh, conn_corner, prec_track);
+	paths = path_s.boundary.find_all("object", thresh, conn_corner, prec_trace);
 end
 if #paths == 0 then return end
 
+-- adjust directions.
+if force_clockwise then
+	for i = 1, #paths do
+		local p = paths[i];
+		local c = path_s.rotation_count(p.points, p.num_segments);
+		if c < 0 then
+			-- reverse.
+			for j = 2, (p.num_segments + 1) / 2 do
+				p.points[2 * j - 1], p.points[2 * j],
+				p.points[2 * (p.num_segments - j) + 3], p.points[2 * (p.num_segments - j) + 4] =
+					p.points[2 * (p.num_segments - j) + 3], p.points[2 * (p.num_segments - j) + 4],
+					p.points[2 * j - 1], p.points[2 * j];
+			end
+		end
+	end
+end
+
+-- randomize.
 if rand_amplify > 0 then
 	-- randomize the path.
 	for i = 1, #paths do
