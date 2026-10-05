@@ -14,6 +14,35 @@ local function PI_as_bool(pi_value, gui_value)
 	else return gui_value end
 end
 
+local PI_choose_blend_mode do
+	local name2num, num2code = {
+		["通常"] = 0, ["加算"] = 1, ["減算"] = 2, ["乗算"] = 3, ["スクリーン"] = 4, ["オーバーレイ"] = 5,
+		["比較(明)"] = 6, ["比較(暗)"] = 7, ["輝度"] = 8, ["色差"] = 9,
+		["陰影"] = 10, ["明暗"] = 11, ["差分"] = 12,
+		["alpha_add"] = 100, ["alpha_max"] = 101, ["alpha_sub"] = 102, ["alpha_add2"] = 103, ["rgba_add"] = 104,
+	}, {
+		[0] = "none", "add", "sub", "mul", "screen", "overlay",
+		"light", "dark", "brightness", "chroma", "shadow", "light_dark", "diff",
+		[100] = "alpha_add", [101] = "alpha_max", [102] = "alpha_sub", [103] = "alpha_add2", [104] = "rgba_add",
+	};
+
+	---PI で「合成モード」指定を適用して，`obj.setoption("blend", ...)` に渡せる文字列に変換する．
+	---このパラメタは次の形式で指定されているものとする:
+	---
+	---`--select@blend:合成モード=0,通常=0,加算=1,減算=2,乗算=3,スクリーン=4,オーバーレイ=5,比較(明)=6,比較(暗)=7,輝度=8,色差=9,陰影=10,明暗=11,差分=12`
+	---
+	---この他にも `"alpha_add"` などの仮想バッファ専用合成モードも `pi_value` として有効．
+	---@param pi_value any PI に渡ってきた値．
+	---@param gui_value integer 実際にスクリプトのパラメタとして渡ってきた値．
+	---@return string # 合成モードの名前．
+	function PI_choose_blend_mode(pi_value, gui_value)
+		if type(pi_value) == "string" then
+			gui_value = name2num[pi_value] or gui_value;
+		end
+		return num2code[gui_value] or "none";
+	end
+end
+
 ---@alias path_type # パスの種類．
 ---| 0 # 折れ線
 ---| 1 # 補間移動
@@ -1200,7 +1229,7 @@ local partial_filter_check_cxt, partial_filter_make_cxt, partial_filter_combine 
 end
 
 local post_effect_check_cxt, post_effect_make_cxt,post_effect_combine do
-	---@alias post_effect_context { [1]: "eff", [2]: 0|1, [3]: number, [4]: number, [5]: integer, [6]: integer, [7]: number, [8]: number, [9]: string } # 後続フィルタに伝達できる形で処理の途中状態を保持するテーブル．
+	---@alias post_effect_context { [1]: "eff", [2]: 0|1, [3]: blend_mode, [4]: number, [5]: number, [6]: integer, [7]: integer, [8]: number, [9]: number, [10]: string } # 後続フィルタに伝達できる形で処理の途中状態を保持するテーブル．
 	---与えられたテーブルが `post_effect_context` であるかどうかを確認する．
 	---@param t table? # 確認対象のテーブル値．
 	---@return post_effect_context? # `post_effect_context` である場合 `t` と同じ値，そうでないなら `nil`.
@@ -1211,24 +1240,27 @@ local post_effect_check_cxt, post_effect_make_cxt,post_effect_combine do
 		if t[1] ~= "eff" then return nil end
 		-- mode_draw
 		if type(t[2]) ~= "number" or t[2] % 1 > 0 or t[2] < 0 or t[2] > 1 then return nil end
+		-- blend_mode
+		if type(t[3]) ~= "string" then return nil end
 		-- orig_alpha
-		if type(t[3]) ~= "number" or t[3] < 0 or t[3] > 1 then return nil end
-		-- ext_alpha
 		if type(t[4]) ~= "number" or t[4] < 0 or t[4] > 1 then return nil end
+		-- ext_alpha
+		if type(t[5]) ~= "number" or t[5] < 0 or t[5] > 1 then return nil end
 		-- w0
-		if type(t[5]) ~= "number" or t[5] % 1 > 0 or t[5] < 1 or t[5] >= 2 ^ 14 then return nil end
-		-- h0
 		if type(t[6]) ~= "number" or t[6] % 1 > 0 or t[6] < 1 or t[6] >= 2 ^ 14 then return nil end
+		-- h0
+		if type(t[7]) ~= "number" or t[7] % 1 > 0 or t[7] < 1 or t[7] >= 2 ^ 14 then return nil end
 		-- cx0
-		if type(t[7]) ~= "number" then return nil end
-		-- cy0
 		if type(t[8]) ~= "number" then return nil end
+		-- cy0
+		if type(t[9]) ~= "number" then return nil end
 		-- cache_name
-		if type(t[9]) ~= "string" or not t[9]:find("^cache:.") then return nil end
+		if type(t[10]) ~= "string" or not t[10]:find("^cache:.") then return nil end
 		return t;
 	end
 	---輪郭パスσ などで後続フィルタに伝達する情報を登録し，登録情報のテーブルを作成する．`post_effect_push_cxt()` や `post_effect_combine()` で利用する．
 	---@param mode_draw 0|1 # モード (前方から合成 or 後方から合成).
+	---@param blend_mode blend_mode # 合成モードの名前．
 	---@param orig_alpha number # 元画像のアルファ値．
 	---@param ext_alpha number # 合成画像のアルファ値．
 	---@param w0 integer # 元画像の幅．
@@ -1238,21 +1270,21 @@ local post_effect_check_cxt, post_effect_make_cxt,post_effect_combine do
 	---@param cache_name string # 元画像のキャッシュ名．
 	---@return post_effect_context
 	function post_effect_make_cxt(
-		mode_draw, orig_alpha, ext_alpha,
+		mode_draw, blend_mode, orig_alpha, ext_alpha,
 		w0, h0, cx0, cy0, cache_name)
 		return {
 			"eff",
-			mode_draw, orig_alpha, ext_alpha,
+			mode_draw, blend_mode, orig_alpha, ext_alpha,
 			w0, h0, cx0, cy0, cache_name,
 		};
 	end
 	---登録情報のテーブルをもとにフィルタ加工後と元画像の 2 つを合成する．
 	---@param cxt post_effect_context 登録情報のテーブル．
 	function post_effect_combine(cxt)
-		local mode_draw, orig_alpha, ext_alpha,
+		local mode_draw, blend_mode, orig_alpha, ext_alpha,
 			w0, h0, cx0, cy0, cache_name =
-			cxt[2], cxt[3], cxt[4],
-			cxt[5], cxt[6], cxt[7], cxt[8], cxt[9];
+			cxt[2], cxt[3], cxt[4], cxt[5],
+			cxt[6], cxt[7], cxt[8], cxt[9], cxt[10];
 		local cx1, cy1, L, R, T, B = obj.cx, obj.cy,
 			math.floor(math.min(cx0 - obj.cx + (w0 - obj.w) / 2, 0)),
 			math.ceil(math.max(cx0 - obj.cx + (w0 + obj.w) / 2, w0)),
@@ -1260,6 +1292,8 @@ local post_effect_check_cxt, post_effect_make_cxt,post_effect_combine do
 			math.ceil(math.max(cy0 - obj.cy + (h0 + obj.h) / 2, h0));
 		local W, H = R - L, B - T;
 		obj.cx, obj.cy = cx0 - (L + R - w0) / 2, cy0 - (T + B - h0) / 2;
+
+		local prev_dst = obj.getoption("drawtarget");
 		if mode_draw == 0 then
 			local line_cache = "cache:path_s/track/line";
 			assert(obj.copybuffer(line_cache, "object"));
@@ -1272,7 +1306,10 @@ local post_effect_check_cxt, post_effect_make_cxt,post_effect_combine do
 				obj.setoption("drawtarget", "tempbuffer");
 			end
 			assert(obj.copybuffer("object", line_cache));
+			local prev_blend = obj.getoption("blend");
+			obj.setoption("blend", blend_mode);
 			obj.draw(obj.cx - cx1, obj.cy - cy1, 0, 1, ext_alpha);
+			obj.setoption("blend", prev_blend);
 		else
 			if W > obj.w or H > obj.h or obj.cx ~= cx1 or obj.cy ~= cy1 or ext_alpha < 1 then
 				obj.setoption("drawtarget", "tempbuffer", W, H);
@@ -1282,8 +1319,12 @@ local post_effect_check_cxt, post_effect_make_cxt,post_effect_combine do
 				obj.setoption("drawtarget", "tempbuffer");
 			end
 			assert(obj.copybuffer("object", cache_name));
+			local prev_blend = obj.getoption("blend");
+			obj.setoption("blend", blend_mode);
 			obj.draw(obj.cx - cx0, obj.cy - cy0, 0, 1, orig_alpha);
+			obj.setoption("blend", prev_blend);
 		end
+		obj.setoption("drawtarget", prev_dst);
 		assert(obj.copybuffer("object", "tempbuffer"));
 	end
 end
@@ -1515,6 +1556,7 @@ end
 return {
 	PI = {
 		as_bool = PI_as_bool,
+		blend_mode = PI_choose_blend_mode,
 		path_type = PI_choose_path_type,
 		mode_anchor_base = PI_choose_mode_anchor_base,
 		mode_fill = PI_choose_mode_fill,

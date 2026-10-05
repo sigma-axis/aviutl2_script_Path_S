@@ -12,11 +12,13 @@ local mode_targets = 0
 ---$track:X, min = -4000, max = 4000, step = 0.01, scale = 0.25
 local X = 0
 
---hide@X:mode_targets~=0
 ---$nolang: name
 ---$track:Y, min = -4000, max = 4000, step = 0.01, scale = 0.25
 local Y = 0
 
+--trackgroup@X,Y:PrimaryPos
+--hide@X:mode_targets~=0
+--hide@Y:mode_targets~=0
 ---$value:対象個数
 local num_points = 2
 
@@ -25,7 +27,6 @@ local num_points = 2
 local points = {-100,0,100,0}
 
 --hide@points:mode_targets~=1
---hide@Y:mode_targets~=0
 ---$select:アンカー基準
 ---回転中心 = 0
 ---左上 = 1
@@ -44,10 +45,7 @@ local mode_anchor_base = 5
 local line = 5
 
 ---$color:色
-local color= 0xffffff
-
--- ---$track:曲線精度, min = 1, max = 128, step = 1, scale = 0.25
--- _local precision = 8
+local color = 0xffffff
 
 --group:境界設定,false
 ---$track:αしきい値, min = 0, max = 100, step = 0.01
@@ -144,6 +142,22 @@ local rand_seed = 10000
 ---後方から合成 = 1
 local mode_draw = 0
 
+---$select:合成モード
+---通常 = 0
+---加算 = 1
+---減算 = 2
+---乗算 = 3
+---スクリーン = 4
+---オーバーレイ = 5
+---比較(明) = 6
+---比較(暗) = 7
+---輝度 = 8
+---色差 = 9
+---陰影 = 10
+---明暗 = 11
+---差分 = 12
+local blend = 0
+
 ---$track:ライン透明度, min = 0, max = 100, step = 0.01
 local line_alpha = 0
 
@@ -151,7 +165,7 @@ local line_alpha = 0
 local orig_alpha = 0
 
 --group:フィルタ設定,false
--- ---$tips:「後続フィルタ」の範囲は「後続フィルタここまで」で区切ることができます．
+---$tips:「後続フィルタ」の範囲は「後続フィルタここまで」で区切ることができます．
 ---$select:追加のフィルタ効果
 ---なし = 0
 ---後続フィルタ = 1
@@ -164,6 +178,37 @@ local extra_script = 'obj.effect("グラデーション",\n  "形状","凸形",\
 --hide@extra_script:extra_filter~=2
 --group:その他,false
 ---$nolang: name
+---$tips:PI = {
+---     :  mode_targets: string?,
+---     :  X, Y: number?,
+---     :  num_points: number?,
+---     :  points: table?,
+---     :  mode_anchor_base: string?,
+---     :  line: number?,
+---     :  color: number?,
+---     :  thresh: number?,
+---     :  conn_corner: boolean|number|nil,
+---     :  prec_track: number?,
+---     :  start_pos: number?,
+---     :  end_pos: number?,
+---     :  end_shape: string?
+---     :  dash_pat: table?,
+---     :  dash_pos: number?,
+---     :  dash_end_shape: string?,
+---     :  antialias: number?,
+---     :  dither_pattern: string?
+---     :  dither_seed: number?,
+---     :  dither_rate: number?,
+---     :  dither_size: number?,
+---     :  rand_period: number?,
+---     :  rand_amplify: number?,
+---     :  rand_seed: number?,
+---     :  mode_draw: string?,
+---     :  blend: string?,
+---     :  line_alpha: number?,
+---     :  orig_alpha: number?,
+---     :  extra_filter: string?,
+---     :}
 ---$value:PI
 local PI = {}
 
@@ -172,6 +217,8 @@ local PI = {}
 ]]
 local path_s = require("Path_S");
 local obj, math, tonumber, type = obj, math, tonumber, type;
+
+-- TODO: 「時計回りに揃える」
 
 if obj.getoption("gui") and mode_targets ~= 2 then
 	local cx, cy = path_s.anchor_offset(mode_anchor_base);
@@ -187,10 +234,50 @@ end
 --#region PI / normalize parameters.
 
 -- take parameters.
--- TODO: PI
---[[
-
-]]
+if type(PI.mode_targets) == "string" then
+	local name2num = {
+		["1個"] = 0, ["複数"] = 1, ["全て"] = 2
+	};
+	mode_targets = name2num[PI.mode_targets] or mode_targets;
+end
+X, Y = tonumber(PI.X) or X, tonumber(PI.Y) or Y;
+num_points = tonumber(PI.num_points) or num_points;
+if type(PI.points) == "table" then points = PI.points end
+mode_anchor_base = path_s.PI.mode_anchor_base(PI.mode_anchor_base, mode_anchor_base);
+line = tonumber(PI.line) or line;
+color = tonumber(PI.color) or color;
+thresh = tonumber(PI.thresh) or thresh;
+conn_corner = path_s.PI.as_bool(PI.conn_corner, conn_corner);
+prec_track = tonumber(PI.prec_track) or prec_track;
+start_pos = tonumber(PI.start_pos) or start_pos;
+end_pos = tonumber(PI.end_pos) or end_pos;
+end_shape = path_s.PI.end_shape(PI.end_shape, end_shape);
+if type(PI.dash_pat) == "table" then dash_pat = PI.dash_pat end
+dash_pos = tonumber(PI.dash_pos) or dash_pos;
+dash_end_shape = path_s.PI.end_shape(PI.dash_end_shape, dash_end_shape);
+antialias = tonumber(PI.antialias) or antialias;
+dither_pattern = path_s.PI.dither_pattern(PI.dither_pattern, dither_pattern);
+dither_seed = tonumber(PI.dither_seed) or dither_seed;
+dither_rate = tonumber(PI.dither_rate) or dither_rate;
+dither_size = tonumber(PI.dither_size) or dither_size;
+rand_period = tonumber(PI.rand_period) or rand_period;
+rand_amplify = tonumber(PI.rand_amplify) or rand_amplify;
+rand_seed = tonumber(PI.rand_seed) or rand_seed;
+if type(PI.mode_draw) == "string" then
+	local name2num = {
+		["前方から合成"] = 0, ["後方から合成"] = 1
+	};
+	mode_draw = name2num[PI.mode_draw] or mode_draw;
+end
+local blend_mode = path_s.PI.blend_mode(PI.blend, blend);
+line_alpha = tonumber(PI.line_alpha) or line_alpha;
+orig_alpha = tonumber(PI.orig_alpha) or orig_alpha;
+if type(PI.extra_filter) == "string" then
+	local name2num = {
+		["なし"] = 0, ["後続フィルタ"] = 1, ["スクリプト実行"] = 2
+	};
+	extra_filter = name2num[PI.extra_filter] or extra_filter;
+end
 
 -- normalize parameters.
 mode_targets = math.min(math.max(math.floor(0.5 + mode_targets), 0), 2);
@@ -251,10 +338,9 @@ if rand_amplify > 0 then
 end
 
 -- measure paths.
-local w, h, L, R, T, B = obj.w, obj.h, 0, obj.w, 0, obj.h;
-for i = 1, #paths do
-	local p = paths[i];
-	local l, r, t, b = path_s.measure(p.points, p.num_segments);
+local w, h, L, R, T, B = obj.w, obj.h, path_s.measure(paths[1].points, paths[1].num_segments);
+for i = 2, #paths do
+	local l, r, t, b = path_s.measure(paths[i].points, paths[i].num_segments);
 	L, R = math.min(L, l), math.max(R, r);
 	T, B = math.min(T, t), math.max(B, b);
 end
@@ -280,8 +366,8 @@ for i = 1, #paths do
 			rate = dither_rate,
 			seed = dither_seed,
 			size = dither_size,
-			cx = cx + dcx - w / 2,
-			cy = cy + dcy - h / 2,
+			cx = cx + dcx + W / 2,
+			cy = cy + dcy + H / 2,
 		}, nil,
 		p.points, p.num_segments, true, 8,
 		start_pos, end_pos, end_shape, 0, 1,
@@ -298,7 +384,7 @@ end
 
 -- save the current context.
 local cxt; cxt = path_s.post_effect.make_cxt(
-	mode_draw, orig_alpha, line_alpha,
+	mode_draw, blend_mode, orig_alpha, line_alpha,
 	w, h, cx0, cy0, cache_name);
 
 -- apply following filters.
