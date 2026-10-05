@@ -4,8 +4,8 @@ project:
     NAME: Path_S
     AUTHOR: σ軸
     PUBLISH_PAGE: https://github.com/sigma-axis/aviutl2_script_Path_S
-    LEAST_AVIUTL_VERSION: "2010800"
-    LEAST_AVIUTL_VERSION_STRING: "2.1.8"
+    LEAST_AVIUTL_VERSION: "2011100"
+    LEAST_AVIUTL_VERSION_STRING: "2.1.11"
 
 package:
   id: Path_S
