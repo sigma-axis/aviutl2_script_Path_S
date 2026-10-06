@@ -154,7 +154,7 @@ local PI = {}
 --[[pixelshader@carve:
 ---$include "../../path_coord_header.hlsl"
 ---$include "../../ibukihash.hlsl"
----$include "../../noise_func.hlsl"
+---$include "../../dither_func.hlsl"
 ---$include "carve.hlsl"
 ]]
 local path_s = require("Path_S");

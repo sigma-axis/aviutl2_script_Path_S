@@ -205,14 +205,14 @@ local PI = {}
 --[[pixelshader@carve:
 ---$include "../../path_coord_header.hlsl"
 ---$include "../../ibukihash.hlsl"
----$include "../../noise_func.hlsl"
+---$include "../../dither_func.hlsl"
 ---$include "line_dist_header.hlsl"
 ---$include "carve.hlsl"
 ]]
 --[[pixelshader@carve_dash:
 ---$include "../../path_coord_header.hlsl"
 ---$include "../../ibukihash.hlsl"
----$include "../../noise_func.hlsl"
+---$include "../../dither_func.hlsl"
 ---$include "line_dist_header.hlsl"
 ---$include "carve_dash.hlsl"
 ]]
