@@ -32,6 +32,30 @@ float halftone(float2 p)
 	if (R < 1) return a * R;
 	else return 1 - (1 - a) * (2 - R) * (2 - R);
 }
+float halftone_honeycomb(float2 p)
+{
+	static const float pi = 4 * atan(1), a = pi / (2 * sqrt(3));
+	static const float2x2
+		mat1 = float2x2(1, -1 / sqrt(3), 0, 2 / sqrt(3)),
+		mat2 = 2 * float2x2(1, 0.5, 0, sqrt(3) / 2);
+	float2 u = mul(mat1, p);
+	u = frac(u / 4);
+	if (dot(u, 1) > 1) u = 1 - u;
+	if (dot(u, float2(2, 1)) > 1) u.x = 1 - dot(u, 1);
+	if (dot(u, float2(1, 2)) > 1) u.y = 1 - dot(u, 1);
+	u = mul(mat2, u);
+	const float R = dot(u, u);
+	if (R < 1) return a * R;
+	else return 1 - (1 - a) * (4 - 3 * R) * (4 - 3 * R);
+}
+float halftone_diamond(float2 p)
+{
+	static const float a = 0.5;
+	const float2 u = abs(2 * frac(p / 4 - 0.5) - 1);
+	const float R = dot(u, 1);
+	if (R < 1) return a * R * R;
+	else return 1 - (1 - a) * (2 - R) * (2 - R);
+}
 float dither_func(float2 pos, uint2 seed, uint pattern)
 {
 	[branch] switch (pattern) {
@@ -53,5 +77,9 @@ float dither_func(float2 pos, uint2 seed, uint pattern)
 		return ibuki(float4(pos + (1 << 16), seed));
 	case 7: // halftone
 		return halftone(pos);
+	case 8: // halftone (honeycomb)
+		return halftone_honeycomb(pos);
+	case 9: // halftone (diamond)
+		return halftone_diamond(pos);
 	}
 }
