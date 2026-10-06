@@ -237,7 +237,7 @@ TODO: images.
 
 最小値は 1, 最大値は 128, 初期値は 8.
 
-####  ぼかし幅 / ディザリング / ノイズシード / ディザ強さ / ドットサイズ
+####  ぼかし幅 / ディザリング / ノイズシード / ディザ強さ / ドットサイズ / 移動X / 移動Y / 回転
 
 パスで囲った領域や，ライン部分のアンチエイリアスやディザリングに関する設定です．
 
@@ -264,6 +264,9 @@ TODO: images.
   | `Bayer 256x256` | ![Bayer 256x256 でのディザリング](https://github.com/user-attachments/assets/ea018a2e-1d1a-404a-a779-55769243a867) |
   | `IGN` | ![Interleaved Gradient Noise でのディザリング](https://github.com/user-attachments/assets/e04bd74f-719e-4bfa-b1e6-870116ee8e1e) |
   | `White Noise` | ![White Noise でのディザリング](https://github.com/user-attachments/assets/3a588a5c-e36b-4749-b837-ff78d950648f) |
+  | `Halftone` | TODO: \!\[Halftone でのディザリング\]() |
+  | `Halftone (Honeycomb)` | TODO: \!\[Halftone (Honeycomb) でのディザリング\]() |
+  | `Halftone (Diamond)` | TODO: \!\[Halftone (Diamond) でのディザリング\]() |
 
   - `IGN` は “Interleaved Gradient Noise” の略．
 
@@ -291,6 +294,18 @@ TODO: images.
   パターン模様の拡大率を % 単位で指定します．
 
   最小値は 100, 最大値は 6400, 初期値は 100.
+
+- **移動X** / **移動Y**
+
+  パターン模様を上下左右に平行移動します．移動量をピクセル単位で指定．
+
+  最小値は -4000, 最大値は 4000, 初期値は $(0,0)$.
+
+- **回転**
+
+  パターン模様を回転します．回転角度を度数単位で指定．
+
+  最小値は -3600, 最大値は 3600, 初期値は 0.
 
 ####  ライン幅
 
@@ -508,7 +523,7 @@ TODO: images.
 | `直線` | $y=0$ |
 | `正弦波` | $y=\cos 2\pi x$  |
 | `三角波` | $y=2\left\lvert 2\langle x \rangle - 1\right\rvert - 1$  |
-| `矩形波` | $$ y=\begin{cases} +1 & \left(\langle x \rangle < \frac{1}{2}\right) \\\ -1 & (\text{otherwise}) \end{cases} $$ |
+| `矩形波` | $ y=\begin{cases} +1 & \left(\langle x \rangle < \frac{1}{2}\right) \\\ -1 & (\text{otherwise}) \end{cases} $ |
 | `のこぎり波` | $y=1 - 2 \langle x \rangle$ |
 - ここに $\langle x \rangle = x - \lfloor x \rfloor$ は $x$ の小数部分．
 
@@ -1016,7 +1031,10 @@ TODO: images.
   dither_pattern = str,      -- string 型で "ディザリング" の項目を上書き，または nil.
   dither_seed = num,         -- number 型で "dither::ノイズシード" の項目を上書き，または nil.
   dither_rate = num,         -- number 型で "ディザ強さ" の項目を上書き，または nil.
-  dither_size = num,         -- number 型で "dither::ドットサイズ" の項目を上書き，また
+  dither_size = num,         -- number 型で "dither::ドットサイズ" の項目を上書き，または nil.
+  dither_X = num,            -- number 型で "dither::移動X" の項目を上書き，または nil.
+  dither_Y = num,            -- number 型で "dither::移動Y" の項目を上書き，または nil.
+  dither_angle = num,        -- number 型で "dither::回転" の項目を上書き，または nil.
   inflation = num,           -- number 型で "塗り追加幅" の項目を上書き，または nil.
   alpha_fill = num,          -- number 型で "塗り透明度" の項目を上書き，または nil.
   mode_fill = str,           -- string 型で "塗り範囲" の項目を上書き，または nil.
@@ -1024,7 +1042,10 @@ TODO: images.
   fill_dither_pattern = str, -- string 型で "fill::ディザリング" の項目を上書き，または nil.
   fill_dither_seed = num,    -- number 型で "fill::dither::ノイズシード" の項目を上書き，または nil.
   fill_dither_rate = num,    -- number 型で "fill::ディザ強さ" の項目を上書き，または nil.
-  fill_dither_size = num,    -- number 型で "fill::dither::ドットサイズ" の項目を上書き，また
+  fill_dither_size = num,    -- number 型で "fill::dither::ドットサイズ" の項目を上書き，または nil.
+  fill_dither_X = num,       -- number 型で "fill::dither::移動X" の項目を上書き，または nil.
+  fill_dither_Y = num,       -- number 型で "fill::dither::移動Y" の項目を上書き，または nil.
+  fill_dither_angle = num,   -- number 型で "fill::dither::回転" の項目を上書き，または nil.
   rand_period = num,         -- number 型で "ランダム周期" の項目を上書き，または nil.
   rand_amplify = num,        -- number 型で "ランダム振幅" の項目を上書き，または nil.
   rand_fix_end = bool,       -- boolean 型で "ランダム固定端" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
@@ -1058,7 +1079,10 @@ TODO: images.
   dither_pattern = str, -- string 型で "ディザリング" の項目を上書き，または nil.
   dither_seed = num,    -- number 型で "dither::ノイズシード" の項目を上書き，または nil.
   dither_rate = num,    -- number 型で "ディザ強さ" の項目を上書き，または nil.
-  dither_size = num,    -- number 型で "dither::ドットサイズ" の項目を上書き，また
+  dither_size = num,    -- number 型で "dither::ドットサイズ" の項目を上書き，または nil.
+  dither_X = num,       -- number 型で "dither::移動X" の項目を上書き，または nil.
+  dither_Y = num,       -- number 型で "dither::移動Y" の項目を上書き，または nil.
+  dither_angle = num,   -- number 型で "dither::回転" の項目を上書き，または nil.
   rand_period = num,    -- number 型で "ランダム周期" の項目を上書き，または nil.
   rand_amplify = num,   -- number 型で "ランダム振幅" の項目を上書き，または nil.
   rand_fix_end = bool,  -- boolean 型で "ランダム固定端" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
@@ -1092,7 +1116,10 @@ TODO: images.
   dither_pattern = str, -- string 型で "ディザリング" の項目を上書き，または nil.
   dither_seed = num,    -- number 型で "dither::ノイズシード" の項目を上書き，または nil.
   dither_rate = num,    -- number 型で "ディザ強さ" の項目を上書き，または nil.
-  dither_size = num,    -- number 型で "dither::ドットサイズ" の項目を上書き，また
+  dither_size = num,    -- number 型で "dither::ドットサイズ" の項目を上書き，または nil.
+  dither_X = num,       -- number 型で "dither::移動X" の項目を上書き，または nil.
+  dither_Y = num,       -- number 型で "dither::移動Y" の項目を上書き，または nil.
+  dither_angle = num,   -- number 型で "dither::回転" の項目を上書き，または nil.
   rand_period = num,    -- number 型で "ランダム周期" の項目を上書き，または nil.
   rand_amplify = num,   -- number 型で "ランダム振幅" の項目を上書き，または nil.
   rand_fix_end = bool,  -- boolean 型で "ランダム固定端" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
@@ -1123,7 +1150,10 @@ TODO: images.
   dither_pattern = str, -- string 型で "ディザリング" の項目を上書き，または nil.
   dither_seed = num,    -- number 型で "dither::ノイズシード" の項目を上書き，または nil.
   dither_rate = num,    -- number 型で "ディザ強さ" の項目を上書き，または nil.
-  dither_size = num,    -- number 型で "dither::ドットサイズ" の項目を上書き，また
+  dither_size = num,    -- number 型で "dither::ドットサイズ" の項目を上書き，または nil.
+  dither_X = num,       -- number 型で "dither::移動X" の項目を上書き，または nil.
+  dither_Y = num,       -- number 型で "dither::移動Y" の項目を上書き，または nil.
+  dither_angle = num,   -- number 型で "dither::回転" の項目を上書き，または nil.
   head_type = str,      -- string 型で "矢じり配置" の項目を上書き，または nil.
   head_fig = str,       -- string 型で "矢じり図形" の項目を上書き，または nil.
   head_width = num,     -- number 型で "矢じり幅" の項目を上書き，または nil.
@@ -1162,13 +1192,19 @@ TODO: images.
   dither_pattern = str,      -- string 型で "ディザリング" の項目を上書き，または nil.
   dither_seed = num,         -- number 型で "dither::ノイズシード" の項目を上書き，または nil.
   dither_rate = num,         -- number 型で "ディザ強さ" の項目を上書き，または nil.
-  dither_size = num,         -- number 型で "dither::ドットサイズ" の項目を上書き，また
+  dither_size = num,         -- number 型で "dither::ドットサイズ" の項目を上書き，または nil.
+  dither_X = num,            -- number 型で "dither::移動X" の項目を上書き，または nil.
+  dither_Y = num,            -- number 型で "dither::移動Y" の項目を上書き，または nil.
+  dither_angle = num,        -- number 型で "dither::回転" の項目を上書き，または nil.
   inflation = num,           -- number 型で "塗り追加幅" の項目を上書き，または nil.
   alpha_fill = num,          -- number 型で "塗り透明度" の項目を上書き，または nil.
   fill_dither_pattern = str, -- string 型で "fill::ディザリング" の項目を上書き，または nil.
   fill_dither_seed = num,    -- number 型で "fill::dither::ノイズシード" の項目を上書き，または nil.
   fill_dither_rate = num,    -- number 型で "fill::ディザ強さ" の項目を上書き，または nil.
-  fill_dither_size = num,    -- number 型で "fill::dither::ドットサイズ" の項目を上書き，また
+  fill_dither_size = num,    -- number 型で "fill::dither::ドットサイズ" の項目を上書き，または nil.
+  fill_dither_X = num,       -- number 型で "fill::dither::移動X" の項目を上書き，または nil.
+  fill_dither_Y = num,       -- number 型で "fill::dither::移動Y" の項目を上書き，または nil.
+  fill_dither_angle = num,   -- number 型で "fill::dither::回転" の項目を上書き，または nil.
   rand_period = num,         -- number 型で "ランダム周期" の項目を上書き，または nil.
   rand_amplify = num,        -- number 型で "ランダム振幅" の項目を上書き，または nil.
   rand_seed = num,           -- number 型で "ランダムシード" の項目を上書き，または nil.
@@ -1221,7 +1257,10 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
   dither_pattern = str,   -- string 型で "ディザリング" の項目を上書き，または nil.
   dither_seed = num,      -- number 型で "dither::ノイズシード" の項目を上書き，または nil.
   dither_rate = num,      -- number 型で "ディザ強さ" の項目を上書き，または nil.
-  dither_size = num,      -- number 型で "dither::ドットサイズ" の項目を上書き，また
+  dither_size = num,      -- number 型で "dither::ドットサイズ" の項目を上書き，または nil.
+  dither_X = num,         -- number 型で "dither::移動X" の項目を上書き，または nil.
+  dither_Y = num,         -- number 型で "dither::移動Y" の項目を上書き，または nil.
+  dither_angle = num,     -- number 型で "dither::回転" の項目を上書き，または nil.
   X = num, Y = num,       -- number 型で "移動X", "移動Y" の項目を上書き，または nil.
   zoom = num,             -- number 型で "拡大率" の項目を上書き，または nil.
   rotate = num,           -- number 型で "回転" の項目を上書き，または nil.
@@ -1272,7 +1311,10 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
   dither_pattern = str,   -- string 型で "ディザリング" の項目を上書き，または nil.
   dither_seed = num,      -- number 型で "dither::ノイズシード" の項目を上書き，または nil.
   dither_rate = num,      -- number 型で "ディザ強さ" の項目を上書き，または nil.
-  dither_size = num,      -- number 型で "dither::ドットサイズ" の項目を上書き，また
+  dither_size = num,      -- number 型で "dither::ドットサイズ" の項目を上書き，または nil.
+  dither_X = num,         -- number 型で "dither::移動X" の項目を上書き，または nil.
+  dither_Y = num,         -- number 型で "dither::移動Y" の項目を上書き，または nil.
+  dither_angle = num,     -- number 型で "dither::回転" の項目を上書き，または nil.
   X = num, Y = num,       -- number 型で "移動X", "移動Y" の項目を上書き，または nil.
   zoom = num,             -- number 型で "拡大率" の項目を上書き，または nil.
   rotate = num,           -- number 型で "回転" の項目を上書き，または nil.
@@ -1332,7 +1374,10 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
   dither_pattern = str,   -- string 型で "ディザリング" の項目を上書き，または nil.
   dither_seed = num,      -- number 型で "dither::ノイズシード" の項目を上書き，または nil.
   dither_rate = num,      -- number 型で "ディザ強さ" の項目を上書き，または nil.
-  dither_size = num,      -- number 型で "dither::ドットサイズ" の項目を上書き，また
+  dither_size = num,      -- number 型で "dither::ドットサイズ" の項目を上書き，または nil.
+  dither_X = num,         -- number 型で "dither::移動X" の項目を上書き，または nil.
+  dither_Y = num,         -- number 型で "dither::移動Y" の項目を上書き，または nil.
+  dither_angle = num,     -- number 型で "dither::回転" の項目を上書き，または nil.
   X = num, Y = num,       -- number 型で "移動X", "移動Y" の項目を上書き，または nil.
   zoom = num,             -- number 型で "拡大率" の項目を上書き，または nil.
   rotate = num,           -- number 型で "回転" の項目を上書き，または nil.
@@ -1384,6 +1429,9 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
   dither_seed = num,      -- number 型で "dither::ノイズシード" の項目を上書き，または nil.
   dither_rate = num,      -- number 型で "ディザ強さ" の項目を上書き，または nil.
   dither_size = num,      -- number 型で "dither::ドットサイズ" の項目を上書き，または nil.
+  dither_X = num,         -- number 型で "dither::移動X" の項目を上書き，または nil.
+  dither_Y = num,         -- number 型で "dither::移動Y" の項目を上書き，または nil.
+  dither_angle = num,     -- number 型で "dither::回転" の項目を上書き，または nil.
   rand_period = num,      -- number 型で "ランダム周期" の項目を上書き，または nil.
   rand_amplify = num,     -- number 型で "ランダム振幅" の項目を上書き，または nil.
   rand_seed = num,        -- number 型で "ランダムシード" の項目を上書き，または nil.
@@ -1435,6 +1483,8 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
   - 「輪郭パスσ」を追加．オブジェクトの輪郭からパスを生成・描画します．
   - 「追加フィルタここまで」を追加．「パス部分フィルタσ」や「輪郭パスσ」で「追加のフィルタ効果」に「後続フィルタ」を選んでいた場合，このフィルタ効果の直前までで区切ります．
   - 「パス部分フィルタσここまで」を非推奨扱いに．「追加フィルタここまで」に機能を統合し，追加メニューからも非表示に．
+  - 「ディザリング」のパターン模様に「Halftone」「Halftone (Honeycomb)」「Halftone (Diamond)」を追加．
+  - ディザリングのパターン模様を平行移動・回転するパラメタの「移動X」「移動Y」「回転」を追加．
 
 ##  改版履歴
 
