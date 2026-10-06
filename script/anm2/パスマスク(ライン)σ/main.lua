@@ -109,6 +109,7 @@ local antialias = 1
 ---Bayer 256x256 = 4
 ---IGN = 5
 ---White Noise = 6
+---Halftone = 7
 local dither_pattern = 0
 
 ---$tips:0 以上だと同じシードでも別オブジェクトだと別の乱数．
@@ -121,6 +122,7 @@ local dither_seed = 10000
 --hide@dither_seed:dither_pattern==2
 --hide@dither_seed:dither_pattern==3
 --hide@dither_seed:dither_pattern==4
+--hide@dither_seed:dither_pattern==7
 ---$track:ディザ強さ, min = 0, max = 100, step = 0.01
 local dither_rate = 100
 
@@ -129,6 +131,10 @@ local dither_rate = 100
 local dither_size = 100
 
 --hide@dither_size:dither_pattern==0
+---$track:dither::回転, min = -3600, max = 3600, step = 0.01, scale = 0.1
+local dither_angle = 0
+
+--hide@dither_angle:dither_pattern==0
 --group:配置,false
 ---$track:移動X, min = -4000, max = 4000, step = 0.01, scale = 0.25
 local X = 0
@@ -173,6 +179,7 @@ local toggle_gui = false
 ---     :  dither_seed: number?,
 ---     :  dither_rate: number?,
 ---     :  dither_size: number?,
+---     :  dither_angle: number?,
 ---     :  X, Y: number?,
 ---     :  zoom: number?,
 ---     :  rotate: number?,
@@ -242,6 +249,7 @@ dither_pattern = path_s.PI.dither_pattern(PI.dither_pattern, dither_pattern);
 dither_seed = tonumber(PI.dither_seed) or dither_seed;
 dither_rate = tonumber(PI.dither_rate) or dither_rate;
 dither_size = tonumber(PI.dither_size) or dither_size;
+dither_angle = tonumber(PI.dither_angle) or dither_angle;
 X = tonumber(PI.X) or X;
 Y = tonumber(PI.Y) or Y;
 zoom = tonumber(PI.zoom) or zoom;
@@ -266,6 +274,7 @@ end
 dither_seed = dither_seed % 2 ^ 20;
 dither_rate = math.min(math.max(dither_rate / 100, 0), 1);
 dither_size = math.max(dither_size / 100, 1);
+dither_angle = 2 * math.pi * ((dither_angle / 360) % 1);
 do
 	local cx, cy = path_s.anchor_offset(mode_anchor_base);
 	X, Y = X + cx, Y + cy;
@@ -290,7 +299,8 @@ else
 			width = antialias,
 			pattern = dither_pattern, seed = dither_seed,
 			rate = dither_rate,
-			cx = X + obj.w / 2, cy = Y + obj.h / 2, size = dither_size,
+			cx = X + obj.w / 2, cy = Y + obj.h / 2,
+			size = dither_size, rot = dither_angle,
 		},
 		path_type, points, num_points - (loop and 0 or 1), loop, precision,
 		start_pos, end_pos, end_shape, join_shape, miter_limit,

@@ -24,24 +24,34 @@ float ign(float2 v)
     float3 magic = float3(0.06711056, 0.00583715, 52.9829189);
     return frac(magic.z * frac(dot(v, magic.xy)));
 }
+float halftone(float2 p)
+{
+	static const float pi = 4 * atan(1), a = pi / 4;
+	const float2 u = 2 * frac(p / 4 - 0.5) - 1;
+	const float R = dot(u, u);
+	if (R < 1) return a * R;
+	else return 1 - (1 - a) * (2 - R) * (2 - R);
+}
 float noise_func(float2 pos, uint2 seed, uint noise_type)
 {
 	[branch] switch (noise_type) {
 	default: return 0;
 	case 1: // checker
-		return checker(uint2(pos));
+		return checker(uint2(pos + (1 << 16)));
 	case 2: // bayer 2x2
-		return ((bayer_88(uint2(pos)) & 0xc000) + 0x2000) / float(1 << 16);
+		return ((bayer_88(uint2(pos + (1 << 16))) & 0xc000) + 0x2000) / float(1 << 16);
 	case 3: // bayer 4x4
-		return ((bayer_88(uint2(pos)) & 0xf000) + 0x0800) / float(1 << 16);
+		return ((bayer_88(uint2(pos + (1 << 16))) & 0xf000) + 0x0800) / float(1 << 16);
 	case 4: // bayer 256x256
-		return (bayer_88(uint2(pos)) + 0.5) / float(1 << 16);
+		return (bayer_88(uint2(pos + (1 << 16))) + 0.5) / float(1 << 16);
 	case 5: { // Interleaved Gradient Noise
 		uint2 s = uint2(106033, 92681) * seed;
 		s ^= s >> 14; s &= 0x3fff;
-		return ign(floor(pos) + s);
+		return ign(floor(pos + (1 << 16)) + s);
 	}
 	case 6: // white noise
-		return ibuki(float4(pos, seed));
+		return ibuki(float4(pos + (1 << 16), seed));
+	case 7: // halftone
+		return halftone(pos);
 	}
 }

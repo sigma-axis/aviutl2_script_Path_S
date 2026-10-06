@@ -98,6 +98,7 @@ local antialias = 1
 ---Bayer 256x256 = 4
 ---IGN = 5
 ---White Noise = 6
+---Halftone = 7
 local dither_pattern = 0
 
 ---$tips:0 以上だと同じシードでも別オブジェクトだと別の乱数．
@@ -110,6 +111,7 @@ local dither_seed = 10000
 --hide@dither_seed:dither_pattern==2
 --hide@dither_seed:dither_pattern==3
 --hide@dither_seed:dither_pattern==4
+--hide@dither_seed:dither_pattern==7
 ---$track:ディザ強さ, min = 0, max = 100, step = 0.01
 local dither_rate = 100
 
@@ -118,6 +120,10 @@ local dither_rate = 100
 local dither_size = 100
 
 --hide@dither_size:dither_pattern==0
+---$track:dither::回転, min = -3600, max = 3600, step = 0.01, scale = 0.1
+local dither_angle = 0
+
+--hide@dither_angle:dither_pattern==0
 --group:塗り設定,false
 ---$track:塗り追加幅, min = 0, max = 1000, step = 0.01, scale = 0.2
 local inflation = 0
@@ -143,6 +149,7 @@ local fill_antialias = 1
 ---Bayer 256x256 = 4
 ---IGN = 5
 ---White Noise = 6
+---Halftone = 7
 local fill_dither_pattern = 0
 
 ---$tips:0 以上だと同じシードでも別オブジェクトだと別の乱数．
@@ -155,6 +162,7 @@ local fill_dither_seed = 20000
 --hide@fill_dither_seed:fill_dither_pattern==2
 --hide@fill_dither_seed:fill_dither_pattern==3
 --hide@fill_dither_seed:fill_dither_pattern==4
+--hide@fill_dither_seed:fill_dither_pattern==7
 ---$track:fill::ディザ強さ, min = 0, max = 100, step = 0.01
 local fill_dither_rate = 100
 
@@ -163,6 +171,10 @@ local fill_dither_rate = 100
 local fill_dither_size = 100
 
 --hide@fill_dither_size:fill_dither_pattern==0
+---$track:fill::dither::回転, min = -3600, max = 3600, step = 0.01, scale = 0.1
+local fill_dither_angle = 0
+
+--hide@fill_dither_angle:dither_pattern==0
 --group:ランダム変化,false
 ---$tips:パスの描画方向に沿ったランダム変動の周期，ピクセル単位
 ---$track:ランダム周期, min = 4, max = 1024, step = 0.001, scale = 0.25
@@ -208,6 +220,7 @@ local rand_seed = 10000
 ---     :  dither_seed: number?,
 ---     :  dither_rate: number?,
 ---     :  dither_size: number?,
+---     :  dither_angle: number?,
 ---     :  inflation: number?,
 ---     :  alpha_fill: number?,
 ---     :  mode_fill: string?,
@@ -216,6 +229,7 @@ local rand_seed = 10000
 ---     :  fill_dither_seed: number?,
 ---     :  fill_dither_rate: number?,
 ---     :  fill_dither_size: number?,
+---     :  fill_dither_angle: number?,
 ---     :  rand_period: number?,
 ---     :  rand_amplify: number?,
 ---     :  rand_fix_end: boolean|number|nil,
@@ -266,6 +280,7 @@ dither_pattern = path_s.PI.dither_pattern(PI.dither_pattern, dither_pattern);
 dither_seed = tonumber(PI.dither_seed) or dither_seed;
 dither_rate = tonumber(PI.dither_rate) or dither_rate;
 dither_size = tonumber(PI.dither_size) or dither_size;
+dither_angle = tonumber(PI.dither_angle) or dither_angle;
 inflation = tonumber(PI.inflation) or inflation;
 alpha_fill = tonumber(PI.alpha_fill) or alpha_fill;
 if type(PI.mode_fill) == "string" then
@@ -279,6 +294,7 @@ fill_dither_pattern = path_s.PI.dither_pattern(PI.fill_dither_pattern, fill_dith
 fill_dither_seed = tonumber(PI.fill_dither_seed) or fill_dither_seed;
 fill_dither_rate = tonumber(PI.fill_dither_rate) or fill_dither_rate;
 fill_dither_size = tonumber(PI.fill_dither_size) or fill_dither_size;
+fill_dither_angle = tonumber(PI.fill_dither_angle) or fill_dither_angle;
 rand_period = tonumber(PI.rand_period) or rand_period;
 rand_amplify = tonumber(PI.rand_amplify) or rand_amplify;
 rand_fix_end = path_s.PI.as_bool(PI.rand_fix_end, rand_fix_end);
@@ -303,6 +319,7 @@ end
 dither_seed = dither_seed % 2 ^ 20;
 dither_rate = math.min(math.max(dither_rate / 100, 0), 1);
 dither_size = math.max(dither_size / 100, 1);
+dither_angle = 2 * math.pi * ((dither_angle / 360) % 1);
 inflation = math.max(inflation, 0);
 alpha_fill = math.min(math.max(1 - alpha_fill / 100, 0), 1);
 mode_fill = math.min(math.max(math.floor(0.5 + mode_fill), 0), 1);
@@ -314,6 +331,7 @@ end
 fill_dither_seed = fill_dither_seed % 2 ^ 20;
 fill_dither_rate = math.min(math.max(fill_dither_rate / 100, 0), 1);
 fill_dither_size = math.max(fill_dither_size / 100, 1);
+fill_dither_angle = 2 * math.pi * ((fill_dither_angle / 360) % 1);
 rand_period = math.max(rand_period, 4);
 rand_amplify = math.max(rand_amplify, 0);
 rand_seed = math.min(math.max(math.floor(0.5 + rand_seed), -2 ^ 16), 2 ^ 16 - 1);
@@ -364,7 +382,8 @@ if has_fill or has_chrome then
 				width = fill_antialias,
 				pattern = fill_dither_pattern, seed = fill_dither_seed,
 				rate = fill_dither_rate,
-				cx = obj.cx + obj.w / 2, cy = obj.cy + obj.h / 2, size = fill_dither_size,
+				cx = obj.cx + obj.w / 2, cy = obj.cy + obj.h / 2,
+				size = fill_dither_size, rot = dither_angle,
 			},
 			cache_name, num_points,
 			has_chrome and { name = "tempbuffer", w = obj.w, h = obj.h } or nil);
@@ -378,7 +397,8 @@ if has_fill or has_chrome then
 				width = antialias,
 				pattern = dither_pattern, seed = dither_seed,
 				rate = dither_rate,
-				cx = obj.cx + obj.w / 2, cy = obj.cy + obj.h / 2, size = dither_size,
+				cx = obj.cx + obj.w / 2, cy = obj.cy + obj.h / 2,
+				size = dither_size, rot = dither_angle,
 			},
 			cache_name, num_segments, len, loop,
 			start_pos, end_pos, end_shape, join_shape, miter_limit,

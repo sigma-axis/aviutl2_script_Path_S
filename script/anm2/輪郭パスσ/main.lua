@@ -105,6 +105,7 @@ local antialias = 1
 ---Bayer 256x256 = 4
 ---IGN = 5
 ---White Noise = 6
+---Halftone = 7
 local dither_pattern = 0
 
 ---$tips:0 以上だと同じシードでも別オブジェクトだと別の乱数．
@@ -117,6 +118,7 @@ local dither_seed = 10000
 --hide@dither_seed:dither_pattern==2
 --hide@dither_seed:dither_pattern==3
 --hide@dither_seed:dither_pattern==4
+--hide@dither_seed:dither_pattern==7
 ---$track:ディザ強さ, min = 0, max = 100, step = 0.01
 local dither_rate = 100
 
@@ -125,6 +127,10 @@ local dither_rate = 100
 local dither_size = 100
 
 --hide@dither_size:dither_pattern==0
+---$track:dither::回転, min = -3600, max = 3600, step = 0.01, scale = 0.1
+local dither_angle = 0
+
+--hide@dither_angle:dither_pattern==0
 --group:ランダム変化,false
 ---$tips:パスの描画方向に沿ったランダム変動の周期，ピクセル単位
 ---$track:ランダム周期, min = 4, max = 1024, step = 0.01, scale = 0.25
@@ -204,6 +210,7 @@ local extra_script = 'obj.effect("グラデーション",\n  "形状","凸形",\
 ---     :  dither_seed: number?,
 ---     :  dither_rate: number?,
 ---     :  dither_size: number?,
+---     :  dither_angle: number?,
 ---     :  rand_period: number?,
 ---     :  rand_amplify: number?,
 ---     :  rand_seed: number?,
@@ -263,6 +270,7 @@ dither_pattern = path_s.PI.dither_pattern(PI.dither_pattern, dither_pattern);
 dither_seed = tonumber(PI.dither_seed) or dither_seed;
 dither_rate = tonumber(PI.dither_rate) or dither_rate;
 dither_size = tonumber(PI.dither_size) or dither_size;
+dither_angle = tonumber(PI.dither_angle) or dither_angle;
 rand_period = tonumber(PI.rand_period) or rand_period;
 rand_amplify = tonumber(PI.rand_amplify) or rand_amplify;
 rand_seed = tonumber(PI.rand_seed) or rand_seed;
@@ -305,6 +313,7 @@ end
 dither_seed = dither_seed % 2 ^ 20;
 dither_rate = math.min(math.max(dither_rate / 100, 0), 1);
 dither_size = math.max(dither_size / 100, 1);
+dither_angle = 2 * math.pi * ((dither_angle / 360) % 1);
 rand_period = math.max(rand_period, 4);
 rand_amplify = math.max(rand_amplify, 0);
 rand_seed = math.min(math.max(math.floor(0.5 + rand_seed), -2 ^ 16), 2 ^ 16 - 1);
@@ -383,12 +392,10 @@ for i = 1, #paths do
 	path_s.path_mask_line(#paths > 1 and 1 or 0, #paths > 1 and 0 or 1,
 		line, {
 			width = antialias,
-			pattern = dither_pattern,
+			pattern = dither_pattern, seed = dither_seed,
 			rate = dither_rate,
-			seed = dither_seed,
-			size = dither_size,
-			cx = cx + dcx + W / 2,
-			cy = cy + dcy + H / 2,
+			cx = cx + dcx + W / 2, cy = cy + dcy + H / 2,
+			size = dither_size, rot = dither_angle,
 		}, nil,
 		p.points, p.num_segments, true, 8,
 		start_pos, end_pos, end_shape, 0, 1,

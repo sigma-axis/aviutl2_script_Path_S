@@ -88,6 +88,7 @@ local antialias = 1
 ---Bayer 256x256 = 4
 ---IGN = 5
 ---White Noise = 6
+---Halftone = 7
 local dither_pattern = 0
 
 ---$tips:0 以上だと同じシードでも別オブジェクトだと別の乱数．
@@ -100,6 +101,7 @@ local dither_seed = 10000
 --hide@dither_seed:dither_pattern==2
 --hide@dither_seed:dither_pattern==3
 --hide@dither_seed:dither_pattern==4
+--hide@dither_seed:dither_pattern==7
 ---$track:ディザ強さ, min = 0, max = 100, step = 0.01
 local dither_rate = 100
 
@@ -108,6 +110,10 @@ local dither_rate = 100
 local dither_size = 100
 
 --hide@dither_size:dither_pattern==0
+---$track:dither::回転, min = -3600, max = 3600, step = 0.01, scale = 0.1
+local dither_angle = 0
+
+--hide@dither_angle:dither_pattern==0
 --group:矢じり設定,false
 ---$select:矢じり配置
 ---なし = 0
@@ -178,6 +184,7 @@ local rand_seed = 10000
 ---     :  dither_seed: number?,
 ---     :  dither_rate: number?,
 ---     :  dither_size: number?,
+---     :  dither_angle: number?,
 ---     :  head_type: string?,
 ---     :  head_fig: string?,
 ---     :  head_width: number?,
@@ -226,6 +233,7 @@ dither_pattern = path_s.PI.dither_pattern(PI.dither_pattern, dither_pattern);
 dither_seed = tonumber(PI.dither_seed) or dither_seed;
 dither_rate = tonumber(PI.dither_rate) or dither_rate;
 dither_size = tonumber(PI.dither_size) or dither_size;
+dither_angle = tonumber(PI.dither_angle) or dither_angle;
 if type(PI.head_type) == "string" then
 	local name2num = {
 		["なし"] = 0, ["終点"] = 1, ["両方"] = 2, ["双方向"] = 3,
@@ -259,6 +267,7 @@ end
 dither_seed = dither_seed % 2 ^ 20;
 dither_rate = math.min(math.max(dither_rate / 100, 0), 1);
 dither_size = math.max(dither_size / 100, 1);
+dither_angle = 2 * math.pi * ((dither_angle / 360) % 1);
 head_type = math.min(math.max(math.floor(0.5 + head_type), 0), 3);
 head_width = math.max(head_width / 100, 0);
 head_center = head_center / 100;
@@ -375,7 +384,8 @@ path_s.path_mask_line(
 		width = antialias,
 		pattern = dither_pattern, seed = dither_seed,
 		rate = dither_rate,
-		cx = cx + obj.w / 2, cy = cy + obj.h / 2, size = dither_size,
+		cx = cx + obj.w / 2, cy = cy + obj.h / 2,
+		size = dither_size, rot = dither_angle,
 	},
 	nil, points, num_points - 1, false, 1,
 	start_pos, end_pos, end_shape, join_shape, miter_limit,

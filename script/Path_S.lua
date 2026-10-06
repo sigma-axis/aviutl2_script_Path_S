@@ -235,9 +235,10 @@ end
 ---| 4 # Bayer 256x256
 ---| 5 # IGN
 ---| 6 # White Noise
+---| 7 # Halftone
 local PI_choose_dither_pattern do
 	local name2num = {
-		["なし"] = 0, ["Checker"] = 1, ["Bayer 2x2"] = 2, ["Bayer 4x4"] = 3, ["Bayer 256x256"] = 4, ["IGN"] = 5, ["White Noise"] = 6,
+		["なし"] = 0, ["Checker"] = 1, ["Bayer 2x2"] = 2, ["Bayer 4x4"] = 3, ["Bayer 256x256"] = 4, ["IGN"] = 5, ["White Noise"] = 6, ["Halftone"] = 7,
 	};
 	---PI で「ディザリング」指定を適用する．
 	---このパラメタは次の形式で指定されているものとする:
@@ -250,7 +251,7 @@ local PI_choose_dither_pattern do
 		if type(pi_value) == "string" then
 			gui_value = name2num[pi_value] or gui_value;
 		end
-		return math.min(math.max(math.floor(0.5 + gui_value), 0), 6);
+		return math.min(math.max(math.floor(0.5 + gui_value), 0), 7);
 	end
 end
 
@@ -262,6 +263,7 @@ end
 ---@field cx number パターンの原点の X 座標．バッファ左上からのピクセル単位の相対座標．
 ---@field cy number パターンの原点の Y 座標．バッファ左上からのピクセル単位の相対座標．
 ---@field size number ディザリングのドットの拡大率．1.0 以上の実数.
+---@field rot number ディザリングの回転角．時計回りのラジアン単位．
 
 ---@alias antialias # アンチエイリアス幅，またはディザ設定．
 ---| number # アンチエイリアス幅．ピクセル単位．0.0 以上．
@@ -278,7 +280,7 @@ local function wrap_antialias(antialias)
 	return {
 		width = antialias,
 		pattern = 0, seed = 0, rate = 0,
-		cx = 0, cy = 0, size = 1,
+		cx = 0, cy = 0, size = 1, rot = 0,
 	};
 end
 
@@ -781,12 +783,15 @@ local function path_mask_area_buffered(
 	if alpha_outer == alpha_inner then mask_uniform(alpha_outer, tgt_name); return end
 
 	-- mask with the path.
+	local dc, ds = math.cos(antialias.rot) / antialias.size, math.sin(antialias.rot) / antialias.size;
 	obj.pixelshader("carve@パスマスクσ@Path_S", tgt_name, buffer_name,
 	{
 		alpha_inner - alpha_outer, alpha_outer;
 		num_points, mode_fill, inflation;
 		math.max(antialias.width, 1 / 1024);
-		antialias.cx, antialias.cy; 1 / antialias.size;
+		antialias.cx, antialias.cy;
+		dc, -ds, 0, 0,
+		ds, dc;
 		math.max(1 - antialias.rate, 1 / 1024), antialias.seed; antialias.pattern;
 	}, "mask");
 end
@@ -964,31 +969,36 @@ local function path_mask_line_buffered(
 	end
 
 	-- mask with the path.
+	local dc, ds = math.cos(antialias.rot) / antialias.size, math.sin(antialias.rot) / antialias.size;
 	if end_pos - start_pos >= 1 and sum_dash_len <= 0 then
 		obj.pixelshader("carve@パスマスク(ライン)σ@Path_S", tgt_name, buffer_name,
 		{
 			alpha_inner - alpha_outer, alpha_outer;
-			num_points, math.max(line_width - 1, 0) / 2, math.max(antialias.width, 1 / 1024);
+			num_points, loop and 1 or 0;
+			math.max(line_width - 1, 0) / 2, math.max(antialias.width, 1 / 1024);
 
-			antialias.cx, antialias.cy; 1 / antialias.size;
+			antialias.cx, antialias.cy;
+			dc, -ds, 0, 0,
+			ds, dc;
 			math.max(1 - antialias.rate, 1 / 1024); antialias.seed; antialias.pattern;
 
-			end_shape; join_shape;
-			loop and 1 or 0; 1 - 2 / miter_limit ^ 2;
+			end_shape; join_shape; 1 - 2 / miter_limit ^ 2;
 		}, "mask");
 	else
 		obj.pixelshader("carve_dash@パスマスク(ライン)σ@Path_S", tgt_name, buffer_name,
 		{
 			alpha_inner - alpha_outer, alpha_outer;
-			num_points, math.max(line_width - 1, 0) / 2, math.max(antialias.width, 1 / 1024);
+			num_points, loop and 1 or 0;
+			math.max(line_width - 1, 0) / 2, math.max(antialias.width, 1 / 1024);
 
-			antialias.cx, antialias.cy; 1 / antialias.size;
+			antialias.cx, antialias.cy;
+			dc, -ds, 0, 0,
+			ds, dc;
 			math.max(1 - antialias.rate, 1 / 1024); antialias.seed; antialias.pattern;
 
 			#dash_pat, dash_len0, dash_idx0 - 1;
 
-			end_shape; join_shape; dash_end_shape;
-			loop and 1 or 0; 1 - 2 / miter_limit ^ 2; 0;
+			end_shape; join_shape; dash_end_shape; 1 - 2 / miter_limit ^ 2;
 
 			len_path * phase_whole0, len_path * phase_whole1, len_path * phase_whole2, len_path * 2;
 			unpack(dash_pat)
