@@ -88,7 +88,7 @@ float4 carve_dash(float4 pos : SV_Position) : SV_Target
 		sq_dist = min(sq_dist, sq_dist_func_end(pt0, d0, end_shape, padding));
 
 	float a = 1 - (sqrt(sq_dist) - padding) / aa_thick;
-	const float noise = noise_func(
+	const float noise = dither_func(
 		mul(inv_dither_mat, pos.xy - dither_offset) + (1 << 16),
 		uint2(noise_seed, 101), dither_pattern);
 	a = (a - (1 - dither_buff) * noise) / dither_buff;

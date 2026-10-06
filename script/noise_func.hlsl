@@ -32,9 +32,9 @@ float halftone(float2 p)
 	if (R < 1) return a * R;
 	else return 1 - (1 - a) * (2 - R) * (2 - R);
 }
-float noise_func(float2 pos, uint2 seed, uint noise_type)
+float dither_func(float2 pos, uint2 seed, uint pattern)
 {
-	[branch] switch (noise_type) {
+	[branch] switch (pattern) {
 	default: return 0;
 	case 1: // checker
 		return checker(uint2(pos + (1 << 16)));
@@ -47,7 +47,7 @@ float noise_func(float2 pos, uint2 seed, uint noise_type)
 	case 5: { // Interleaved Gradient Noise
 		uint2 s = uint2(106033, 92681) * seed;
 		s ^= s >> 14; s &= 0x3fff;
-		return ign(floor(pos + (1 << 16)) + s);
+		return ign(floor(pos) + ((1 << 16) + s));
 	}
 	case 6: // white noise
 		return ibuki(float4(pos + (1 << 16), seed));
