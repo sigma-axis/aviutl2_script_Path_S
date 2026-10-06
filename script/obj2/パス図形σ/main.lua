@@ -124,6 +124,15 @@ local dither_rate = 100
 local dither_size = 100
 
 --hide@dither_size:dither_pattern==0
+---$track:dither::移動X, min = -4000, max = 4000, step = 0.01, scale = 0.25
+local dither_X = 0
+
+--hide@dither_X:dither_pattern==0
+---$track:dither::移動Y, min = -4000, max = 4000, step = 0.01, scale = 0.25
+local dither_Y = 0
+
+--hide@dither_Y:dither_pattern==0
+--trackgroup@dither_X,dither_Y:DitherPos
 ---$track:dither::回転, min = -3600, max = 3600, step = 0.01, scale = 0.1
 local dither_angle = 0
 
@@ -179,10 +188,19 @@ local fill_dither_rate = 100
 local fill_dither_size = 100
 
 --hide@fill_dither_size:fill_dither_pattern==0
+---$track:fill::dither::移動X, min = -4000, max = 4000, step = 0.01, scale = 0.25
+local fill_dither_X = 0
+
+--hide@fill_dither_X:fill_dither_pattern==0
+---$track:fill::dither::移動Y, min = -4000, max = 4000, step = 0.01, scale = 0.25
+local fill_dither_Y = 0
+
+--hide@fill_dither_Y:fill_dither_pattern==0
+--trackgroup@fill_dither_X,fill_dither_Y:FillDitherPos
 ---$track:fill::dither::回転, min = -3600, max = 3600, step = 0.01, scale = 0.1
 local fill_dither_angle = 0
 
---hide@fill_dither_angle:dither_pattern==0
+--hide@fill_dither_angle:fill_dither_pattern==0
 --group:ランダム変化,false
 ---$tips:パスの描画方向に沿ったランダム変動の周期，ピクセル単位
 ---$track:ランダム周期, min = 4, max = 1024, step = 0.001, scale = 0.25
@@ -228,6 +246,8 @@ local rand_seed = 10000
 ---     :  dither_seed: number?,
 ---     :  dither_rate: number?,
 ---     :  dither_size: number?,
+---     :  dither_X: number?,
+---     :  dither_Y: number?,
 ---     :  dither_angle: number?,
 ---     :  inflation: number?,
 ---     :  alpha_fill: number?,
@@ -237,6 +257,8 @@ local rand_seed = 10000
 ---     :  fill_dither_seed: number?,
 ---     :  fill_dither_rate: number?,
 ---     :  fill_dither_size: number?,
+---     :  fill_dither_X: number?,
+---     :  fill_dither_Y: number?,
 ---     :  fill_dither_angle: number?,
 ---     :  rand_period: number?,
 ---     :  rand_amplify: number?,
@@ -288,6 +310,8 @@ dither_pattern = path_s.PI.dither_pattern(PI.dither_pattern, dither_pattern);
 dither_seed = tonumber(PI.dither_seed) or dither_seed;
 dither_rate = tonumber(PI.dither_rate) or dither_rate;
 dither_size = tonumber(PI.dither_size) or dither_size;
+dither_X = tonumber(PI.dither_X) or dither_X;
+dither_Y = tonumber(PI.dither_Y) or dither_Y;
 dither_angle = tonumber(PI.dither_angle) or dither_angle;
 inflation = tonumber(PI.inflation) or inflation;
 alpha_fill = tonumber(PI.alpha_fill) or alpha_fill;
@@ -302,6 +326,8 @@ fill_dither_pattern = path_s.PI.dither_pattern(PI.fill_dither_pattern, fill_dith
 fill_dither_seed = tonumber(PI.fill_dither_seed) or fill_dither_seed;
 fill_dither_rate = tonumber(PI.fill_dither_rate) or fill_dither_rate;
 fill_dither_size = tonumber(PI.fill_dither_size) or fill_dither_size;
+fill_dither_X = tonumber(PI.fill_dither_X) or fill_dither_X;
+fill_dither_Y = tonumber(PI.fill_dither_Y) or fill_dither_Y;
 fill_dither_angle = tonumber(PI.fill_dither_angle) or fill_dither_angle;
 rand_period = tonumber(PI.rand_period) or rand_period;
 rand_amplify = tonumber(PI.rand_amplify) or rand_amplify;
@@ -390,8 +416,8 @@ if has_fill or has_chrome then
 				width = fill_antialias,
 				pattern = fill_dither_pattern, seed = fill_dither_seed,
 				rate = fill_dither_rate,
-				cx = obj.cx + obj.w / 2, cy = obj.cy + obj.h / 2,
-				size = fill_dither_size, rot = dither_angle,
+				cx = obj.cx + obj.w / 2 + fill_dither_X, cy = obj.cy + obj.h / 2 + fill_dither_Y,
+				size = fill_dither_size, rot = fill_dither_angle,
 			},
 			cache_name, num_points,
 			has_chrome and { name = "tempbuffer", w = obj.w, h = obj.h } or nil);
@@ -405,7 +431,7 @@ if has_fill or has_chrome then
 				width = antialias,
 				pattern = dither_pattern, seed = dither_seed,
 				rate = dither_rate,
-				cx = obj.cx + obj.w / 2, cy = obj.cy + obj.h / 2,
+				cx = obj.cx + obj.w / 2 + dither_X, cy = obj.cy + obj.h / 2 + dither_Y,
 				size = dither_size, rot = dither_angle,
 			},
 			cache_name, num_segments, len, loop,

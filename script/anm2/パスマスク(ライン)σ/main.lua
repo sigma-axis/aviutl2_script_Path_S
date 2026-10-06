@@ -135,6 +135,15 @@ local dither_rate = 100
 local dither_size = 100
 
 --hide@dither_size:dither_pattern==0
+---$track:dither::移動X, min = -4000, max = 4000, step = 0.01, scale = 0.25
+local dither_X = 0
+
+--hide@dither_X:dither_pattern==0
+---$track:dither::移動Y, min = -4000, max = 4000, step = 0.01, scale = 0.25
+local dither_Y = 0
+
+--hide@dither_Y:dither_pattern==0
+--trackgroup@dither_X,dither_Y:DitherPos
 ---$track:dither::回転, min = -3600, max = 3600, step = 0.01, scale = 0.1
 local dither_angle = 0
 
@@ -183,6 +192,8 @@ local toggle_gui = false
 ---     :  dither_seed: number?,
 ---     :  dither_rate: number?,
 ---     :  dither_size: number?,
+---     :  dither_X: number?,
+---     :  dither_Y: number?,
 ---     :  dither_angle: number?,
 ---     :  X, Y: number?,
 ---     :  zoom: number?,
@@ -253,6 +264,8 @@ dither_pattern = path_s.PI.dither_pattern(PI.dither_pattern, dither_pattern);
 dither_seed = tonumber(PI.dither_seed) or dither_seed;
 dither_rate = tonumber(PI.dither_rate) or dither_rate;
 dither_size = tonumber(PI.dither_size) or dither_size;
+dither_X = tonumber(PI.dither_X) or dither_X;
+dither_Y = tonumber(PI.dither_Y) or dither_Y;
 dither_angle = tonumber(PI.dither_angle) or dither_angle;
 X = tonumber(PI.X) or X;
 Y = tonumber(PI.Y) or Y;
@@ -303,7 +316,7 @@ else
 			width = antialias,
 			pattern = dither_pattern, seed = dither_seed,
 			rate = dither_rate,
-			cx = X + obj.w / 2, cy = Y + obj.h / 2,
+			cx = X + obj.w / 2 + dither_X, cy = Y + obj.h / 2 + dither_Y,
 			size = dither_size, rot = dither_angle,
 		},
 		path_type, points, num_points - (loop and 0 or 1), loop, precision,
