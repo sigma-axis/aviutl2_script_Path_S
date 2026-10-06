@@ -58,7 +58,7 @@ float halftone_diamond(float2 p)
 }
 float dither_func(float2 pos, uint2 seed, uint pattern)
 {
-	[branch] switch (pattern) {
+	switch (pattern) {
 	default: return 0;
 	case 1: // checker
 		return checker(uint2(pos + (1 << 16)));
