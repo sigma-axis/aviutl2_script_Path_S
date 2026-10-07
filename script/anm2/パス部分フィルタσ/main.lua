@@ -52,6 +52,7 @@ local mode_fill = 0
 local antialias = 1
 
 ---$nolang: option:Checker, option:Bayer 2x2, option:Bayer 4x4, option:Bayer 256x256, option:IGN, option:White Noise
+---$tips:ぼかし幅の範囲にディザリングを適用します．
 ---$select:ディザリング
 ---なし = 0
 ---Checker = 1
@@ -61,8 +62,8 @@ local antialias = 1
 ---IGN = 5
 ---White Noise = 6
 ---Halftone = 7
----Halftone (Honeycomb) = 8
----Halftone (Diamond) = 9
+---Halftone Honeycomb = 8
+---Halftone Square = 9
 local dither_pattern = 0
 
 ---$tips:0 以上だと同じシードでも別オブジェクトだと別の乱数．

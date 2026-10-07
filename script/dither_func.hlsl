@@ -48,7 +48,7 @@ float halftone_honeycomb(float2 p)
 	if (R < 1) return a * R;
 	else return 1 - (1 - a) * (4 - 3 * R) * (4 - 3 * R);
 }
-float halftone_diamond(float2 p)
+float halftone_square(float2 p)
 {
 	static const float a = 0.5;
 	const float2 u = abs(2 * frac(p / 4 - 0.5) - 1);
@@ -77,9 +77,9 @@ float dither_func(float2 pos, uint2 seed, uint pattern)
 		return ibuki(float4(pos + (1 << 16), seed));
 	case 7: // halftone
 		return halftone(pos);
-	case 8: // halftone (honeycomb)
+	case 8: // halftone honeycomb
 		return halftone_honeycomb(pos);
-	case 9: // halftone (diamond)
-		return halftone_diamond(pos);
+	case 9: // halftone square
+		return halftone_square(pos);
 	}
 }

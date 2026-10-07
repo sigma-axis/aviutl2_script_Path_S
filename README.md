@@ -265,10 +265,12 @@ TODO: images.
   | `IGN` | ![Interleaved Gradient Noise でのディザリング](https://github.com/user-attachments/assets/e04bd74f-719e-4bfa-b1e6-870116ee8e1e) |
   | `White Noise` | ![White Noise でのディザリング](https://github.com/user-attachments/assets/3a588a5c-e36b-4749-b837-ff78d950648f) |
   | `Halftone` | TODO: \!\[Halftone でのディザリング\]() |
-  | `Halftone (Honeycomb)` | TODO: \!\[Halftone (Honeycomb) でのディザリング\]() |
-  | `Halftone (Diamond)` | TODO: \!\[Halftone (Diamond) でのディザリング\]() |
+  | `Halftone Honeycomb` | TODO: \!\[Halftone Honeycomb でのディザリング\]() |
+  | `Halftone Square` | TODO: \!\[Halftone Square でのディザリング\]() |
 
   - `IGN` は “Interleaved Gradient Noise” の略．
+
+    Interleaved Gradient Noise by Jorge Jimenez
 
     https://www.iryoku.com/next-generation-post-processing-in-call-of-duty-advanced-warfare
 
@@ -1483,7 +1485,7 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
   - 「輪郭パスσ」を追加．オブジェクトの輪郭からパスを生成・描画します．
   - 「追加フィルタここまで」を追加．「パス部分フィルタσ」や「輪郭パスσ」で「追加のフィルタ効果」に「後続フィルタ」を選んでいた場合，このフィルタ効果の直前までで区切ります．
   - 「パス部分フィルタσここまで」を非推奨扱いに．「追加フィルタここまで」に機能を統合し，追加メニューからも非表示に．
-  - 「ディザリング」のパターン模様に「Halftone」「Halftone (Honeycomb)」「Halftone (Diamond)」を追加．
+  - 「ディザリング」のパターン模様に「Halftone」「Halftone Honeycomb」「Halftone Square」を追加．
   - ディザリングのパターン模様を平行移動・回転するパラメタの「移動X」「移動Y」「回転」を追加．
 
 ##  改版履歴
