@@ -352,6 +352,7 @@ TODO: images.
   | `Halftone` | TODO: \!\[Halftone でのディザリング\]() |
   | `Halftone Honeycomb` | TODO: \!\[Halftone Honeycomb でのディザリング\]() |
   | `Halftone Square` | TODO: \!\[Halftone Square でのディザリング\]() |
+  | `Stripe` | TODO: \!\[Stripe でのディザリング\]() |
 
   - `IGN` は “Interleaved Gradient Noise” の略．
 
@@ -1570,7 +1571,7 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
   - 「輪郭パスσ」を追加．オブジェクトの輪郭からパスを生成・描画します．
   - 「追加フィルタここまで」を追加．「パス部分フィルタσ」や「輪郭パスσ」で「追加のフィルタ効果」に「後続フィルタ」を選んでいた場合，このフィルタ効果の直前までで区切ります．
   - 「パス部分フィルタσここまで」を非推奨扱いに．「追加フィルタここまで」に機能を統合し，追加メニューからも非表示に．
-  - 「ディザリング」のパターン模様に「Halftone」「Halftone Honeycomb」「Halftone Square」を追加．
+  - 「ディザリング」のパターン模様に「Halftone」「Halftone Honeycomb」「Halftone Square」「Stripe」を追加．
   - ディザリングのパターン模様を平行移動・回転するパラメタの「移動X」「移動Y」「回転」を追加．
   - アンカーのスナップ機能を追加．「点リスト」で指定した点列に対して描画前に座標や角度を揃えるなどの前処理をします．
 

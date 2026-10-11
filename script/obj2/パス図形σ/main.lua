@@ -102,6 +102,7 @@ local antialias = 1
 ---Halftone = 7
 ---Halftone Honeycomb = 8
 ---Halftone Square = 9
+---Stripe = 10
 local dither_pattern = 0
 
 ---$tips:0 以上だと同じシードでも別オブジェクトだと別の乱数．
@@ -167,6 +168,7 @@ local fill_antialias = 1
 ---Halftone = 7
 ---Halftone Honeycomb = 8
 ---Halftone Square = 9
+---Stripe = 10
 local fill_dither_pattern = 0
 
 ---$tips:0 以上だと同じシードでも別オブジェクトだと別の乱数．

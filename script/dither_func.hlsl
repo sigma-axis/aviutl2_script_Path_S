@@ -56,6 +56,10 @@ float halftone_square(float2 p)
 	if (R < 1) return a * R * R;
 	else return 1 - (1 - a) * (2 - R) * (2 - R);
 }
+float stripe(float2 p)
+{
+	return abs(2 * frac(p.y / 2 - 0.5) - 1);
+}
 float dither_func(float2 pos, uint2 seed, uint pattern)
 {
 	switch (pattern) {
@@ -81,5 +85,7 @@ float dither_func(float2 pos, uint2 seed, uint pattern)
 		return halftone_honeycomb(pos);
 	case 9: // halftone square
 		return halftone_square(pos);
+	case 10: // stripe
+		return stripe(pos);
 	}
 }

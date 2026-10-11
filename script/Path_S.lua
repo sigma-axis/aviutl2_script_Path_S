@@ -238,6 +238,7 @@ end
 ---| 7 # Halftone
 ---| 8 # Halftone Honeycomb
 ---| 9 # Halftone Square
+---| 10 # Stripe
 local PI_choose_dither_pattern do
 	local name2num = {
 		["なし"] = 0,
@@ -250,11 +251,12 @@ local PI_choose_dither_pattern do
 		["Halftone"] = 7,
 		["Halftone Honeycomb"] = 8,
 		["Halftone Square"] = 9,
+		["Stripe"] = 10,
 	};
 	---PI で「ディザリング」指定を適用する．
 	---このパラメタは次の形式で指定されているものとする:
 	---
-	---`--select@dither_pattern:ディザリング=0,なし=0,Checker=1,Bayer 2x2=2,Bayer 4x4=3,Bayer 256x256=4,IGN=5,White Noise=6,Halftone=7,Halftone Honeycomb=8,Halftone Square=9`
+	---`--select@dither_pattern:ディザリング=0,なし=0,Checker=1,Bayer 2x2=2,Bayer 4x4=3,Bayer 256x256=4,IGN=5,White Noise=6,Halftone=7,Halftone Honeycomb=8,Halftone Square=9,Stripe=10`
 	---@param pi_value any
 	---@param gui_value dither_pattern
 	---@return dither_pattern
@@ -262,7 +264,7 @@ local PI_choose_dither_pattern do
 		if type(pi_value) == "string" then
 			gui_value = name2num[pi_value] or gui_value;
 		end
-		return math.min(math.max(math.floor(0.5 + gui_value), 0), 9);
+		return math.min(math.max(math.floor(0.5 + gui_value), 0), 10);
 	end
 end
 
