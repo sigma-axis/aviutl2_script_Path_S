@@ -679,13 +679,13 @@ local snap_anchors do
 
 	---アンカー位置にスナップを適用する．指定したグリッドや角度に十分近い場合，その位置に点を矯正してテーブルを書き換える．各パラメタは型や範囲のチェックを受け，型が合わない場合は何もせずエラーにもならない．
 	---@param path_type path_type|any # パスの種類．
-	---@param pts any[]|any # 点列．`{ x1, y1, x2, y2, ... }` の形式．このテーブルの中身が書き換えられる．
+	---@param pts any[]|any # 点列．`{ x1, y1, x2, y2, ... }` の形式．このテーブルの中身が書き換えられる．number 型以外の項目は書き換えない．
 	---@param n_pos_pts integer|any # `pts` 内の位置を指定する点 (制御点でない点) の個数．
 	---@param loop boolean|any # 閉じたパスかどうか．
 	---@param grid_x number|any # 制御点でない点をスナップするグリッドの X 間隔．0 でスナップしない．
 	---@param grid_y number|any # 制御点でない点をスナップするグリッドの Y 間隔．0 でスナップしない．
-	---@param angle_pos snap_angle|any # 制御点でない点の，直前の点との位置から特定角度でスナップする設定．ループの場合はループ終端直前と，ループ始点との関係でもスナップする．
-	---@param angle_ctrl snap_angle|any # 制御点のハンドルを特定角度でスナップする設定．
+	---@param angle_pos snap_angle|any # 制御点でない点の，直前の点との位置から角度でスナップする設定．ループの場合はループ終端直前と，ループ始点との関係でもスナップする．
+	---@param angle_ctrl snap_angle|any # 制御点のハンドルを角度でスナップする設定．
 	---@param prev_ctrl snap_prev_ctrl|any # 制御点を，同じ点から伸びる直前の制御点と揃えるためのスナップ設定．角度や長さが一致するようにスナップする．ループの場合，ループ終点から伸びる制御点は，ループ始点から伸びる制御点とも揃えるようにもスナップする．
 	---@param threshold number|any # スナップ先に矯正する際の最大許容移動距離．ピクセル単位．
 	---@param show_grid boolean|any # `grid_x` や `grid_y` によるスナップ先のグリッドを `obj.setanchor()` を使って表示するかどうか指定．
@@ -715,76 +715,97 @@ local snap_anchors do
 			path_type == 2 and 2 or 3;
 
 		-- position points.
-		pts[1], pts[2] = snap_pos(pt(pts, 1), pt(pts, 2), nil, nil, nil, nil, grid_x, grid_y, num_angle_pos, threshold);
+		do local x, y = tonumber(pts[1]), tonumber(pts[2]);
+			if x and y then pts[1], pts[2] = snap_pos(x, y, nil, nil, nil, nil, grid_x, grid_y, num_angle_pos, threshold) end
+		end
 		for i = 1, n_pos_pts - (loop and 2 or 1) do
 			local x1, y1, x, y =
-				pt(pts, 2 * pts_per_seg * (i - 1) + 1), pt(pts, 2 * pts_per_seg * (i - 1) + 2),
-				pt(pts, 2 * pts_per_seg * i + 1), pt(pts, 2 * pts_per_seg * i + 2);
-			pts[2 * pts_per_seg * i + 1], pts[2 * pts_per_seg * i + 2] =
-				snap_pos(x, y, x1, y1, nil, nil, grid_x, grid_y, num_angle_pos, threshold);
+				tonumber(pts[2 * pts_per_seg * (i - 1) + 1]), tonumber(pts[2 * pts_per_seg * (i - 1) + 2]),
+				tonumber(pts[2 * pts_per_seg * i + 1]), tonumber(pts[2 * pts_per_seg * i + 2]);
+			if x and y then
+				pts[2 * pts_per_seg * i + 1], pts[2 * pts_per_seg * i + 2] =
+					snap_pos(x, y, x1, y1, nil, nil, grid_x, grid_y, num_angle_pos, threshold);
+			end
 		end
 		if loop then
 			local x1, y1, x, y, x2, y2 =
-				pt(pts, 2 * pts_per_seg * (n_pos_pts - 2) + 1), pt(pts, 2 * pts_per_seg * (n_pos_pts - 2) + 2),
-				pt(pts, 2 * pts_per_seg * (n_pos_pts - 1) + 1), pt(pts, 2 * pts_per_seg * (n_pos_pts - 1) + 2),
-				pt(pts, 1), pt(pts, 2);
-			pts[2 * pts_per_seg * (n_pos_pts - 1) + 1], pts[2 * pts_per_seg * (n_pos_pts - 1) + 2] =
-				snap_pos(x, y, x1, y1, x2, y2, grid_x, grid_y, num_angle_pos, threshold);
+				tonumber(pts[2 * pts_per_seg * (n_pos_pts - 2) + 1]), tonumber(pts[2 * pts_per_seg * (n_pos_pts - 2) + 2]),
+				tonumber(pts[2 * pts_per_seg * (n_pos_pts - 1) + 1]), tonumber(pts[2 * pts_per_seg * (n_pos_pts - 1) + 2]),
+				tonumber(pts[1]), tonumber(pts[2]);
+			if x and y then
+				pts[2 * pts_per_seg * (n_pos_pts - 1) + 1], pts[2 * pts_per_seg * (n_pos_pts - 1) + 2] =
+					snap_pos(x, y, x1, y1, x2, y2, grid_x, grid_y, num_angle_pos, threshold);
+			end
 		end
 
 		-- control points.
 		if path_type == 2 then
 			for i = 1, n_pos_pts - 1 do
 				local x1, y1, x, y, x2, y2 =
-					pt(pts, 4 * i - 3), pt(pts, 4 * i - 2),
-					pt(pts, 4 * i - 1), pt(pts, 4 * i),
-					pt(pts, 4 * i + 1), pt(pts, 4 * i + 2);
-				local dx1, dy1;
-				if i > 1 then
-					dx1, dy1 = pt(pts, 4 * i - 5) - x1, pt(pts, 4 * i - 4) - y1;
+					tonumber(pts[4 * i - 3]), tonumber(pts[4 * i - 2]),
+					tonumber(pts[4 * i - 1]), tonumber(pts[4 * i]),
+					tonumber(pts[4 * i + 1]), tonumber(pts[4 * i + 2]);
+				if x1 and y1 and x and y and x2 and y2 then
+					local dx1, dy1;
+					if i > 1 then
+						dx1, dy1 = tonumber(pts[4 * i - 5]), tonumber(pts[4 * i - 4]);
+						if dx1 and dy1 then dx1, dy1 = dx1 - x1, dy1 - y1 end
+					end
+					pts[4 * i - 1], pts[4 * i] =
+						snap_ctrl_2(x, y, x1, y1, x2, y2, dx1, dy1, nil, nil,
+							num_angle_ctrl, prev_angle_ctrl, prev_length_ctrl, threshold);
 				end
-				pts[4 * i - 1], pts[4 * i] =
-					snap_ctrl_2(x, y, x1, y1, x2, y2, dx1, dy1, nil, nil,
-						num_angle_ctrl, prev_angle_ctrl, prev_length_ctrl, threshold);
 			end
 			if loop then
 				local x1, y1, x, y, x2, y2 =
-					pt(pts, 4 * n_pos_pts - 3), pt(pts, 4 * n_pos_pts - 2),
-					pt(pts, 4 * n_pos_pts - 1), pt(pts, 4 * n_pos_pts),
-					pt(pts, 1), pt(pts, 2);
-				local dx1, dy1, dx2, dy2;
-				if n_pos_pts > 1 then
-					dx1, dy1 = pt(pts, 4 * n_pos_pts - 5) - x1, pt(pts, 4 * n_pos_pts - 4) - y1;
+					tonumber(pts[4 * n_pos_pts - 3]), tonumber(pts[4 * n_pos_pts - 2]),
+					tonumber(pts[4 * n_pos_pts - 1]), tonumber(pts[4 * n_pos_pts]),
+					tonumber(pts[1]), tonumber(pts[2]);
+				if x1 and y1 and x and y and x2 and y2 then
+					local dx1, dy1, dx2, dy2;
+					if n_pos_pts > 1 then
+						dx1, dy1 = tonumber(pts[4 * n_pos_pts - 5]), tonumber(pts[4 * n_pos_pts - 4]);
+						if dx1 and dy1 then dx1, dy1 = dx1 - x1, dy1 - y1 end
+					end
+					dx2, dy2 = tonumber(pts[3]), tonumber(pts[4]);
+					if dx2 and dy2 then dx2, dy2 = dx2 - x2, dy2 - y2 end
+					pts[4 * n_pos_pts - 1], pts[4 * n_pos_pts] =
+						snap_ctrl_2(x, y, x1, y1, x2, y2, dx1, dy1, dx2, dy2,
+							num_angle_ctrl, prev_angle_ctrl, prev_length_ctrl, threshold);
 				end
-				dx2, dy2 = pt(pts, 3) - x2, pt(pts, 4) - y2;
-				pts[4 * n_pos_pts - 1], pts[4 * n_pos_pts] =
-					snap_ctrl_2(x, y, x1, y1, x2, y2, dx1, dy1, dx2, dy2,
-						num_angle_ctrl, prev_angle_ctrl, prev_length_ctrl, threshold);
 			end
 		elseif path_type == 3 then
 			for i = 1, n_pos_pts - (loop and 0 or 1) do
 				local dx1, dy1, x1, y1, dx, dy = nil, nil,
-					pt(pts, 6 * i - 5), pt(pts, 6 * i - 4),
-					pt(pts, 6 * i - 3), pt(pts, 6 * i - 2);
-				if i > 1 then dx1, dy1 = pt(pts, 6 * i - 7) - x1, pt(pts, 6 * i - 6) - y1 end
-				dx, dy = dx - x1, dy - y1;
-				dx, dy = snap_ctrl_3(dx, dy, dx1, dy1,
-					num_angle_ctrl, prev_angle_ctrl, prev_length_ctrl, threshold);
-				pts[6 * i - 3], pts[6 * i - 2] = dx + x1, dy + y1;
+					tonumber(pts[6 * i - 5]), tonumber(pts[6 * i - 4]),
+					tonumber(pts[6 * i - 3]), tonumber(pts[6 * i - 2]);
+				if x1 and y1 and dx and dy then
+					if i > 1 then
+						dx1, dy1 = tonumber(pts[6 * i - 7]), tonumber(pts[6 * i - 6]);
+						if dx1 and dy1 then dx1, dy1 = dx1 - x1, dy1 - y1 end
+					end
+					dx, dy = dx - x1, dy - y1;
+					dx, dy = snap_ctrl_3(dx, dy, dx1, dy1,
+						num_angle_ctrl, prev_angle_ctrl, prev_length_ctrl, threshold);
+					pts[6 * i - 3], pts[6 * i - 2] = dx + x1, dy + y1;
+				end
 
 				if not loop or i < n_pos_pts then
 					dx1, dy1, x1, y1 = nil, nil,
-						pt(pts, 6 * i + 1), pt(pts, 6 * i + 2);
+						tonumber(pts[6 * i + 1]), tonumber(pts[6 * i + 2]);
 				else
 					dx1, dy1, x1, y1 =
-						pt(pts, 3), pt(pts, 4),
-						pt(pts, 1), pt(pts, 2);
-					dx1, dy1 = dx1 - x1, dy1 - y1;
+						tonumber(pts[3]), tonumber(pts[4]),
+						tonumber(pts[1]), tonumber(pts[2]);
 				end
-				dx, dy = pt(pts, 6 * i - 1) - x1, pt(pts, 6 * i) - y1;
-				dx, dy = snap_ctrl_3(dx, dy, dx1, dy1,
-					num_angle_ctrl, prev_angle_ctrl, prev_length_ctrl, threshold);
-				pts[6 * i - 1], pts[6 * i] = dx + x1, dy + y1;
+				dx, dy = tonumber(pts[6 * i - 1]), tonumber(pts[6 * i]);
+				if x1 and y1 and dx and dy then
+					if dx1 and dy1 then dx1, dy1 = dx1 - x1, dy1 - y1 end
+					dx, dy = dx - x1, dy - y1;
+					dx, dy = snap_ctrl_3(dx, dy, dx1, dy1,
+						num_angle_ctrl, prev_angle_ctrl, prev_length_ctrl, threshold);
+					pts[6 * i - 1], pts[6 * i] = dx + x1, dy + y1;
+				end
 			end
 		end
 

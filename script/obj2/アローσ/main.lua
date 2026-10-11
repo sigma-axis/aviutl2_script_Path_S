@@ -176,7 +176,7 @@ local rand_fix_end = true
 local rand_seed = 10000
 
 --group:スナップ設定,false
----$tips:グリッド状にスナップします．制御点以外に有効．
+---$tips:格子状にスナップします．制御点以外に有効．
 ---$select:snap::グリッド
 ---なし = 0
 ---横のみ = 1
@@ -199,7 +199,7 @@ local snap_show_grid = false
 
 --hide@snap_show_grid:snap_grid==0
 ---$nolang: option:90°, option:45°, option:30°, option:15°, option:5°
----$tips:直前の点からの特定角度でスナップします．制御点以外に有効．
+---$tips:直前の点からの角度でスナップします．制御点以外に有効．
 ---$select:snap::隣との角度
 ---なし = 0
 ---90° = 1
@@ -210,7 +210,7 @@ local snap_show_grid = false
 local snap_angle_pos = 0
 
 ---$nolang: option:90°, option:45°, option:30°, option:15°, option:5°
----$tips:特定角度でスナップします．制御点のみに有効．
+---$tips:制御点の角度でスナップします．制御点のみに有効．
 ---$select:snap::制御点の角度
 ---なし = 0
 ---90° = 1
