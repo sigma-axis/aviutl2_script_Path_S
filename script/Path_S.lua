@@ -310,6 +310,510 @@ local function anchor_offset(mode_anchor_base)
 	return cx, cy;
 end
 
+---@alias snap_angle # 角度単位のスナップ設定．
+---| 0 # なし
+---| 1 # 90°
+---| 2 # 45°
+---| 3 # 30°
+---| 4 # 15°
+---| 5 # 5°
+
+---@alias snap_prev_ctrl # 制御点ハンドルのスナップ設定．
+---| 0 # なし
+---| 1 # 角度
+---| 2 # 長さ
+---| 3 # 角度と長さ
+
+local snap_anchors do
+	local tau, sin, cos, atan2, abs, min, max, floor = 2 * math.pi, math.sin, math.cos, math.atan2, math.abs, math.min, math.max, math.floor;
+	local num_angles = { 4, 8, 12, 24, 72 };
+
+	local function pt(pts, i) return tonumber(pts[i]) or 0 end
+	local function norm(x, y) return x ^ 2 + y ^ 2 end
+	local function closer(x0, y0, x1, y1, x2, y2)
+		if not x1 or norm(x1 - x0, y1 - y0) > norm(x2 - x0, y2 - y0) then return x2, y2 end
+		return x1, y1;
+	end
+
+	-- for position points.
+	local function snap_pos(x, y, x1, y1, x2, y2, grid_x, grid_y, n_angles, thresh)
+		-- grid.
+		local X0, Y0;
+		if grid_x > 0 then X0 = floor(0.5 + x / grid_x) * grid_x end
+		if grid_y > 0 then Y0 = floor(0.5 + y / grid_y) * grid_y end
+
+		-- angles.
+		local c1, s1, c2, s2;
+		if n_angles > 0 then
+			if x1 and y1 then
+				local a = atan2(y - y1, x - x1);
+				a = floor(0.5 + n_angles * a / tau) / n_angles * tau;
+				c1, s1 = cos(a), sin(a);
+			end
+			if x2 and y2 then
+				local a = atan2(y - y2, x - x2);
+				a = floor(0.5 + n_angles * a / tau) / n_angles * tau;
+				c2, s2 = cos(a), sin(a);
+			end
+		end
+
+		-- co-dimension of 2 (i.e. points).
+		local X, Y;
+
+		-- grid.
+		if X0 and Y0 then X, Y = X0, Y0 end
+
+		-- two angles.
+		if c1 and c2 then
+			local det = c1 * s2 - c2 * s1;
+			if det ~= 0 then
+				local u, v = -s1 * x1 + c1 * y1, -s2 * x2 + c2 * y2;
+				X, Y = closer(x, y, X, Y,
+					(c2 * u - c1 * v) / det, (s2 * u - s1 * v) / det);
+			end
+		end
+
+		-- angle and grid.
+		if c1 then
+			if X0 and c1 ~= 0 then
+				X, Y = closer(x, y, X, Y, X0, (X0 - x1) / c1 * s1 + y1);
+			end
+			if Y0 and s1 ~= 0 then
+				X, Y = closer(x, y, X, Y, (Y0 - y1) / s1 * c1 + x1, Y0);
+			end
+		end
+		if c2 then
+			if X0 and c2 ~= 0 then
+				X, Y = closer(x, y, X, Y, X0, (X0 - x2) / c2 * s2 + y2);
+			end
+			if Y0 and s2 ~= 0 then
+				X, Y = closer(x, y, X, Y, (Y0 - y2) / s2 * c2 + x2, Y0);
+			end
+		end
+
+		-- check the threshold.
+		if X and Y and norm(X - x, Y - y) <= thresh ^ 2 then return X, Y end
+
+		-- co-dimension of 1 (i.e. lines).
+		X, Y = nil, nil;
+
+		-- grid.
+		if X0 then X, Y = X0, y end
+		if Y0 then X, Y = closer(x, y, X, Y, x, Y0) end
+
+		-- angle.
+		if c1 then
+			local d = (x - x1) * c1 + (y - y1) * s1;
+			X, Y = closer(x, y, X, Y, d * c1 + x1, d * s1 + y1);
+		end
+		if c2 then
+			local d = (x - x2) * c2 + (y - y2) * s2;
+			X, Y = closer(x, y, X, Y, d * c2 + x2, d * s2 + y2);
+		end
+
+		-- check the threshold.
+		if X and Y and norm(X - x, Y - y) <= thresh ^ 2 then return X, Y end
+
+		return x, y;
+	end
+
+	-- for control points of quadratic bezier.
+	local function snap_ctrl_2(x, y, x1, y1, x2, y2, dx1, dy1, dx2, dy2, n_angles, snap_angle, snap_length, thresh)
+		-- from position points.
+		local c01, s01, c02, s02;
+		if n_angles > 0 then
+			local a = atan2(y - y1, x - x1);
+			a = floor(0.5 + n_angles * a / tau) / n_angles * tau;
+			c01, s01 = cos(a), sin(a);
+			a = atan2(y - y2, x - x2);
+			a = floor(0.5 + n_angles * a / tau) / n_angles * tau;
+			c02, s02 = cos(a), sin(a);
+		end
+
+		-- from control points.
+		local c1, s1, r1, c2, s2, r2;
+		if snap_angle or snap_length then
+			if dx1 and dy1 then
+				r1 = (dx1 ^ 2 + dy1 ^ 2) ^ 0.5;
+				c1, s1 = dx1 / r1, dy1 / r1;
+				if c1 * (x - x1) + s1 * (y - y1) < 0 then c1, s1 = -c1, -s1 end
+			end
+			if dx2 and dy2 then
+				r2 = (dx2 ^ 2 + dy2 ^ 2) ^ 0.5;
+				c2, s2 = dx2 / r2, dy2 / r2;
+				if c2 * (x - x2) + s2 * (y - y2) < 0 then c2, s2 = -c2, -s2 end
+			end
+			if not snap_angle then c1, s1, c2, s2 = nil, nil, nil, nil end
+			if not snap_length then r1, r2 = nil, nil end
+		end
+
+		-- co-dimension of 2 (i.e. points).
+		local X, Y;
+
+		-- angles from position points.
+		if c01 then
+			local det = c01 * s02 - c02 * s01;
+			if det ~= 0 then
+				local u, v = -s01 * x1 + c01 * y1, -s02 * x2 + c02 * y2;
+				X, Y = (c02 * u - c01 * v) / det, (s02 * u - s01 * v) / det;
+			end
+		end
+
+		-- control point.
+		if r1 then
+			if c1 then
+				X, Y = closer(x, y, X, Y,
+					r1 * c1 + x1, r1 * s1 + y1);
+			end
+			X, Y = closer(x, y, X, Y, x1, y1);
+		end
+		if r2 then
+			if c2 then
+				X, Y = closer(x, y, X, Y,
+					r2 * c2 + x2, r2 * s2 + y2);
+			end
+			X, Y = closer(x, y, X, Y, x2, y2);
+		end
+
+		-- mixed conditions from control points.
+		if c1 and c2 then -- two angles.
+			local det = c1 * s2 - c2 * s1;
+			if det ~= 0 then
+				local u, v = -s1 * x1 + c1 * y1, -s2 * x2 + c2 * y2;
+				X, Y = closer(x, y, X, Y,
+					(c2 * u - c1 * v) / det, (s2 * u - s1 * v) / det);
+			end
+		end
+		if r1 and r2 then -- two radii.
+			local l = ((x1 - x2) ^ 2 + (y1 - y2) ^ 2) ^ 0.5;
+			if l > 0 and abs(r1 - r2) <= l and l <= r1 + r2 then
+				local u = (l ^ 2 + r1 ^ 2 - r2 ^ 2) / (2 * l);
+				local v, c, s = (r1 ^ 2 - u ^ 2) ^ 0.5, (x2 - x1) / l, (y2 - y1) / l;
+				X, Y = closer(x, y, X, Y, u * c - v * s, u * s + v * c);
+				X, Y = closer(x, y, X, Y, u * c + v * s, u * s - v * c);
+			end
+		end
+		if c1 and r2 then -- angle and length.
+			local d = -(x1 - x2) * s1 + (y1 - y2) * c1;
+			if abs(d) <= r2 then
+				local v = (r2 ^ 2 - d ^ 2) ^ 0.5;
+				local x12, y12 = -s1 * d + x2, c1 * d + y2;
+				X, Y = closer(x, y, X, Y, v * c1 + x12, v * s1 + y12);
+				X, Y = closer(x, y, X, Y, -v * c1 + x12, -v * s1 + y12);
+			end
+		end
+		if c2 and r1 then
+			local d = -(x2 - x1) * s2 + (y2 - y1) * c2;
+			if abs(d) <= r1 then
+				local v = (r1 ^ 2 - d ^ 2) ^ 0.5;
+				local x21, y21 = -s2 * d + x1, c2 * d + y1;
+				X, Y = closer(x, y, X, Y, v * c2 + x21, v * s2 + y21);
+				X, Y = closer(x, y, X, Y, -v * c2 + x21, -v * s2 + y21);
+			end
+		end
+
+		-- mixed conditions from position and control points.
+		if c01 then
+			if r1 then
+				X, Y = closer(x, y, X, Y, r1 * c01 + x1, r1 * s01 + y1);
+			end
+			if c2 then
+				local det = c01 * s2 - c2 * s01;
+				if det ~= 0 then
+					local u, v = -s01 * x1 + c01 * y1, -s2 * x2 + c2 * y2;
+					X, Y = closer(x, y, X, Y,
+						(c2 * u - c01 * v) / det, (s2 * u - s01 * v) / det);
+				end
+			end
+		end
+		if c02 then
+			if r2 then
+				X, Y = closer(x, y, X, Y, r2 * c02 + x2, r2 * s02 + y2);
+			end
+			if c1 then
+				local det = c1 * s02 - c02 * s1;
+				if det ~= 0 then
+					local u, v = -s1 * x1 + c1 * y1, -s02 * x2 + c02 * y2;
+					X, Y = closer(x, y, X, Y,
+						(c02 * u - c1 * v) / det, (s02 * u - s1 * v) / det);
+				end
+			end
+		end
+		if c01 and r2 then
+			local d = -(x1 - x2) * s01 + (y1 - y2) * c01;
+			if abs(d) <= r2 then
+				local v = (r2 ^ 2 - d ^ 2) ^ 0.5;
+				local x12, y12 = -s01 * d + x2, c01 * d + y2;
+				X, Y = closer(x, y, X, Y, v * c01 + x12, v * s01 + y12);
+				X, Y = closer(x, y, X, Y, -v * c01 + x12, -v * s01 + y12);
+			end
+		end
+		if c02 and r1 then
+			local d = -(x2 - x1) * s02 + (y2 - y1) * c02;
+			if abs(d) <= r1 then
+				local v = (r1 ^ 2 - d ^ 2) ^ 0.5;
+				local x21, y21 = -s02 * d + x1, c02 * d + y1;
+				X, Y = closer(x, y, X, Y, v * c02 + x21, v * s02 + y21);
+				X, Y = closer(x, y, X, Y, -v * c02 + x21, -v * s02 + y21);
+			end
+		end
+
+		-- check the threshold.
+		if X and Y and norm(X - x, Y - y) <= thresh ^ 2 then return X, Y end
+
+		-- co-dimension of 1 (i.e. lines).
+		X, Y = nil, nil;
+
+		-- angle from a position point.
+		if c01 then
+			local d = (x - x1) * c01 + (y - y1) * s01;
+			X, Y = closer(x, y, X, Y, d * c01 + x1, d * s01 + y1);
+		end
+		if c02 then
+			local d = (x - x2) * c02 + (y - y2) * s02;
+			X, Y = closer(x, y, X, Y, d * c02 + x2, d * s02 + y2);
+		end
+		-- in-between the position points.
+		if c01 then
+			local l = ((x1 - x2) ^ 2 + (y1 - y2) ^ 2) ^ 0.5;
+			if l > 0 then
+				local c, s = (x1 - x2) / l, (y1 - y2) / l;
+				local d = (x - x1) * c + (y - y1) * s;
+				X, Y = closer(x, y, X, Y, d * c + x1, d * s + y1);
+			end
+		end
+		-- angle from a control point.
+		if c1 then
+			local d = (x - x1) * c1 + (y - y1) * s1;
+			X, Y = closer(x, y, X, Y, d * c1 + x1, d * s1 + y1);
+		end
+		if c2 then
+			local d = (x - x2) * c2 + (y - y2) * s2;
+			X, Y = closer(x, y, X, Y, d * c2 + x2, d * s2 + y2);
+		end
+		-- length from a control point.
+		if r1 then
+			local l = ((x - x1) ^ 2 + (y - y1) ^ 2) ^ 0.5;
+			if l > 0 then
+				X, Y = closer(x, y, X, Y, (x - x1) / l * r1 + x1, (y - y1) / l * r1 + y1);
+			end
+		end
+		if r2 then
+			local l = ((x - x2) ^ 2 + (y - y2) ^ 2) ^ 0.5;
+			if l > 0 then
+				X, Y = closer(x, y, X, Y, (x - x2) / l * r2 + x2, (y - y2) / l * r2 + y2);
+			end
+		end
+
+		-- check the threshold.
+		if X and Y and norm(X - x, Y - y) <= thresh ^ 2 then return X, Y end
+
+		return x, y;
+	end
+
+	-- for control points of cubic bezier.
+	local function snap_ctrl_3(dx, dy, dx1, dy1, n_angles, snap_angle, snap_length, thresh)
+		-- from position points.
+		local c0, s0;
+		if n_angles > 0 then
+			local a = atan2(dy, dx);
+			a = floor(0.5 + n_angles * a / tau) / n_angles * tau;
+			c0, s0 = cos(a), sin(a);
+		end
+
+		-- from control points.
+		local c1, s1, r1;
+		if (snap_angle or snap_length) and dx1 and dy1 then
+			r1 = (dx1 ^ 2 + dy1 ^ 2) ^ 0.5;
+			c1, s1 = dx1 / r1, dy1 / r1;
+			if c1 * dx + s1 * dy < 0 then c1, s1 = -c1, -s1 end
+			if not snap_angle then c1, s1 = nil, nil end
+			if not snap_length then r1 = nil end
+		end
+
+		-- co-dimension of 2 (i.e. points).
+		local dX, dY;
+
+		-- control point.
+		if r1 then
+			if c1 then
+				dX, dY = r1 * c1, r1 * s1;
+			end
+			dX, dY = closer(dx, dy, dX, dY, 0, 0);
+		end
+
+		-- mixed conditions from position and control points.
+		if c0 and r1 then
+			dX, dY = closer(dx, dy, dX, dY, r1 * c0, r1 * s0);
+		end
+
+		-- check the threshold.
+		if dX and dY and norm(dX - dx, dY - dy) <= thresh ^ 2 then return dX, dY end
+
+		-- co-dimension of 1 (i.e. lines).
+		dX, dY = nil, nil;
+
+		-- position point.
+		if c0 then
+			local d = dx * c0 + dy * s0;
+			dX, dY = d * c0, d * s0;
+		end
+
+		-- control point.
+		if c1 then
+			local d = dx * c1 + dy * s1;
+			dX, dY = closer(dx, dy, dX, dY, d * c1, d * s1);
+		end
+		if r1 then
+			local l = (dx ^ 2 + dy ^ 2) ^ 0.5;
+			if l > 0 then
+				dX, dY = closer(dx, dy, dX, dY, dx / l * r1, dy / l * r1);
+			end
+		end
+
+		-- check the threshold.
+		if dX and dY and norm(dX - dx, dY - dy) <= thresh ^ 2 then return dX, dY end
+
+		return dx, dy;
+	end
+
+	---アンカー位置にスナップを適用する．指定したグリッドや角度に十分近い場合，その位置に点を矯正してテーブルを書き換える．各パラメタは型や範囲のチェックを受け，型が合わない場合は何もせずエラーにもならない．
+	---@param path_type path_type|any # パスの種類．
+	---@param pts any[]|any # 点列．`{ x1, y1, x2, y2, ... }` の形式．このテーブルの中身が書き換えられる．
+	---@param n_pos_pts integer|any # `pts` 内の位置を指定する点 (制御点でない点) の個数．
+	---@param loop boolean|any # 閉じたパスかどうか．
+	---@param grid_x number|any # 制御点でない点をスナップするグリッドの X 間隔．0 でスナップしない．
+	---@param grid_y number|any # 制御点でない点をスナップするグリッドの Y 間隔．0 でスナップしない．
+	---@param angle_pos snap_angle|any # 制御点でない点の，直前の点との位置から特定角度でスナップする設定．ループの場合はループ終端直前と，ループ始点との関係でもスナップする．
+	---@param angle_ctrl snap_angle|any # 制御点のハンドルを特定角度でスナップする設定．
+	---@param prev_ctrl snap_prev_ctrl|any # 制御点を，同じ点から伸びる直前の制御点と揃えるためのスナップ設定．角度や長さが一致するようにスナップする．ループの場合，ループ終点から伸びる制御点は，ループ始点から伸びる制御点とも揃えるようにもスナップする．
+	---@param threshold number|any # スナップ先に矯正する際の最大許容移動距離．ピクセル単位．
+	---@param show_grid boolean|any # `grid_x` や `grid_y` によるスナップ先のグリッドを `obj.setanchor()` を使って表示するかどうか指定．
+	---@param mode_anchor_base mode_anchor_base|any # `show_grid` が `true` のときのみ有効．グリッド表示の基準位置を指定．
+	function snap_anchors(path_type, pts, n_pos_pts, loop,
+		grid_x, grid_y, angle_pos,
+		angle_ctrl, prev_ctrl, threshold,
+		show_grid, mode_anchor_base)
+		-- parameter checks.
+		path_type = min(max(floor(0.5 + (tonumber(path_type) or 0)), 0), 3);
+		n_pos_pts = floor(0.5 + (tonumber(n_pos_pts) or 0));
+		grid_x = tonumber(grid_x) or 0;
+		grid_y = tonumber(grid_y) or 0;
+		local num_angle_pos = num_angles[floor(0.5 + (tonumber(angle_pos) or 0))] or 0;
+		local num_angle_ctrl = num_angles[floor(0.5 + (tonumber(angle_ctrl) or 0))] or 0;
+		local prev_angle_ctrl = prev_ctrl == 1 or prev_ctrl == 3;
+		local prev_length_ctrl = prev_ctrl == 2 or prev_ctrl == 3;
+		threshold = tonumber(threshold) or 0;
+		if type(pts) ~= "table" or (n_pos_pts <= 0) or
+			(grid_x <= 0 and grid_y <= 0 and num_angle_pos <= 0 and
+				(path_type < 2 or (num_angle_ctrl <= 0 and not prev_angle_ctrl and not prev_length_ctrl))) or
+			(threshold <= 0) then return end
+
+		local pts_per_seg =
+			path_type == 0 and 1 or
+			path_type == 1 and 1 or
+			path_type == 2 and 2 or 3;
+
+		-- position points.
+		pts[1], pts[2] = snap_pos(pt(pts, 1), pt(pts, 2), nil, nil, nil, nil, grid_x, grid_y, num_angle_pos, threshold);
+		for i = 1, n_pos_pts - (loop and 2 or 1) do
+			local x1, y1, x, y =
+				pt(pts, 2 * pts_per_seg * (i - 1) + 1), pt(pts, 2 * pts_per_seg * (i - 1) + 2),
+				pt(pts, 2 * pts_per_seg * i + 1), pt(pts, 2 * pts_per_seg * i + 2);
+			pts[2 * pts_per_seg * i + 1], pts[2 * pts_per_seg * i + 2] =
+				snap_pos(x, y, x1, y1, nil, nil, grid_x, grid_y, num_angle_pos, threshold);
+		end
+		if loop then
+			local x1, y1, x, y, x2, y2 =
+				pt(pts, 2 * pts_per_seg * (n_pos_pts - 2) + 1), pt(pts, 2 * pts_per_seg * (n_pos_pts - 2) + 2),
+				pt(pts, 2 * pts_per_seg * (n_pos_pts - 1) + 1), pt(pts, 2 * pts_per_seg * (n_pos_pts - 1) + 2),
+				pt(pts, 1), pt(pts, 2);
+			pts[2 * pts_per_seg * (n_pos_pts - 1) + 1], pts[2 * pts_per_seg * (n_pos_pts - 1) + 2] =
+				snap_pos(x, y, x1, y1, x2, y2, grid_x, grid_y, num_angle_pos, threshold);
+		end
+
+		-- control points.
+		if path_type == 2 then
+			for i = 1, n_pos_pts - 1 do
+				local x1, y1, x, y, x2, y2 =
+					pt(pts, 4 * i - 3), pt(pts, 4 * i - 2),
+					pt(pts, 4 * i - 1), pt(pts, 4 * i),
+					pt(pts, 4 * i + 1), pt(pts, 4 * i + 2);
+				local dx1, dy1;
+				if i > 1 then
+					dx1, dy1 = pt(pts, 4 * i - 5) - x1, pt(pts, 4 * i - 4) - y1;
+				end
+				pts[4 * i - 1], pts[4 * i] =
+					snap_ctrl_2(x, y, x1, y1, x2, y2, dx1, dy1, nil, nil,
+						num_angle_ctrl, prev_angle_ctrl, prev_length_ctrl, threshold);
+			end
+			if loop then
+				local x1, y1, x, y, x2, y2 =
+					pt(pts, 4 * n_pos_pts - 3), pt(pts, 4 * n_pos_pts - 2),
+					pt(pts, 4 * n_pos_pts - 1), pt(pts, 4 * n_pos_pts),
+					pt(pts, 1), pt(pts, 2);
+				local dx1, dy1, dx2, dy2;
+				if n_pos_pts > 1 then
+					dx1, dy1 = pt(pts, 4 * n_pos_pts - 5) - x1, pt(pts, 4 * n_pos_pts - 4) - y1;
+				end
+				dx2, dy2 = pt(pts, 3) - x2, pt(pts, 4) - y2;
+				pts[4 * n_pos_pts - 1], pts[4 * n_pos_pts] =
+					snap_ctrl_2(x, y, x1, y1, x2, y2, dx1, dy1, dx2, dy2,
+						num_angle_ctrl, prev_angle_ctrl, prev_length_ctrl, threshold);
+			end
+		elseif path_type == 3 then
+			for i = 1, n_pos_pts - (loop and 0 or 1) do
+				local dx1, dy1, x1, y1, dx, dy = nil, nil,
+					pt(pts, 6 * i - 5), pt(pts, 6 * i - 4),
+					pt(pts, 6 * i - 3), pt(pts, 6 * i - 2);
+				if i > 1 then dx1, dy1 = pt(pts, 6 * i - 7) - x1, pt(pts, 6 * i - 6) - y1 end
+				dx, dy = dx - x1, dy - y1;
+				dx, dy = snap_ctrl_3(dx, dy, dx1, dy1,
+					num_angle_ctrl, prev_angle_ctrl, prev_length_ctrl, threshold);
+				pts[6 * i - 3], pts[6 * i - 2] = dx + x1, dy + y1;
+
+				if not loop or i < n_pos_pts then
+					dx1, dy1, x1, y1 = nil, nil,
+						pt(pts, 6 * i + 1), pt(pts, 6 * i + 2);
+				else
+					dx1, dy1, x1, y1 =
+						pt(pts, 3), pt(pts, 4),
+						pt(pts, 1), pt(pts, 2);
+					dx1, dy1 = dx1 - x1, dy1 - y1;
+				end
+				dx, dy = pt(pts, 6 * i - 1) - x1, pt(pts, 6 * i) - y1;
+				dx, dy = snap_ctrl_3(dx, dy, dx1, dy1,
+					num_angle_ctrl, prev_angle_ctrl, prev_length_ctrl, threshold);
+				pts[6 * i - 1], pts[6 * i] = dx + x1, dy + y1;
+			end
+		end
+
+		-- show grid.
+		if show_grid == true and (grid_x > 0 or grid_y > 0) then
+			local color, max_grid = 0xffffff55, 128;
+			local l, t = pt(pts, 1), pt(pts, 2); local r, b = l, t;
+			for i = 3, 2 * (n_pos_pts * pts_per_seg - (loop and 0 or pts_per_seg - 1)), 2 do
+				local x, y = pt(pts, i), pt(pts, i + 1);
+				l, r, t, b = min(l, x), max(r, x), min(t, y), max(b, y);
+			end
+			l, r, t, b = l - threshold, r + threshold, t - threshold, b + threshold;
+			local cx, cy = anchor_offset(PI_choose_mode_anchor_base(nil, mode_anchor_base));
+
+			local setanchor = obj.setanchor;
+			if r - l < max_grid * grid_x then
+				for x = -floor(-l / grid_x), floor(r / grid_x) do
+					setanchor({ x * grid_x, t, x * grid_x, b }, 2, "line", "rgba", color, "offset", cx, cy);
+				end
+			end
+			if b - t < max_grid * grid_y then
+				for y = -floor(-t / grid_y), floor(b / grid_y) do
+					setanchor({ l, y * grid_y, r, y * grid_y }, 2, "line", "rgba", color, "offset", cx, cy);
+				end
+			end
+		end
+	end
+end
+
 local anchor, poll do
 	local function pt(pts, i) return tonumber(pts[i]) or 0 end
 	local function unpack1(x) if x ~= nil then return x end end
@@ -320,7 +824,7 @@ local anchor, poll do
 	---@param pts any[] 点列の配列， `{ x1, y1, x2, y2, x3, y3, ... }` の形式．
 	---@param n_segs integer パスの分割区間の個数．
 	---@param loop boolean 閉じたパスかどうか．
-	---@param alt_points function? `alt_pts = alt_points(path_type, pts, n_segs, loop)` 想定されるアンカーの個数が `pts` の点の個数と異なる場合に呼ばれる関数．代替となる点列テーブルを返す．省略時は独自の方法で代替の点列を構築する．
+	---@param alt_points nil|fun(path_type: path_type, pts: any[], n_segs: integer, loop: boolean): number[] # 想定されるアンカーの個数が `pts` の点の個数と異なる場合に呼ばれる関数．代替となる点列テーブルを返す．省略時は独自の方法で代替の点列を構築する．
 	---@param mode_anchor_base mode_anchor_base? アンカー基準．省略時は `5` (中央).
 	---@return integer n_anchors 設定したアンカーの個数．
 	---@return table pts_corrected 足りない点や余剰な点を補正した点列．補正の必要がない場合は `pts` そのもの．
@@ -368,30 +872,31 @@ local anchor, poll do
 		end
 
 		local cx, cy = anchor_offset(mode_anchor_base or 5);
-		if path_type == 3 then
+		if path_type >= 2 then
 			obj.setanchor(var_name, n_anchors, "offset", cx, cy, unpack1(alt_pts));
 
 			-- draw handles.
 			local pts2, pts3 = alt_pts or pts, {};
 			for i = 1, n_segs do
-				local I, J = 6 * i, 6 * (loop and (i % n_segs) or i);
+				local I, J = 2 * pts_per_seg * i, 2 * pts_per_seg * (loop and (i % n_segs) or i);
 				obj.setanchor({
-					pt(pts2, I - 5), pt(pts2, I - 4),
-					pt(pts2, I - 3), pt(pts2, I - 2),
+					pt(pts2, I - 2 * pts_per_seg + 1), pt(pts2, I - 2 * pts_per_seg + 2),
+					pt(pts2, I - 2 * pts_per_seg + 3), pt(pts2, I - 2 * pts_per_seg + 4),
 					pt(pts2, I - 1), pt(pts2, I - 0),
 					pt(pts2, J + 1), pt(pts2, J + 2),
 				}, 4, "offset", cx, cy, "line", "inout");
-				pts3[2 * i - 1], pts3[2 * i] = pt(pts2, I - 5), pt(pts2, I - 4);
+				pts3[2 * i - 1], pts3[2 * i] = pt(pts2, I - 2 * pts_per_seg + 1), pt(pts2, I - 2 * pts_per_seg + 2);
 			end
 			if not loop then
 				pts3[2 * n_segs + 1], pts3[2 * n_segs + 2] =
-					pt(pts2, 6 * n_segs + 1), pt(pts2, 6 * n_segs + 2);
+					pt(pts2, 2 * pts_per_seg * n_segs + 1), pt(pts2, 2 * pts_per_seg * n_segs + 2);
 			end
 			obj.setanchor(pts3, n_segs + (loop and 0 or 1),
 				"offset", cx, cy, loop and "loop" or "line");
 		else
-			obj.setanchor(var_name, n_anchors, "offset", cx, cy,
-				loop and "loop" or "line", unpack1(alt_pts));
+			obj.setanchor(var_name, n_anchors, "offset", cx, cy, unpack1(alt_pts));
+			obj.setanchor(alt_pts or pts, n_segs + (loop and 0 or 1),
+				"offset", cx, cy, loop and "loop" or "line");
 		end
 		return n_anchors, alt_pts or pts;
 	end
@@ -1616,6 +2121,7 @@ return {
 		dither_pattern = PI_choose_dither_pattern,
 	},
 
+	snap_anchors = snap_anchors,
 	anchor_offset = anchor_offset,
 	anchor = anchor,
 	poll = poll,
