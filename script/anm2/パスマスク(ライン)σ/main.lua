@@ -167,6 +167,64 @@ local rotate = 0
 ---$check:アンカー切り替え
 local toggle_gui = false
 
+--group:スナップ設定,false
+---$tips:グリッド状にスナップします．制御点以外に有効．
+---$select:snap::グリッド
+---なし = 0
+---横のみ = 1
+---縦のみ = 2
+---縦横 = 3
+local snap_grid = 0
+
+---$track:snap::間隔X, min = 1, max = 1000, step = 0.01, scale = 0.1
+local snap_grid_X = 40
+
+--hide@snap_grid_X:snap_grid==0
+--hide@snap_grid_X:snap_grid==2
+---$track:snap::間隔Y, min = 1, max = 1000, step = 0.01, scale = 0.1
+local snap_grid_Y = 40
+
+--hide@snap_grid_Y:snap_grid==0
+--hide@snap_grid_Y:snap_grid==1
+---$check:snap::グリッド表示
+local snap_show_grid = false
+
+--hide@snap_show_grid:snap_grid==0
+---$nolang: option:90°, option:45°, option:30°, option:15°, option:5°
+---$tips:直前の点からの特定角度でスナップします．制御点以外に有効．
+---$select:snap::隣との角度
+---なし = 0
+---90° = 1
+---45° = 2
+---30° = 3
+---15° = 4
+---5° = 5
+local snap_angle_pos = 0
+
+---$nolang: option:90°, option:45°, option:30°, option:15°, option:5°
+---$tips:特定角度でスナップします．制御点のみに有効．
+---$select:snap::制御点の角度
+---なし = 0
+---90° = 1
+---45° = 2
+---30° = 3
+---15° = 4
+---5° = 5
+local snap_angle_ctrl = 0
+
+--hide@snap_angle_ctrl:path_type<2
+---$tips:直前の制御点と角度や長さを揃えます．
+---$select:snap::隣の制御点
+---なし = 0
+---角度 = 1
+---長さ = 2
+---角度と長さ = 3
+local snap_prev_ctrl = 0
+
+--hide@snap_prev_ctrl:path_type<2
+---$track:snap::スナップ距離, min = 0, max = 200, step = 0.01, scale = 0.1
+local snap_threshold = 8
+
 --group:その他,false
 ---$nolang: name
 ---$tips:PI = {
@@ -225,6 +283,16 @@ local pt_buff, len_buff =
 	type(PI.pt_buff) == "string" and PI.pt_buff or nil,
 	tonumber(PI.len_buff);
 if (pt_buff and pt_buff ~= "tempbuffer" and not pt_buff:match("^cache:.+$")) or not (len_buff and len_buff > 0) then pt_buff, len_buff = nil, -1 end
+
+-- process snapping.
+if (snap_grid ~= 0 or snap_angle_pos ~= 0 or snap_angle_ctrl ~= 0 or snap_prev_ctrl ~= 0) and snap_threshold > 0 then
+	path_s.snap_anchors(path_type,
+		points, num_points, loop,
+		(snap_grid == 1 or snap_grid == 3) and snap_grid_X or 0,
+		(snap_grid == 2 or snap_grid == 3) and snap_grid_Y or 0,
+		snap_angle_pos, snap_angle_ctrl, snap_prev_ctrl, snap_threshold,
+		snap_show_grid and snap_grid ~= 0 and obj.getoption("gui"), mode_anchor_base);
+end
 
 -- set anchors.
 if obj.getoption("gui") and not pt_buff then

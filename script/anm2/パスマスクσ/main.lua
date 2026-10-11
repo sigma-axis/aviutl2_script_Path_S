@@ -146,7 +146,7 @@ local snap_show_grid = false
 
 --hide@snap_show_grid:snap_grid==0
 ---$nolang: option:90°, option:45°, option:30°, option:15°, option:5°
----$tips:特定角度でスナップします．制御点以外に有効．
+---$tips:直前の点からの特定角度でスナップします．制御点以外に有効．
 ---$select:snap::隣との角度
 ---なし = 0
 ---90° = 1
@@ -168,7 +168,7 @@ local snap_angle_pos = 0
 local snap_angle_ctrl = 0
 
 --hide@snap_angle_ctrl:path_type<2
----$tips:隣の制御点と角度や長さを揃えます．
+---$tips:直前の制御点と角度や長さを揃えます．
 ---$select:snap::隣の制御点
 ---なし = 0
 ---角度 = 1

@@ -797,7 +797,7 @@ local snap_anchors do
 				l, r, t, b = min(l, x), max(r, x), min(t, y), max(b, y);
 			end
 			l, r, t, b = l - threshold, r + threshold, t - threshold, b + threshold;
-			local cx, cy = anchor_offset(PI_choose_mode_anchor_base(nil, mode_anchor_base));
+			local cx, cy = anchor_offset(PI_choose_mode_anchor_base(nil, tonumber(mode_anchor_base) or 5));
 
 			local setanchor = obj.setanchor;
 			if r - l < max_grid * grid_x then
