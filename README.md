@@ -162,7 +162,7 @@ Although, usage documentations for this script / plugin in languages other than 
 
 [パラメタの説明 :arrow_down:](#輪郭パスσのパラメタ) [共通のパラメタの説明 :arrow_down:](#共通の設定項目)
 
-TODO: images.
+![テキストオブジェクトや図形に適用した例](https://github.com/user-attachments/assets/dabcba1f-f934-4127-b44c-0eb81753f34a)
 
 - 初期状態だと「フィルタ効果を追加」メニューの「Path_S :arrow_right: 装飾」に「輪郭パスσ@Path_S」が追加されています．
 
@@ -357,10 +357,10 @@ TODO: images.
   | `Bayer 256x256` | ![Bayer 256x256 でのディザリング](https://github.com/user-attachments/assets/ea018a2e-1d1a-404a-a779-55769243a867) |
   | `IGN` | ![Interleaved Gradient Noise でのディザリング](https://github.com/user-attachments/assets/e04bd74f-719e-4bfa-b1e6-870116ee8e1e) |
   | `White Noise` | ![White Noise でのディザリング](https://github.com/user-attachments/assets/3a588a5c-e36b-4749-b837-ff78d950648f) |
-  | `Halftone` | TODO: \!\[Halftone でのディザリング\]() |
-  | `Halftone Honeycomb` | TODO: \!\[Halftone Honeycomb でのディザリング\]() |
-  | `Halftone Square` | TODO: \!\[Halftone Square でのディザリング\]() |
-  | `Stripe` | TODO: \!\[Stripe でのディザリング\]() |
+  | `Halftone` | ![Halftone でのディザリング](https://github.com/user-attachments/assets/31468a32-bddb-41b9-83fb-fa0b5b4263e8) |
+  | `Halftone Honeycomb` | ![Halftone Honeycomb でのディザリング](https://github.com/user-attachments/assets/e2c475d4-2b2b-4923-bb83-2b2136a90dcb) |
+  | `Halftone Square` | ![Halftone Square でのディザリング](https://github.com/user-attachments/assets/19fe9190-e54f-4039-9e93-c6d07dea63b1) |
+  | `Stripe` | ![Stripe でのディザリング](https://github.com/user-attachments/assets/f6bebb0c-d0d1-43e8-b4f1-43748c26589e) |
 
   - `IGN` は “Interleaved Gradient Noise” の略．
 
