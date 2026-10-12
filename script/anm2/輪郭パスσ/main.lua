@@ -96,7 +96,7 @@ local dash_end_shape = 0
 ---$track:ぼかし幅, min = 0, max = 1000, step = 0.01, scale = 0.2
 local antialias = 1
 
----$nolang: option:Checker, option:Bayer 2x2, option:Bayer 4x4, option:Bayer 256x256, option:IGN, option:White Noise
+---$nolang: option:Checker, option:Bayer 2x2, option:Bayer 4x4, option:Bayer 256x256, option:IGN, option:White Noise, option:Halftone, option:Halftone Honeycomb, option:Halftone Square, option:Stripe
 ---$tips:ぼかし幅の範囲にディザリングを適用します．
 ---$select:ディザリング
 ---なし = 0
@@ -189,7 +189,7 @@ local line_alpha = 0
 local orig_alpha = 0
 
 --group:フィルタ設定,false
----$tips:「後続フィルタ」の範囲は「後続フィルタここまで」で区切ることができます．
+---$tips:「後続フィルタ」の範囲は「追加フィルタここまで」で区切ることができます．
 ---$select:追加のフィルタ効果
 ---なし = 0
 ---後続フィルタ = 1

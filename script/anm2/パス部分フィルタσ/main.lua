@@ -51,7 +51,7 @@ local mode_fill = 0
 ---$track:ぼかし幅, min = 0, max = 1000, step = 0.01, scale = 0.2
 local antialias = 1
 
----$nolang: option:Checker, option:Bayer 2x2, option:Bayer 4x4, option:Bayer 256x256, option:IGN, option:White Noise
+---$nolang: option:Checker, option:Bayer 2x2, option:Bayer 4x4, option:Bayer 256x256, option:IGN, option:White Noise, option:Halftone, option:Halftone Honeycomb, option:Halftone Square, option:Stripe
 ---$tips:ぼかし幅の範囲にディザリングを適用します．
 ---$select:ディザリング
 ---なし = 0
@@ -120,7 +120,7 @@ local rotate = 0
 local toggle_gui = false
 
 --group:フィルタ設定,false
----$tips:「後続フィルタ」の範囲は「パス部分フィルタσここまで」で区切ることができます．
+---$tips:「後続フィルタ」の範囲は「追加フィルタここまで」で区切ることができます．
 ---$select:追加のフィルタ効果
 ---後続フィルタ = 0
 ---スクリプト実行 = 1
