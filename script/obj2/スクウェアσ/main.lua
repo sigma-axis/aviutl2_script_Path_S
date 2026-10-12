@@ -130,6 +130,7 @@ local dither_seed = 10000
 --hide@dither_seed:dither_pattern==7
 --hide@dither_seed:dither_pattern==8
 --hide@dither_seed:dither_pattern==9
+--hide@dither_seed:dither_pattern==10
 ---$track:ディザ強さ, min = 0, max = 100, step = 0.01
 local dither_rate = 100
 
@@ -191,6 +192,7 @@ local fill_dither_seed = 20000
 --hide@fill_dither_seed:fill_dither_pattern==7
 --hide@fill_dither_seed:fill_dither_pattern==8
 --hide@fill_dither_seed:fill_dither_pattern==9
+--hide@fill_dither_seed:fill_dither_pattern==10
 ---$track:fill::ディザ強さ, min = 0, max = 100, step = 0.01
 local fill_dither_rate = 100
 
