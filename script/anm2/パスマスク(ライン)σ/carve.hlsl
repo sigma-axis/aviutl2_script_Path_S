@@ -49,7 +49,7 @@ float4 carve(float4 pos : SV_Position) : SV_Target
 	float a = 1 - (sqrt(sq_dist) - padding) / aa_thick;
 	float noise = 0;
 	[branch] if (dither_pattern != 0) noise = dither_func(
-		mul(inv_dither_mat, pos.xy - dither_offset) + (1 << 16),
+		mul(inv_dither_mat, pos.xy - dither_offset),
 		uint2(noise_seed, 101), dither_pattern);
 	a = (a - (1 - dither_buff) * noise) / dither_buff;
 	return float4(0, 0, 0, dot(alpha_map, float2(saturate(a), 1)));
