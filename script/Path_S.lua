@@ -336,6 +336,14 @@ local snap_anchors do
 		if not x1 or norm(x1 - x0, y1 - y0) > norm(x2 - x0, y2 - y0) then return x2, y2 end
 		return x1, y1;
 	end
+	local function snap_cossin(dx, dy, N)
+		local a = atan2(dy, dx);
+		a = floor(0.5 + N * a / tau) / N * tau;
+		local c, s = cos(a), sin(a);
+		if abs(c) < 2 ^ -10 then c = 0 end
+		if abs(s) < 2 ^ -10 then s = 0 end
+		return c, s;
+	end
 
 	-- for position points.
 	local function snap_pos(x, y, x1, y1, x2, y2, grid_x, grid_y, n_angles, thresh)
@@ -347,16 +355,8 @@ local snap_anchors do
 		-- angles.
 		local c1, s1, c2, s2;
 		if n_angles > 0 then
-			if x1 and y1 then
-				local a = atan2(y - y1, x - x1);
-				a = floor(0.5 + n_angles * a / tau) / n_angles * tau;
-				c1, s1 = cos(a), sin(a);
-			end
-			if x2 and y2 then
-				local a = atan2(y - y2, x - x2);
-				a = floor(0.5 + n_angles * a / tau) / n_angles * tau;
-				c2, s2 = cos(a), sin(a);
-			end
+			if x1 and y1 then c1, s1 = snap_cossin(x - x1, y - y1, n_angles) end
+			if x2 and y2 then c2, s2 = snap_cossin(x - x2, y - y2, n_angles) end
 		end
 
 		-- co-dimension of 2 (i.e. points).
@@ -424,12 +424,8 @@ local snap_anchors do
 		-- from position points.
 		local c01, s01, c02, s02;
 		if n_angles > 0 then
-			local a = atan2(y - y1, x - x1);
-			a = floor(0.5 + n_angles * a / tau) / n_angles * tau;
-			c01, s01 = cos(a), sin(a);
-			a = atan2(y - y2, x - x2);
-			a = floor(0.5 + n_angles * a / tau) / n_angles * tau;
-			c02, s02 = cos(a), sin(a);
+			c01, s01 = snap_cossin(x - x1, y - y1, n_angles);
+			c02, s02 = snap_cossin(x - x2, y - y2, n_angles);
 		end
 
 		-- from control points.
@@ -617,11 +613,7 @@ local snap_anchors do
 	local function snap_ctrl_3(dx, dy, dx1, dy1, n_angles, snap_angle, snap_length, thresh)
 		-- from position points.
 		local c0, s0;
-		if n_angles > 0 then
-			local a = atan2(dy, dx);
-			a = floor(0.5 + n_angles * a / tau) / n_angles * tau;
-			c0, s0 = cos(a), sin(a);
-		end
+		if n_angles > 0 then c0, s0 = snap_cossin(dx, dy, n_angles) end
 
 		-- from control points.
 		local c1, s1, r1;
