@@ -74,7 +74,7 @@ float dither_func(float2 pos, uint2 seed, uint pattern)
 		return (bayer_88(uint2(pos + (1 << 16))) + 0.5) / float(1 << 16);
 	case 5: { // Interleaved Gradient Noise
 		uint2 s = uint2(106033, 92681) * seed;
-		s ^= s >> 14; s &= 0x3fff;
+		s ^= s.yx >> 14; s &= 0x3fff;
 		return ign(floor(pos) + ((1 << 16) + s));
 	}
 	case 6: // white noise
