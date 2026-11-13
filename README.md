@@ -357,6 +357,7 @@ Although, usage documentations for this script / plugin in languages other than 
   | `Bayer 256x256` | ![Bayer 256x256 でのディザリング](https://github.com/user-attachments/assets/ea018a2e-1d1a-404a-a779-55769243a867) |
   | `IGN` | ![Interleaved Gradient Noise でのディザリング](https://github.com/user-attachments/assets/e04bd74f-719e-4bfa-b1e6-870116ee8e1e) |
   | `White Noise` | ![White Noise でのディザリング](https://github.com/user-attachments/assets/3a588a5c-e36b-4749-b837-ff78d950648f) |
+  | `Perlin Noise` | !\[Perlin Noise でのディザリング\](TODO: ) |
   | `Halftone` | ![Halftone でのディザリング](https://github.com/user-attachments/assets/31468a32-bddb-41b9-83fb-fa0b5b4263e8) |
   | `Halftone Honeycomb` | ![Halftone Honeycomb でのディザリング](https://github.com/user-attachments/assets/e2c475d4-2b2b-4923-bb83-2b2136a90dcb) |
   | `Halftone Square` | ![Halftone Square でのディザリング](https://github.com/user-attachments/assets/19fe9190-e54f-4039-9e93-c6d07dea63b1) |
@@ -1576,9 +1577,14 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
 
 ##  次の改版予定
 
-- **v2.43** (2026-??-??)
+- **v2.50** (2026-??-??)
 
-  - コード整理．
+  - 「ディザリング」のパターン模様に「Perlin Noise」を追加．
+  - `Path_S.lua` の一部関数の仕様変更．
+
+    ディザリングのパターンに割り当てていた数値を変更:
+    - `"Halftone"`, `"Halftone Honeycomb"`, `"Halftone Square"`, `"Stripe"` に割り当てていた数値を `7`, `8`, `9`, `10` から `8`, `9`, `10`, `11` に変更．
+    - 空いた `7` には新規追加の `"Perlin Noise"` を割り当て．
 
 ##  改版履歴
 

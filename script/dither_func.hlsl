@@ -60,6 +60,32 @@ float stripe(float2 p)
 {
 	return abs(2 * frac(p.y / 2 - 0.5) - 1);
 }
+float perlin(float2 p, uint2 seed)
+{
+	static const float tau = 8 * atan(1), sqrt2 = sqrt(2);
+	const float2 P = floor(p / 2),
+		d = p / 2 - P, t = d * d * (3.0 - 2.0 * d);
+
+	const float
+		a00 = tau * ibuki(float4(P + (float2(0, 0) + (1 << 16)), seed)),
+		a10 = tau * ibuki(float4(P + (float2(1, 0) + (1 << 16)), seed)),
+		a01 = tau * ibuki(float4(P + (float2(0, 1) + (1 << 16)), seed)),
+		a11 = tau * ibuki(float4(P + (float2(1, 1) + (1 << 16)), seed));
+
+	float2 g00, g10, g01, g11;
+	sincos(a00, g00.y, g00.x);
+	sincos(a10, g10.y, g10.x);
+	sincos(a01, g01.y, g01.x);
+	sincos(a11, g11.y, g11.x);
+
+	const float2 nx = lerp(
+		float2(dot(g00, d - float2(0, 0)), dot(g01, d - float2(0, 1))),
+		float2(dot(g10, d - float2(1, 0)), dot(g11, d - float2(1, 1))),
+		t.x);
+	const float n = lerp(nx.x, nx.y, t.y);
+
+	return n / sqrt2 + 0.5;
+}
 float dither_func(float2 pos, uint2 seed, uint pattern)
 {
 	switch (pattern) {
@@ -79,13 +105,15 @@ float dither_func(float2 pos, uint2 seed, uint pattern)
 	}
 	case 6: // white noise
 		return ibuki(float4(pos + (1 << 16), seed));
-	case 7: // halftone
+	case 7: // perlin
+		return perlin(pos, seed);
+	case 8: // halftone
 		return halftone(pos);
-	case 8: // halftone honeycomb
+	case 9: // halftone honeycomb
 		return halftone_honeycomb(pos);
-	case 9: // halftone square
+	case 10: // halftone square
 		return halftone_square(pos);
-	case 10: // stripe
+	case 11: // stripe
 		return stripe(pos);
 	}
 }
