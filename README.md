@@ -357,7 +357,7 @@ Although, usage documentations for this script / plugin in languages other than 
   | `Bayer 256x256` | ![Bayer 256x256 でのディザリング](https://github.com/user-attachments/assets/ea018a2e-1d1a-404a-a779-55769243a867) |
   | `IGN` | ![Interleaved Gradient Noise でのディザリング](https://github.com/user-attachments/assets/e04bd74f-719e-4bfa-b1e6-870116ee8e1e) |
   | `White Noise` | ![White Noise でのディザリング](https://github.com/user-attachments/assets/3a588a5c-e36b-4749-b837-ff78d950648f) |
-  | `Perlin Noise` | !\[Perlin Noise でのディザリング\](TODO: ) |
+  | `Perlin Noise` | ![Perlin Noise でのディザリング](https://github.com/user-attachments/assets/5893e0c7-1a6e-4486-aaeb-ef90a459dbdd) |
   | `Halftone` | ![Halftone でのディザリング](https://github.com/user-attachments/assets/31468a32-bddb-41b9-83fb-fa0b5b4263e8) |
   | `Halftone Honeycomb` | ![Halftone Honeycomb でのディザリング](https://github.com/user-attachments/assets/e2c475d4-2b2b-4923-bb83-2b2136a90dcb) |
   | `Halftone Square` | ![Halftone Square でのディザリング](https://github.com/user-attachments/assets/19fe9190-e54f-4039-9e93-c6d07dea63b1) |
@@ -773,9 +773,9 @@ Although, usage documentations for this script / plugin in languages other than 
 
 [「矢じり配置」](#矢じり配置)が `両方` または `双方向` の場合のみ有効な設定です．
 
-始点側の矢じりに関する設定を，別枠で設定します．チェックを入れることで設定項目が下に表示されるようになります．
+始点側の矢じりに関する設定を，終点のものと異なる設定にできます．チェックを入れることで設定項目が下に表示されるようになります．
 
-TODO: image
+![別設定にした矢じりの例](https://github.com/user-attachments/assets/2f0146f6-243f-4ba8-9d65-40ee12c35e62)
 
 初期値は OFF.
 
