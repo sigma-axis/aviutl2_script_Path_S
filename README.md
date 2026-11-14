@@ -769,6 +769,16 @@ Although, usage documentations for this script / plugin in languages other than 
 
 最小値は -100, 最大値は 100, 初期値は 0.
 
+####  始点矢じりを別設定
+
+[「矢じり配置」](#矢じり配置)が `両方` または `双方向` の場合のみ有効な設定です．
+
+始点側の矢じりに関する設定を，別枠で設定します．チェックを入れることで設定項目が下に表示されるようになります．
+
+TODO: image
+
+初期値は OFF.
+
 
 ### スクウェアσのパラメタ
 
@@ -1230,39 +1240,46 @@ Although, usage documentations for this script / plugin in languages other than 
 
 ```lua
 {
-  line = num,           -- number 型で "ライン幅" の項目を上書き，または nil.
-  head_size = num,      -- number 型で "矢じりサイズ" の項目を上書き，または nil.
-  color = num,          -- number 型で "色" の項目を上書き，または nil.
-  num_points = num,     -- number 型で "頂点数" の項目を上書き，または nil.
-  path_type = str,      -- string 型で "線タイプ" の項目を上書き，または nil.
-  points = tab,         -- table 型で "点リスト" の項目を上書き，または nil.
-  precision = num,      -- number 型で "曲線精度" の項目を上書き，または nil.
-  start_pos = num,      -- number 型で "開始位置" の項目を上書き，または nil.
-  end_pos = num,        -- number 型で "終了位置" の項目を上書き，または nil.
-  end_shape = str,      -- string 型で "端の形状" の項目を上書き，または nil.
-  join_shape = str,     -- string 型で "線結合の形状" の項目を上書き，または nil.
-  miter_limit = num,    -- number 型で "マイター限界" の項目を上書き，または nil.
-  dash_pat = tab,       -- table 型で "破線パターン" の項目を上書き，または nil.
-  dash_pos = num,       -- number 型で "破線位置" の項目を上書き，または nil.
-  dash_end_shape = str, -- string 型で "dash::端の形状" の項目を上書き，または nil.
-  antialias = num,      -- number 型で "ぼかし幅" の項目を上書き，または nil.
-  dither_pattern = str, -- string 型で "ディザリング" の項目を上書き，または nil.
-  dither_seed = num,    -- number 型で "dither::ノイズシード" の項目を上書き，または nil.
-  dither_rate = num,    -- number 型で "ディザ強さ" の項目を上書き，または nil.
-  dither_size = num,    -- number 型で "dither::ドットサイズ" の項目を上書き，または nil.
-  dither_X = num,       -- number 型で "dither::移動X" の項目を上書き，または nil.
-  dither_Y = num,       -- number 型で "dither::移動Y" の項目を上書き，または nil.
-  dither_angle = num,   -- number 型で "dither::回転" の項目を上書き，または nil.
-  head_type = str,      -- string 型で "矢じり配置" の項目を上書き，または nil.
-  head_fig = str,       -- string 型で "矢じり図形" の項目を上書き，または nil.
-  head_width = num,     -- number 型で "矢じり幅" の項目を上書き，または nil.
-  head_center = num,    -- number 型で "矢じり中心" の項目を上書き，または nil.
-  head_rot = num,       -- number 型で "矢じり角度" の項目を上書き，または nil.
-  head_pos = num,       -- number 型で "矢じり位置" の項目を上書き，または nil.
-  rand_period = num,    -- number 型で "ランダム周期" の項目を上書き，または nil.
-  rand_amplify = num,   -- number 型で "ランダム振幅" の項目を上書き，または nil.
-  rand_fix_end = bool,  -- boolean 型で "ランダム固定端" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
-  rand_seed = num,      -- number 型で "ランダムシード" の項目を上書き，または nil.
+  line = num,               -- number 型で "ライン幅" の項目を上書き，または nil.
+  head_size = num,          -- number 型で "矢じりサイズ" の項目を上書き，または nil.
+  color = num,              -- number 型で "色" の項目を上書き，または nil.
+  num_points = num,         -- number 型で "頂点数" の項目を上書き，または nil.
+  path_type = str,          -- string 型で "線タイプ" の項目を上書き，または nil.
+  points = tab,             -- table 型で "点リスト" の項目を上書き，または nil.
+  precision = num,          -- number 型で "曲線精度" の項目を上書き，または nil.
+  start_pos = num,          -- number 型で "開始位置" の項目を上書き，または nil.
+  end_pos = num,            -- number 型で "終了位置" の項目を上書き，または nil.
+  end_shape = str,          -- string 型で "端の形状" の項目を上書き，または nil.
+  join_shape = str,         -- string 型で "線結合の形状" の項目を上書き，または nil.
+  miter_limit = num,        -- number 型で "マイター限界" の項目を上書き，または nil.
+  dash_pat = tab,           -- table 型で "破線パターン" の項目を上書き，または nil.
+  dash_pos = num,           -- number 型で "破線位置" の項目を上書き，または nil.
+  dash_end_shape = str,     -- string 型で "dash::端の形状" の項目を上書き，または nil.
+  antialias = num,          -- number 型で "ぼかし幅" の項目を上書き，または nil.
+  dither_pattern = str,     -- string 型で "ディザリング" の項目を上書き，または nil.
+  dither_seed = num,        -- number 型で "dither::ノイズシード" の項目を上書き，または nil.
+  dither_rate = num,        -- number 型で "ディザ強さ" の項目を上書き，または nil.
+  dither_size = num,        -- number 型で "dither::ドットサイズ" の項目を上書き，または nil.
+  dither_X = num,           -- number 型で "dither::移動X" の項目を上書き，または nil.
+  dither_Y = num,           -- number 型で "dither::移動Y" の項目を上書き，または nil.
+  dither_angle = num,       -- number 型で "dither::回転" の項目を上書き，または nil.
+  head_type = str,          -- string 型で "矢じり配置" の項目を上書き，または nil.
+  head_fig = str,           -- string 型で "矢じり図形" の項目を上書き，または nil.
+  head_width = num,         -- number 型で "矢じり幅" の項目を上書き，または nil.
+  head_center = num,        -- number 型で "矢じり中心" の項目を上書き，または nil.
+  head_rot = num,           -- number 型で "矢じり角度" の項目を上書き，または nil.
+  head_pos = num,           -- number 型で "矢じり位置" の項目を上書き，または nil.
+  alt_head_settings = bool, -- boolean 型で "始点矢じりを別設定" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
+  alt_head_size = num,      -- number 型で "alt::矢じりサイズ" の項目を上書き，または nil.
+  alt_head_fig = str,       -- string 型で "alt::矢じり図形" の項目を上書き，または nil.
+  alt_head_width = num,     -- number 型で "alt::矢じり幅" の項目を上書き，または nil.
+  alt_head_center = num,    -- number 型で "alt::矢じり中心" の項目を上書き，または nil.
+  alt_head_rot = num,       -- number 型で "alt::矢じり角度" の項目を上書き，または nil.
+  alt_head_pos = num,       -- number 型で "alt::矢じり位置" の項目を上書き，または nil.
+  rand_period = num,        -- number 型で "ランダム周期" の項目を上書き，または nil.
+  rand_amplify = num,       -- number 型で "ランダム振幅" の項目を上書き，または nil.
+  rand_fix_end = bool,      -- boolean 型で "ランダム固定端" を上書き，または nil. 0 を false, 0 以外を true として number 型も可能．
+  rand_seed = num,          -- number 型で "ランダムシード" の項目を上書き，または nil.
 }
 ```
 
@@ -1579,6 +1596,7 @@ radii = { uniform = 10; { 16, 8 }, nil, 20, nil }
 
 - **v2.50** (2026-??-??)
 
+  - 「アローσ」に「始点矢じりを別設定」の設定項目を追加．
   - 「ディザリング」のパターン模様に「Perlin Noise」を追加．
   - `Path_S.lua` の一部関数の仕様変更．
 

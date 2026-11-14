@@ -160,6 +160,41 @@ local head_rot = 0
 local head_pos = 0
 
 --hide@head_pos:head_type==0
+---$check:始点矢じりを別設定
+local alt_head_settings = false
+
+--hide@alt_head_settings:head_type<2
+---$track:alt::矢じりサイズ, min = 0, max = 2048, step = 0.01, scale = 0.125
+local alt_head_size = 32
+
+--hide@alt_head_size:head_type<2
+--hide@alt_head_size:alt_head_settings==0
+---$figure:alt::矢じり図形
+local alt_head_fig = "円"
+
+--hide@alt_head_fig:head_type<2
+--hide@alt_head_fig:alt_head_settings==0
+---$tips:矢じりの横幅の拡大率，% 単位
+---$track:alt::矢じり幅, min = 0, max = 800, step = 0.001, scale = 0.25
+local alt_head_width = 100
+
+--hide@alt_head_width:head_type<2
+--hide@alt_head_width:alt_head_settings==0
+---$track:alt::矢じり中心, min = -100, max = 100, step = 0.001
+local alt_head_center = 0
+
+--hide@alt_head_center:head_type<2
+--hide@alt_head_center:alt_head_settings==0
+---$track:alt::矢じり角度, min = -3600, max = 3600, step = 0.01, scale = 0.1
+local alt_head_rot = 0
+
+--hide@alt_head_rot:head_type<2
+--hide@alt_head_rot:alt_head_settings==0
+---$track:alt::矢じり位置, min = -100, max = 100, step = 0.001
+local alt_head_pos = 0
+
+--hide@alt_head_pos:head_type<2
+--hide@alt_head_pos:alt_head_settings==0
 --group:ランダム変化,false
 ---$tips:パスの描画方向に沿ったランダム変動の周期，ピクセル単位
 ---$track:ランダム周期, min = 4, max = 1024, step = 0.001, scale = 0.25
@@ -268,6 +303,13 @@ local snap_threshold = 8
 ---     :  head_center: number?,
 ---     :  head_rot: number?,
 ---     :  head_pos: number?,
+---     :  alt_head_settings: boolean|number|nil,
+---     :  alt_head_size: number?,
+---     :  alt_head_fig: string?,
+---     :  alt_head_width: number?,
+---     :  alt_head_center: number?,
+---     :  alt_head_rot: number?,
+---     :  alt_head_pos: number?,
 ---     :  rand_period: number?,
 ---     :  rand_amplify: number?,
 ---     :  rand_fix_end: boolean|number|nil,
@@ -334,6 +376,13 @@ head_width = tonumber(PI.head_width) or head_width;
 head_center = tonumber(PI.head_center) or head_center;
 head_rot = tonumber(PI.head_rot) or head_rot;
 head_pos = tonumber(PI.head_pos) or head_pos;
+alt_head_settings = path_s.PI.as_bool(PI.alt_head_settings, alt_head_settings);
+alt_head_size = tonumber(PI.alt_head_size) or alt_head_size;
+alt_head_fig = type(PI.alt_head_fig) == "string" and PI.alt_head_fig or alt_head_fig;
+alt_head_width = tonumber(PI.alt_head_width) or alt_head_width;
+alt_head_center = tonumber(PI.alt_head_center) or alt_head_center;
+alt_head_rot = tonumber(PI.alt_head_rot) or alt_head_rot;
+alt_head_pos = tonumber(PI.alt_head_pos) or alt_head_pos;
 rand_period = tonumber(PI.rand_period) or rand_period;
 rand_amplify = tonumber(PI.rand_amplify) or rand_amplify;
 rand_fix_end = path_s.PI.as_bool(PI.rand_fix_end, rand_fix_end);
@@ -362,6 +411,20 @@ head_width = math.max(head_width / 100, 0);
 head_center = head_center / 100;
 head_rot = math.pi / 180 * (head_rot % 360);
 head_pos = math.min(math.max(head_pos / 100, -1), 1);
+if head_type > 1 and alt_head_settings then
+	alt_head_size = math.max(math.floor(0.5 + alt_head_size), 0);
+	alt_head_width = math.max(alt_head_width / 100, 0);
+	alt_head_center = alt_head_center / 100;
+	alt_head_rot = math.pi / 180 * (alt_head_rot % 360);
+	alt_head_pos = math.min(math.max(alt_head_pos / 100, -1), 1);
+else
+	alt_head_size = head_size;
+	alt_head_fig = head_fig;
+	alt_head_width = head_width;
+	alt_head_center = head_center;
+	alt_head_rot = head_rot;
+	alt_head_pos = head_pos;
+end
 rand_period = math.max(rand_period, 4);
 rand_amplify = math.max(rand_amplify, 0);
 rand_seed = math.min(math.max(math.floor(0.5 + rand_seed), -2 ^ 16), 2 ^ 16 - 1);
@@ -401,16 +464,18 @@ local th = path_s.line_inflation(end_shape, dash_end_shape, join_shape,
 	line, antialias, miter_limit, dash_pat);
 if head_type ~= 0 then
 	-- take the arrow heads into account.
-	th = math.max(th, head_size / 2 * ((math.abs(head_center) + 1) ^ 2 + head_width ^ 2) ^ 0.5);
+	th = math.max(th,
+		head_size / 2 * ((math.abs(head_center) + 1) ^ 2 + head_width ^ 2) ^ 0.5,
+		alt_head_size / 2 * ((math.abs(alt_head_center) + 1) ^ 2 + alt_head_width ^ 2) ^ 0.5);
 end
 L, T = math.floor(L - th), math.floor(T - th);
 R, B = math.max(math.ceil(R + th), L + 1), math.max(math.ceil(B + th), T + 1);
 local W, H, cx, cy = R - L, B - T, -(L + R) / 2, -(T + B) / 2;
 
 -- calculate the head position.
-local head_vertices = nil;
-if head_type ~= 0 and head_size > 0 and head_width > 0 then
-	local function polygon(i, j, rot)
+local head_vertices = {};
+if head_type ~= 0 and ((head_size > 0 and head_width > 0) or (alt_head_size > 0 and alt_head_width > 0)) then
+	local function polygon(i, j, rot, size, width, center)
 		local X, Y =
 			(1 - j) * points[2 * i - 1] + j * points[2 * i + 1],
 			(1 - j) * points[2 * i - 0] + j * points[2 * i + 2];
@@ -434,9 +499,9 @@ if head_type ~= 0 and head_size > 0 and head_width > 0 then
 
 		local c, s = math.cos(A), math.sin(A);
 		X, Y =
-			X - head_center * head_size / 2 * s + cx,
-			Y + head_center * head_size / 2 * c + cy;
-		local w2x, w2y, h2x, h2y = head_size * head_width / 2, 0, 0, head_size / 2;
+			X - center * size / 2 * s + cx,
+			Y + center * size / 2 * c + cy;
+		local w2x, w2y, h2x, h2y = size * width / 2, 0, 0, size / 2;
 		w2x, w2y = w2x * c, w2x * s;
 		h2x, h2y = h2y *-s, h2y * c;
 		return
@@ -450,20 +515,24 @@ if head_type ~= 0 and head_size > 0 and head_width > 0 then
 	local pos = math.min(math.max(1 + head_pos, 0), 1);
 	pos = (1 - pos) * start_pos + pos * end_pos;
 	local i, j, l = path_s.find_index(-pos, points, num_points);
-	local vts = { polygon(i, j, head_rot + math.pi / 2) };
+	table.insert(head_vertices, {
+		polygon(i, j, head_rot + math.pi / 2,
+			head_size, head_width, head_center)
+	});
 
 	if head_type > 1 then
 		-- second tip.
-		local pos2 = math.min(math.max(head_pos, 0), 1);
+		local pos2 = math.min(math.max(alt_head_pos, 0), 1);
 		pos2 = (1 - pos2) * start_pos + pos2 * end_pos;
 		if pos ~= pos2 then
 			i, j = path_s.find_index(-pos2, l);
-			vts[5], vts[6], vts[7], vts[8] = polygon(i, j, head_rot
-				+ math.pi / 2 * (head_type == 2 and 1 or -1));
+			table.insert(head_vertices, {
+				polygon(i, j, alt_head_rot
+					+ math.pi / 2 * (head_type == 2 and 1 or -1),
+					alt_head_size, alt_head_width, alt_head_center)
+			});
 		end
 	end
-
-	head_vertices = vts;
 end
 
 -- draw the path.
@@ -484,14 +553,24 @@ path_s.path_mask_line(
 	head_vertices and "object" or nil);
 
 -- draw the arrow heads.
-if head_vertices then
+if #head_vertices > 0 then
 	obj.setoption("drawtarget", "tempbuffer");
-	if obj.load("figure", head_fig, color, math.ceil(head_size * math.max(head_width, 1))) then
-		-- "alpha_max" does not seem to work well with obj.drawpoly().
-		-- obj.setoption("blend", "alpha_max");
-		obj.drawpoly(head_vertices);
-		-- obj.setoption("blend");
+	local fig_size = math.ceil(head_size * math.max(head_width, 1));
+	local blend = obj.getoption("blend");
+	obj.setoption("blend", "alpha_max");
+	if head_size > 0 and head_width > 0 and
+		obj.load("figure", head_fig, color, fig_size) then
+		obj.drawpoly(head_vertices[1]);
 	end
+	if #head_vertices > 1 then
+		local alt_fig_size = math.ceil(alt_head_size * math.max(alt_head_width, 1));
+		if (head_fig == alt_head_fig and fig_size == alt_fig_size) or
+			(alt_head_size > 0 and alt_head_width > 0 and
+			obj.load("figure", alt_head_fig, color, alt_fig_size)) then
+			obj.drawpoly(head_vertices[2]);
+		end
+	end
+	obj.setoption("blend", blend);
 	assert(obj.copybuffer("object", "tempbuffer"));
 end
 
