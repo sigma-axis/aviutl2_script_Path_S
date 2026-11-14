@@ -64,7 +64,7 @@ float perlin(float2 p, uint2 seed)
 {
 	static const float tau = 8 * atan(1), sqrt2 = sqrt(2);
 	const float2 P = floor(p / 2),
-		d = p / 2 - P, t = d * d * (3.0 - 2.0 * d);
+		d = p / 2 - P, t = d * d * (3 - 2 * d);
 
 	const float
 		a00 = tau * ibuki(float4(P + (float2(0, 0) + (1 << 16)), seed)),
@@ -84,7 +84,9 @@ float perlin(float2 p, uint2 seed)
 		t.x);
 	const float n = lerp(nx.x, nx.y, t.y);
 
-	return n / sqrt2 + 0.5;
+	float T = n / sqrt2 + 0.5, S = 1 - T;
+	T = T * T * T * T * T * (1 + 5 * S * (1 + 3 * S + 7 * S * S + 14 * S * S * S));
+	return T;
 }
 float dither_func(float2 pos, uint2 seed, uint pattern)
 {
