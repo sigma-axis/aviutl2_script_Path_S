@@ -536,7 +536,7 @@ if head_type ~= 0 and ((head_size > 0 and head_width > 0) or (alt_head_size > 0 
 end
 
 -- draw the path.
-obj.clearbuffer(head_vertices and "tempbuffer" or "object", W, H, color);
+obj.clearbuffer(#head_vertices > 0 and "tempbuffer" or "object", W, H, color);
 path_s.path_mask_line(
 	0, 1, line, {
 		width = antialias,
@@ -549,8 +549,8 @@ path_s.path_mask_line(
 	start_pos, end_pos, end_shape, join_shape, miter_limit,
 	dash_pat, dash_pos, false, dash_end_shape,
 	1, 0, cx, cy,
-	head_vertices and { name = "tempbuffer", w = W, h = H } or nil,
-	head_vertices and "object" or nil);
+	#head_vertices > 0 and { name = "tempbuffer", w = W, h = H } or nil,
+	#head_vertices > 0 and "object" or nil);
 
 -- draw the arrow heads.
 if #head_vertices > 0 then
