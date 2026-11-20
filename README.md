@@ -371,7 +371,7 @@ Although, usage documentations for this script / plugin in languages other than 
 
   - 一部パターンは厳密には，ディザリングには分類されないかもしれません．
 
-  初期値は `なし`
+  初期値は `なし`.
 
 - **ノイズシード**
 
@@ -405,6 +405,9 @@ Although, usage documentations for this script / plugin in languages other than 
   パターン模様を回転します．回転角度を度数単位で指定．
 
   最小値は -3600, 最大値は 3600, 初期値は 0.
+
+> [!TIP]
+> 「パターン」に Halftone などの連続性のあるものを選んでいる場合，「ディザ強さ」が 100% だとジャギーな見え方になってしまいます．90 % など少し低い値にするとアンチエイリアスがかかってくれます．
 
 ####  ライン幅
 
